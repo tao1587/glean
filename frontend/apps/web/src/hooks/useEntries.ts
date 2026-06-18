@@ -185,6 +185,7 @@ export function useUpdateEntryState() {
       // Period views (week/month) fetch unread-only ranges; any read/save/hide change can affect them.
       queryClient.invalidateQueries({ queryKey: ['range-entries'] })
       queryClient.invalidateQueries({ queryKey: ['range-read-entries'] })
+      queryClient.invalidateQueries({ queryKey: ['source-affinity'] })
     },
   })
 }

@@ -389,3 +389,17 @@ class TestSourceAffinity:
         resp = await client.get("/api/entries/source-affinity", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["affinity"] == {}
+
+    @pytest.mark.asyncio
+    async def test_affinity_excludes_all_false_rows(
+        self, client: AsyncClient, auth_headers, db_session, test_user, test_entries, test_feed
+    ):
+        from glean_database.models.user_entry import UserEntry
+        db_session.add(UserEntry(
+            user_id=test_user.id, entry_id=test_entries[0].id,
+            is_read=False, read_later=False, is_hidden=False,
+        ))
+        await db_session.commit()
+        resp = await client.get("/api/entries/source-affinity", headers=auth_headers)
+        assert resp.status_code == 200
+        assert str(test_feed.id) not in resp.json()["affinity"]

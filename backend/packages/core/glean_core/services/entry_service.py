@@ -544,6 +544,14 @@ class EntryService:
             .join(UserEntry, UserEntry.entry_id == Entry.id)
             .where(UserEntry.user_id == user_id)
             .group_by(Entry.feed_id)
+            .having(
+                (
+                    func.count().filter(UserEntry.is_read.is_(True))
+                    + func.count().filter(UserEntry.read_later.is_(True))
+                    + func.count().filter(UserEntry.is_hidden.is_(True))
+                )
+                > 0
+            )
         )
         result = await self.session.execute(stmt)
         return {
