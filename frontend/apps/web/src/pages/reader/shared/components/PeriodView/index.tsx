@@ -36,6 +36,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
 
   const hide = (e: TodayBoardEntry) => { undo.add(e); update.mutate({ entryId: e.id, data: { is_hidden: true } }) }
   const unhide = (e: TodayBoardEntry) => { undo.remove(e); update.mutate({ entryId: e.id, data: { is_hidden: false } }) }
+  const restore = (e: TodayBoardEntry) => update.mutate({ entryId: e.id, data: { is_hidden: false } })
   const toggleSave = (e: TodayBoardEntry) => update.mutate({ entryId: e.id, data: { read_later: !e.read_later } })
 
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -92,7 +93,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
       ) : (
         orderedGroups.map((g) => (
           <SourceSection key={g.feedId} group={g} period={periodKind} anchorDate={anchorDate} justHidden={undo.hidden[g.feedId] ?? []}
-            onOpen={onOpenEntry} onHide={hide} onUndo={unhide} onToggleSave={toggleSave} />
+            onOpen={onOpenEntry} onHide={hide} onUndo={unhide} onToggleSave={toggleSave} onRestore={restore} />
         ))
       )}
       <div ref={sentinelRef} className="h-8" />

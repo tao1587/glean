@@ -18,7 +18,7 @@ afterEach(() => cleanup())
 it('Hide calls onHide', () => {
   const onHide = vi.fn()
   wrap(<SourceSection group={baseGroup as never} period="week" anchorDate="2026-06-17" justHidden={[]}
-    onOpen={() => {}} onHide={onHide} onUndo={() => {}} onToggleSave={() => {}} />)
+    onOpen={() => {}} onHide={onHide} onUndo={() => {}} onToggleSave={() => {}} onRestore={() => {}} />)
   fireEvent.click(screen.getByLabelText('不感兴趣'))
   expect(onHide).toHaveBeenCalledWith(expect.objectContaining({ id: 'e1' }))
 })
@@ -26,7 +26,7 @@ it('Hide calls onHide', () => {
 it('renders an undo line for a just-hidden entry', () => {
   wrap(<SourceSection group={{ ...baseGroup, visibleEntries: [] } as never} period="week" anchorDate="2026-06-17"
     justHidden={[{ id: 'e1', title: 'Hello' } as never]}
-    onOpen={() => {}} onHide={() => {}} onUndo={() => {}} onToggleSave={() => {}} />)
+    onOpen={() => {}} onHide={() => {}} onUndo={() => {}} onToggleSave={() => {}} onRestore={() => {}} />)
   expect(screen.getByText(/Hello/)).toBeInTheDocument()
   expect(screen.getByText('撤销')).toBeInTheDocument()
 })

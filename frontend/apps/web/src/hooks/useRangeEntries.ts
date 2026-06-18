@@ -44,6 +44,40 @@ export function useRangeEntries(params: {
   return { ...query, entries }
 }
 
+export function useRangeHiddenEntries(
+  feedId: string,
+  params: { period: 'week' | 'month'; anchorDate: string },
+  enabled: boolean
+) {
+  const query = useInfiniteQuery({
+    queryKey: ['range-hidden-entries', feedId, params.period, params.anchorDate],
+    queryFn: ({ pageParam = 1, signal }) =>
+      entryService.getEntries(
+        {
+          feed_id: feedId,
+          period: params.period,
+          period_anchor: params.anchorDate,
+          is_hidden: true,
+          page: pageParam as number,
+          per_page: PER_PAGE,
+        },
+        { signal }
+      ),
+    getNextPageParam: (last) =>
+      last.page < last.total_pages ? last.page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: 45 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled,
+  })
+  const entries: TodayBoardEntry[] = useMemo(() => {
+    const raw = query.data?.pages.flatMap((p) => p.items) ?? []
+    return buildTodayBoardEntries(raw, { filterBySelectedDate: false })
+  }, [query.data])
+  return { ...query, entries }
+}
+
 export function useRangeReadEntries(
   feedId: string,
   params: { period: 'week' | 'month'; anchorDate: string },
