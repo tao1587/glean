@@ -144,6 +144,8 @@ interface DigestTopNavProps {
   onNextDay: () => void
   onAddFeed: () => void
   onDateChange?: (date: string) => void
+  /** Switch to week or month view anchored at the current date. */
+  onChangePeriod?: (kind: 'day' | 'week' | 'month', anchor: string) => void
   /** Anchor "today" for the calendar popover. Supports dev time-travel via useSystemTime. */
   todayAnchor?: Date
   /** Whether list-entry translation is actively fetching. Renders a subtle chip. */
@@ -159,6 +161,7 @@ export function DigestTopNav({
   onNextDay,
   onAddFeed,
   onDateChange,
+  onChangePeriod,
   todayAnchor,
   isTranslating = false,
   onOpenSearch,
@@ -352,6 +355,42 @@ export function DigestTopNav({
             </div>
           )}
         </div>
+
+        {/* Period view toggle: 日 / 周 / 月 */}
+        {onChangePeriod && (
+          <div className="inline-flex overflow-hidden rounded-[5px] border text-xs" style={{ borderColor: 'var(--digest-divider, #E5E0D2)' }}>
+            {(['day', 'week', 'month'] as const).map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                onClick={() => onChangePeriod(kind, date)}
+                className={cn(
+                  'px-2.5 py-1 transition-colors',
+                  kind === 'day'
+                    ? 'font-medium'
+                    : '',
+                )}
+                style={
+                  kind === 'day'
+                    ? { background: 'var(--digest-text, #1A1A1A)', color: 'var(--digest-bg, #FAF8F3)' }
+                    : { color: 'var(--digest-text-secondary, #5E5A52)' }
+                }
+                onMouseEnter={(e) => {
+                  if (kind === 'day') return
+                  e.currentTarget.style.background = 'var(--digest-bg-hover, #F1EDE2)'
+                  e.currentTarget.style.color = 'var(--digest-text, #1A1A1A)'
+                }}
+                onMouseLeave={(e) => {
+                  if (kind === 'day') return
+                  e.currentTarget.style.background = ''
+                  e.currentTarget.style.color = 'var(--digest-text-secondary, #5E5A52)'
+                }}
+              >
+                {kind === 'day' ? '日' : kind === 'week' ? '周' : '月'}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="flex-1" />
 

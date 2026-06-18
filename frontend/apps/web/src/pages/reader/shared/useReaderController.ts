@@ -6,6 +6,8 @@ import {
   resolveTodayBoardDateParam,
 } from './todayBoard'
 
+export type PeriodViewKind = 'week' | 'month'
+
 export type FilterType = 'all' | 'unread' | 'read-later'
 
 const VALID_FILTERS: FilterType[] = ['all', 'unread', 'read-later']
@@ -24,7 +26,9 @@ export function useReaderController() {
   const tabParam = searchParams.get('tab') as FilterType | null
   const isTodayBoardView = viewParam === 'today-board'
   const isTimelineView = viewParam === 'timeline'
-  const isDigestView = !isTodayBoardView && !isTimelineView
+  const isWeekView = viewParam === 'week'
+  const isMonthView = viewParam === 'month'
+  const isDigestView = !isTodayBoardView && !isTimelineView && !isWeekView && !isMonthView
   const todayBoardDateParam = isTodayBoardView ? searchParams.get('date') : null
   const digestDateParam = isDigestView ? searchParams.get('date') : null
   const todayBoardTodayDate = systemTime?.current_date ?? ''
@@ -140,6 +144,32 @@ export function useReaderController() {
     [setSearchParams, todayBoardTodayDate]
   )
 
+  const periodKind: PeriodViewKind | null = isWeekView ? 'week' : isMonthView ? 'month' : null
+  const periodAnchor =
+    isWeekView || isMonthView
+      ? searchParams.get('date') || todayBoardTodayDate
+      : todayBoardTodayDate
+
+  const setPeriodView = useCallback(
+    (kind: PeriodViewKind, anchorDateKey?: string) => {
+      setSelectedEntryId(null)
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set('view', kind)
+          next.delete('entry')
+          next.delete('tab')
+          const anchor = anchorDateKey || todayBoardTodayDate
+          if (anchor === todayBoardTodayDate) next.delete('date')
+          else next.set('date', anchor)
+          return next
+        },
+        { replace: false }
+      )
+    },
+    [setSearchParams, todayBoardTodayDate]
+  )
+
   useEffect(() => {
     setSelectedEntryId(entryIdFromUrl)
   }, [entryIdFromUrl])
@@ -172,7 +202,7 @@ export function useReaderController() {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
-        if (isTodayBoardView || isDigestView) {
+        if (isTodayBoardView || isDigestView || isWeekView || isMonthView) {
           next.delete('tab')
         } else if (tabParam !== filterType) {
           next.set('tab', filterType)
@@ -183,7 +213,7 @@ export function useReaderController() {
       },
       { replace: true }
     )
-  }, [filterType, isTodayBoardView, isDigestView, tabParam, setSearchParams])
+  }, [filterType, isTodayBoardView, isDigestView, isWeekView, isMonthView, tabParam, setSearchParams])
 
   return {
     selectedFeedId,
@@ -191,7 +221,10 @@ export function useReaderController() {
     entryIdFromUrl,
     viewParam,
     isTodayBoardView,
+    isTimelineView,
     isDigestView,
+    isWeekView,
+    isMonthView,
     filterType,
     setFilterType,
     selectedEntryId,
@@ -203,5 +236,8 @@ export function useReaderController() {
     setTodayBoardDate,
     digestDate,
     setDigestDate,
+    periodKind,
+    periodAnchor,
+    setPeriodView,
   }
 }

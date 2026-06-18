@@ -60,9 +60,10 @@ interface DigestViewProps {
   date: string // YYYY-MM-DD
   isMobile: boolean
   onDateChange: (date: string) => void
+  onChangePeriod?: (kind: 'day' | 'week' | 'month', anchor: string) => void
 }
 
-export function DigestView({ date, isMobile, onDateChange }: DigestViewProps) {
+export function DigestView({ date, isMobile, onDateChange, onChangePeriod }: DigestViewProps) {
   const { t } = useTranslation('digest')
   const { data: systemTime } = useSystemTime()
   const todayDate = systemTime?.current_date ?? format(new Date(), 'yyyy-MM-dd')
@@ -567,6 +568,7 @@ export function DigestView({ date, isMobile, onDateChange }: DigestViewProps) {
             onNextDay={handleNextDay}
             onAddFeed={() => setAddFeedOpen(true)}
             onDateChange={onDateChange}
+            onChangePeriod={onChangePeriod}
             todayAnchor={(() => {
               const [y, m, d] = todayDate.split('-').map(Number)
               return new Date(y, m - 1, d)

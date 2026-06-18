@@ -29,6 +29,7 @@ import {
 import { TodayBoard } from './components/TodayBoard'
 import { DigestView } from './components/DigestView'
 import { StreamView } from './components/StreamView'
+import { PeriodView } from './components/PeriodView'
 import { DigestSidebar } from './components/DigestView/DigestSidebar'
 import { stripHtmlTags } from '../../../lib/html'
 import { shouldAutoTranslate } from '../../../lib/translationLanguagePolicy'
@@ -86,6 +87,9 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
     setTodayBoardDate,
     digestDate,
     setDigestDate,
+    periodKind,
+    periodAnchor,
+    setPeriodView,
   } = useReaderController()
   const { user } = useAuthStore()
   const { data: subscriptions = [] } = useAllSubscriptions()
@@ -94,6 +98,14 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
   const aiIntegrationEnabled = (aiIntegrationStatus?.enabled ?? false) && userAIIntegrationEnabled
 
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+
+  const handleChangePeriod = useCallback(
+    (kind: 'day' | 'week' | 'month', anchor: string) => {
+      if (kind === 'day') setDigestDate(anchor)
+      else setPeriodView(kind, anchor)
+    },
+    [setDigestDate, setPeriodView]
+  )
 
   // Store the original position data of the selected entry when it was first clicked.
   const selectedEntryOriginalDataRef = useRef<{
@@ -198,7 +210,7 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
       view: isTodayBoardView ? 'today-board' : 'timeline',
     },
     {
-      enabled: !isTodayBoardView || !!todayBoardDate,
+      enabled: (!isTodayBoardView || !!todayBoardDate) && !periodKind,
     }
   )
 
@@ -783,6 +795,17 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
     }
   }, [isMobile, isReaderVisibleOnMobile, filterType]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (periodKind) {
+    return (
+      <PeriodView
+        periodKind={periodKind}
+        anchorDate={periodAnchor}
+        onChangePeriod={handleChangePeriod}
+        onOpenEntry={(e) => selectEntry(e.id)}
+      />
+    )
+  }
+
   if (isDigestView) {
     // When a feed/folder scope is active, swap Digest for the time-ordered StreamView.
     // The DigestSidebar (rendered inside each view) handles URL params for scope selection.
@@ -800,6 +823,7 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
         date={digestDate}
         isMobile={isMobile}
         onDateChange={setDigestDate}
+        onChangePeriod={handleChangePeriod}
       />
     )
   }
