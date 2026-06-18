@@ -25,6 +25,7 @@ class UserEntry(Base, TimestampMixin):
         entry_id: Entry reference.
         is_read: Whether user has read the entry.
         read_later: Whether marked for later reading.
+        is_hidden: Whether the user marked the entry as not-interested (hidden).
         read_at: Timestamp when marked as read.
     """
 
@@ -50,6 +51,7 @@ class UserEntry(Base, TimestampMixin):
     # User state
     is_read: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     read_later: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_hidden: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Read later expiration (M2)
     read_later_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
