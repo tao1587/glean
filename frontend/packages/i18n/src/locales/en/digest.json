@@ -1,0 +1,169 @@
+{
+  "sidebar": {
+    "feeds": "Feeds",
+    "saved": "Read Later",
+    "settings": "Settings"
+  },
+  "feeds": {
+    "title": "Feeds",
+    "subtitleCount": "{{count}} subscriptions",
+    "addFeed": "Add Feed",
+    "empty": "No feeds yet",
+    "createFolder": "Create folder",
+    "createFolderPrompt": "Folder name",
+    "folderMenu": "Folder options",
+    "rename": "Rename",
+    "renamePrompt": "New folder name",
+    "delete": "Delete",
+    "deleteConfirm": "Delete folder \"{{name}}\"? Feeds inside will become uncategorized.",
+    "removeFromFolder": "Drop here to remove from folder"
+  },
+  "saved": {
+    "title": "Read Later",
+    "subtitleCount": "{{count}} to read",
+    "empty": "Nothing saved for later",
+    "unknownSource": "Unknown source"
+  },
+  "addFeed": {
+    "title": "Add Feed",
+    "description": "Enter an RSS / Atom link or a website URL",
+    "placeholder": "https://example.com/feed",
+    "cancel": "Cancel",
+    "submit": "Subscribe",
+    "submitting": "Subscribing…",
+    "errorFallback": "Subscribe failed, please check the link",
+    "success": "Subscribed successfully!",
+    "modeUrl": "URL",
+    "modeRsshub": "RSSHub",
+    "rsshubDescription": "Enter an RSSHub route path (e.g. /bilibili/user/dynamic/…)"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Appearance · Reading · Language · Account",
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "uiLanguage": "UI language"
+    },
+    "translation": {
+      "title": "Translation",
+      "targetLanguage": "Target language",
+      "off": "Off",
+      "zh": "中文",
+      "en": "English",
+      "listAutoEnable": "Enable list translation by default",
+      "listAutoEnableSub": "Only translates content that differs from the target"
+    },
+    "reading": {
+      "title": "Reading",
+      "autoMarkRead": "Auto mark as read",
+      "autoMarkReadSub": "Mark as read when opening an article",
+      "showRemaining": "Show remaining time",
+      "showRemainingSub": "Show expiry time in Read Later list",
+      "readLaterCleanup": "Read Later auto cleanup",
+      "days1": "1 day",
+      "days7": "7 days",
+      "days30": "30 days",
+      "never": "Never"
+    },
+    "data": {
+      "title": "Data",
+      "importOpml": "Import OPML",
+      "exportOpml": "Export OPML"
+    },
+    "account": {
+      "title": "Account",
+      "notLoggedIn": "Not logged in"
+    },
+    "links": {
+      "manageFeeds": "Manage Feeds",
+      "manageFeedsSub": "feed CRUD",
+      "translation": "Translation",
+      "translationSub": "Target language / service",
+      "ai": "AI Integration",
+      "aiSub": "Model config",
+      "apiTokens": "API Tokens",
+      "apiTokensSub": "Access token management"
+    }
+  },
+  "masthead": {
+    "headline": "Today's Digest",
+    "articles": "articles",
+    "sources": "sources",
+    "topics": "topics",
+    "estimatedReading": "est. reading",
+    "progress": "{{unread}} unread / {{total}} total",
+    "todayDate": "Today · {{month}}/{{day}}",
+    "date": "{{month}}/{{day}}",
+    "clearFilter": "All",
+    "backToDigest": "Today"
+  },
+  "topnav": {
+    "prevDay": "Previous day (←)",
+    "nextDay": "Next day (→)",
+    "selectDate": "Select date",
+    "search": "Search (⌘K)",
+    "addFeed": "Add Feed",
+    "translating": "Translating…"
+  },
+  "weekdays": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "section": {
+    "count": "{{entries}} articles · {{sources}} sources",
+    "markAllRead": "Mark all read",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "viewAll": "View all {{count}} ↓",
+    "collapseViewAll": "Collapse",
+    "otherFolder": "Other",
+    "readTail": "{{count}} read"
+  },
+  "card": {
+    "unknownSource": "Unknown source",
+    "markUnread": "Mark as unread",
+    "markRead": "Mark as read",
+    "unsave": "Remove from Read Later",
+    "save": "Save for later"
+  },
+  "empty": {
+    "headline": "Quiet day",
+    "description": "No articles collected on {{date}}",
+    "yesterday": "Review yesterday →"
+  },
+  "error": {
+    "title": "Failed to load"
+  },
+  "search": {
+    "placeholder": "Search articles...",
+    "scope": {
+      "all": "All",
+      "date": "Today",
+      "week": "This week"
+    },
+    "empty": {
+      "title": "No results",
+      "hint": "Try a different scope or query"
+    },
+    "hints": "↑↓ navigate · ↵ open · ⌘↵ original · esc close",
+    "group": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This week",
+      "older": "Older"
+    },
+    "took": "{{count}} results in {{ms}}ms"
+  }
+}

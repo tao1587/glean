@@ -1,0 +1,417 @@
+{
+  "layout": {
+    "badge": "Admin",
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "feeds": "Feeds",
+      "entries": "Entries",
+      "settings": "Settings",
+      "embeddings": "Embeddings",
+      "system": "System"
+    },
+    "language": {
+      "label": "Language"
+    },
+    "logout": {
+      "button": "Sign out",
+      "title": "Sign Out?",
+      "description": "Are you sure you want to sign out from the admin dashboard?"
+    }
+  },
+  "settings": {
+    "system": {
+      "title": "System Settings",
+      "subtitle": "Manage global configuration for your Glean instance."
+    },
+    "registration": {
+      "title": "User Registration",
+      "description": "Control whether new users can sign up for an account. Existing users will still be able to log in.",
+      "enableLabel": "Enable Registration",
+      "enabled": "New users can sign up.",
+      "disabled": "Sign up is disabled."
+    },
+    "embedding": {
+      "title": "Embedding Settings",
+      "subtitle": "Configure vectorization for AI-powered recommendations.",
+      "config": "Configuration",
+      "enabled": "Enable Vectorization",
+      "enabledDesc": "Turn on AI-powered recommendations using vector embeddings.",
+      "provider": "Provider",
+      "model": "Model",
+      "dimension": "Dimension",
+      "autoFilled": "auto-filled",
+      "customModelPlaceholder": "Enter custom model name",
+      "apiKey": "API Key",
+      "apiKeySet": "configured",
+      "apiKeyPlaceholder": "Enter new API key to update",
+      "baseUrl": "Base URL (optional)",
+      "rateLimit": "Rate limit (rpm)",
+      "rateLimitDefault": "Default",
+      "inherit": "Inherit default",
+      "progress": "Progress",
+      "progressDesc": "Progress is derived from entry counts. Saving config will re-embed all entries.",
+      "total": "Total",
+      "done": "Done",
+      "failed": "Failed",
+      "percent": "{{percent}}% completed",
+      "saved": "Settings Saved",
+      "saveSuccess": "Configuration saved successfully.",
+      "saveError": "Failed to save configuration.",
+      "testConnection": "Test Connection",
+      "validating": "Validating...",
+      "validatingConnection": "Validating provider connection...",
+      "downloadingModel": "Note: First-time validation may take several minutes as the model needs to be downloaded from HuggingFace.",
+      "validatingInProgress": "Validation in Progress",
+      "modelDownloadNotice": "If this is your first time using this model, it may take several minutes to download from HuggingFace. Please be patient.",
+      "downloadTimeout": "The validation will timeout after 10 minutes. If validation fails due to timeout, the model may still be downloading in the background.",
+      "validationError": "Validation Error",
+      "modelDownloadTip": "Tip: If the error is timeout-related, the model might still be downloading. Try again after a few minutes.",
+      "validationSuccess": "Connection Successful",
+      "validationFailed": "Connection Failed",
+      "rebuild": "Rebuild All",
+      "cancelRebuild": "Cancel Rebuild",
+      "errorOccurred": "Error Occurred",
+      "errorCount": "Error count: {{count}}",
+      "info": "Information",
+      "infoDesc": "Vectorization enables AI-powered recommendations in the Smart view by generating embeddings for article content.",
+      "infoLocal": "Sentence Transformers runs locally (no API key needed)",
+      "infoOpenAI": "OpenAI requires an API key and incurs costs",
+      "infoRebuild": "Changing provider or model will trigger a full rebuild",
+      "status": {
+        "disabled": "Disabled",
+        "idle": "Operational",
+        "validating": "Validating...",
+        "rebuilding": "Rebuilding...",
+        "error": "Error"
+      },
+      "modelDownload": {
+        "title": "Model Download",
+        "desc": "Download the model to the server before enabling vectorization.",
+        "ready": "Ready",
+        "failed": "Failed",
+        "downloading": "Downloading...",
+        "notStarted": "Not downloaded",
+        "downloadingNote": "Downloading from HuggingFace. This may take several minutes depending on your network speed.",
+        "inProgress": "Downloading...",
+        "retry": "Retry Download",
+        "start": "Download Model"
+      }
+    }
+  },
+  "login": {
+    "title": "Glean Admin",
+    "subtitle": "Sign in to manage your system",
+    "username": "Username",
+    "password": "Password",
+    "usernamePlaceholder": "Enter your username",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "invalid": "Invalid username or password",
+    "footer": "Admin access only. Unauthorized access is prohibited.",
+    "errorTitle": "Error"
+  },
+  "entries": {
+    "title": "Entry Management",
+    "subtitle": "Manage and moderate all entries across feeds",
+    "badge": "entries",
+    "searchPlaceholder": "Search by title...",
+    "search": "Search",
+    "clear": "Clear",
+    "filters": {
+      "allFeeds": "All Feeds"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{total}}"
+    },
+    "emptyFilter": "No entries found matching your criteria",
+    "empty": "No entries yet",
+    "open": "Open",
+    "delete": "Delete",
+    "deleteTitle": "Delete Entry",
+    "deleteDescription": "Are you sure you want to delete this entry? This action cannot be undone and will permanently remove the entry from the database.",
+    "deleting": "Deleting...",
+    "loading": "Loading...",
+    "noContent": "No content available",
+    "viewOriginal": "View Original Article",
+    "contentBackfill": {
+      "pending": "Needs content fill",
+      "processing": "Filling article content",
+      "done": "Content filled",
+      "failed": "Content fill failed",
+      "skipped": "Content fill skipped",
+      "attempts": "Attempts: {{count}}",
+      "source": "Source: {{source}}",
+      "errorLog": "Error log: {{message}}"
+    }
+  },
+  "feeds": {
+    "feedErrorTitle": "Feed Error",
+    "feedErrorDescription": "This feed has encountered {{count}} consecutive error(s).",
+    "feedErrorMessageLabel": "Error Message:",
+    "noErrorMessage": "No error message available",
+    "title": "Feed Management",
+    "subtitle": "Manage and monitor all RSS feeds",
+    "searchPlaceholder": "Search by title or URL...",
+    "search": "Search",
+    "clear": "Clear",
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "error": "Error"
+    },
+    "table": {
+      "feed": "Feed",
+      "status": "Status",
+      "subscribers": "Subscribers",
+      "lastFetched": "Last Fetched",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "resetTooltip": "Reset error count",
+    "refreshAll": "Refresh All",
+    "retryErrored": "Retry Errored",
+    "refreshNowTooltip": "Refresh now",
+    "refreshStatus": {
+      "queued": "Queued",
+      "deferred": "Deferred",
+      "refreshing": "Refreshing",
+      "completed": "Completed",
+      "notFound": "Not Found"
+    },
+    "refreshResult": {
+      "success": "Success",
+      "notModified": "Not Modified",
+      "failed": "Failed"
+    },
+    "lastSuccessLabel": "Last success",
+    "feedFetchProgress": {
+      "button": "Fetch progress",
+      "currentRun": "Current run",
+      "description": "Feed fetch progress, ETA, stage details, and recent history.",
+      "progressLabel": "Stage progress",
+      "currentStage": "Current stage",
+      "estimatedStart": "Estimated start",
+      "estimatedFinish": "Estimated finish",
+      "predictionLabel": "Prediction based on recent runs",
+      "path": "Path",
+      "pathValues": {
+        "directFeed": "Direct feed",
+        "rsshubPrimary": "RSSHub primary",
+        "rsshubFallback": "RSSHub fallback",
+        "unknown": "Unknown"
+      },
+      "lastFinished": "Last finished",
+      "lastSuccess": "Last success",
+      "nextFetch": "Next fetch",
+      "firstFetch": "First fetch",
+      "nextFetchAfterRun": "Calculated after the current run finishes",
+      "historyTitle": "Recent runs",
+      "historyEmpty": "No fetch history yet.",
+      "historyLoading": "Loading recent runs…",
+      "diagnosticTitle": "Detailed diagnostic",
+      "lastProgress": "Last progress",
+      "queueTitle": "Ahead in queue",
+      "queueSectionTitle": "Queue activity",
+      "queueEmpty": "No queued or running tasks ahead.",
+      "queueEta": "ETA finish",
+      "globalQueueLabel": "Queue",
+      "globalQueueSummary": "{{running}} running · {{queued}} queued",
+      "globalQueueIdle": "Idle",
+      "queueGroups": {
+        "running": "Running ({{count}})",
+        "queued": "Queued ({{count}})"
+      },
+      "filters": {
+        "all": "All",
+        "running": "Running",
+        "queued": "Queued"
+      },
+      "inline": {
+        "stage": "Stage",
+        "etaStart": "ETA start",
+        "etaFinish": "ETA finish",
+        "nextFetch": "Next fetch"
+      },
+      "stageTiming": {
+        "start": "Start",
+        "finish": "Finish",
+        "duration": "Duration"
+      },
+      "statuses": {
+        "queued": "Queued",
+        "in_progress": "Refreshing",
+        "not_modified": "No changes",
+        "success": "Completed",
+        "error": "Failed",
+        "scheduled": "Scheduled",
+        "not_started": "Not started"
+      },
+      "stageStatuses": {
+        "pending": "Pending",
+        "running": "Running",
+        "success": "Done",
+        "error": "Failed",
+        "skipped": "Skipped"
+      },
+      "stages": {
+        "queue_wait": "Queue wait",
+        "resolve_attempt_urls": "Resolve source path",
+        "fetch_xml": "Fetch feed XML",
+        "parse_feed": "Parse feed",
+        "process_entries": "Process entries",
+        "backfill_content": "Backfill content",
+        "store_results": "Store results",
+        "complete": "Complete"
+      },
+      "slowDiagnostics": {
+        "queue_wait": "Waiting for worker capacity.",
+        "resolve_attempt_urls": "Resolving available feed source paths.",
+        "fetch_xml": "Waiting for the feed source to respond.",
+        "parse_feed": "Parsing the feed payload.",
+        "process_entries": "Processing feed entries.",
+        "backfill_content": "Backfilling article content.",
+        "store_results": "Writing feed updates to storage.",
+        "complete": "Finalizing the fetch run."
+      },
+      "emptyStates": {
+        "noRunYet": "No persisted fetch run yet",
+        "waitingWindow": "Waiting for the next fetch window"
+      },
+      "summary": {
+        "newEntries": "New {{count}}",
+        "totalEntries": "Total {{count}}",
+        "backfillFailed": "Backfill failed {{count}}",
+        "fallbackUsed": "RSSHub fallback used"
+      }
+    },
+    "logLabel": "Log",
+    "disableTooltip": "Disable feed",
+    "enableTooltip": "Enable feed",
+    "deleteTitle": "Delete Feed?",
+    "deleteDescription": "Are you sure you want to delete this feed? This action cannot be undone.",
+    "delete": "Delete Feed",
+    "deleting": "Deleting...",
+    "neverFetched": "Never",
+    "contentBackfill": {
+      "open": "Backfill article content",
+      "title": "Backfill Article Content",
+      "description": "Preview and queue full-text backfill jobs for {{title}}.",
+      "limit": "Candidate limit",
+      "missingOnly": "Only include entries that still look summary-only",
+      "force": "Force reprocess even when content already exists",
+      "preview": "Preview candidates",
+      "previewing": "Previewing...",
+      "enqueue": "Queue backfill",
+      "queueing": "Queueing...",
+      "summary": {
+        "matched": "Matched",
+        "enqueued": "Enqueued",
+        "mode": "Mode"
+      },
+      "previewMode": "Preview only",
+      "queuedMode": "Jobs queued",
+      "candidatesTitle": "Candidate entries",
+      "candidatesDescription": "These entries look like they only have teaser content and are worth retrying.",
+      "published": "Published",
+      "contentLength": "Content",
+      "summaryLength": "Summary",
+      "attempts": "Attempts",
+      "unknown": "Unknown",
+      "empty": "No matching entries for the current filters."
+    },
+    "emptyFiltered": "No feeds found matching your criteria",
+    "empty": "No feeds yet",
+    "batch": {
+      "selected": "{{count}} selected",
+      "selectAll": "Select all on this page",
+      "deselectAll": "Deselect all",
+      "clearSelection": "Clear selection",
+      "refresh": "Refresh",
+      "enable": "Enable",
+      "disable": "Disable",
+      "resetError": "Reset Error",
+      "delete": "Delete",
+      "batchDeleteTitle": "Delete {{count}} feeds?",
+      "batchDeleteDescription": "This action cannot be undone. All selected feeds will be permanently deleted."
+    },
+    "pagination": {
+      "page": "Page {{page}} of {{totalPages}} ({{total}} total feeds)",
+      "rowsPerPage": "Rows per page",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "users": {
+    "title": "User Management",
+    "subtitle": "Manage user accounts and permissions",
+    "searchPlaceholder": "Search by email...",
+    "search": "Search",
+    "clear": "Clear",
+    "table": {
+      "email": "Email",
+      "name": "Name",
+      "status": "Status",
+      "created": "Created",
+      "lastLogin": "Last Login",
+      "actions": "Actions"
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "never": "Never",
+    "disable": "Disable",
+    "enable": "Enable",
+    "resetPassword": "Reset Password",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordDesc": "Set a new password for this user.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "resetSuccess": "Password reset successfully",
+    "resetting": "Resetting...",
+    "importSubs": "Import Subscriptions",
+    "importSubsTitle": "Import Subscriptions from Another User",
+    "importSubsDesc": "Copy subscriptions from another user to this user. Existing subscriptions will be skipped automatically.",
+    "sourceUser": "Source User",
+    "selectUser": "Select a user...",
+    "importing": "Importing...",
+    "importSuccess": "Successfully imported {{imported}} subscription(s), skipped {{skipped}} duplicate(s).",
+    "emptyFiltered": "No users found matching your search",
+    "empty": "No users yet",
+    "pagination": {
+      "page": "Page {{page}} of {{totalPages}} ({{total}} total users)",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "System overview and statistics",
+    "cards": {
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "totalFeeds": "Total Feeds",
+      "totalEntries": "Total Entries",
+      "newUsers": "New Users",
+      "newEntries": "New Entries",
+      "last7Days": "Last 7 days"
+    },
+    "activity": {
+      "title": "Today's Activity",
+      "newUsersToday_one": "{{count}} new user",
+      "newUsersToday_other": "{{count}} new users",
+      "newEntriesToday_one": "{{count}} new entry",
+      "newEntriesToday_other": "{{count}} new entries",
+      "registeredToday": "Registered today",
+      "addedToday": "Added today"
+    }
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

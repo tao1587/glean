@@ -1,0 +1,45 @@
+# Worker Dockerfile with Playwright support for browser-based extraction.
+
+FROM mcr.microsoft.com/playwright/python:v1.55.0-jammy
+
+ARG APP_VERSION=dev
+ARG UV_INDEX_URL=https://pypi.org/simple
+
+ENV APP_VERSION=${APP_VERSION}
+ENV UV_CACHE_DIR=/root/.cache/uv
+ENV UV_INDEX_URL=${UV_INDEX_URL}
+
+WORKDIR /app
+
+# Minimal tools retained from the backend image plus init for cleaner signal handling.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    curl \
+    openssl \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir --index-url "${UV_INDEX_URL}" uv
+
+COPY pyproject.toml uv.lock ./
+COPY apps/api/pyproject.toml apps/api/pyproject.toml
+COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
+COPY packages/core/pyproject.toml packages/core/pyproject.toml
+COPY packages/database/pyproject.toml packages/database/pyproject.toml
+COPY packages/rss/pyproject.toml packages/rss/pyproject.toml
+COPY packages/vector/pyproject.toml packages/vector/pyproject.toml
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --all-packages --no-dev --no-install-workspace
+
+COPY apps/ apps/
+COPY packages/ packages/
+COPY scripts/ scripts/
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --all-packages --no-dev
+
+RUN chmod +x scripts/*.sh 2>/dev/null || true
+
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/scripts/entrypoint.sh"]
+CMD ["uv", "run", "--no-sync", "python", "scripts/run-arq-worker.py", "glean_worker.main.WorkerSettings"]

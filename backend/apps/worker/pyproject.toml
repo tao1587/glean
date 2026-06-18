@@ -1,0 +1,34 @@
+[project]
+name = "glean-worker"
+version = "0.1.0"
+description = "Glean Background Worker"
+requires-python = ">=3.11"
+
+dependencies = [
+    "arq>=0.25.0",
+    "httpx>=0.27.0",
+    "structlog>=24.1.0",
+    "pydantic-settings>=2.2.0",
+    "loguru>=0.7.0",
+    "tzdata>=2025.2",
+    "glean-database",
+    "glean-rss",
+    "glean-vector",
+    "deep-translator>=1.11.0",
+    "deepl>=1.17.0",
+    "openai>=1.0.0",
+    "beautifulsoup4>=4.12.0",
+    "playwright==1.55.0",
+]
+
+[tool.uv.sources]
+glean-database = { workspace = true }
+glean-rss = { workspace = true }
+glean-vector = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["glean_worker"]

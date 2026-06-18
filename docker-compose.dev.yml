@@ -1,0 +1,50 @@
+# Development environment configuration
+# Usage: docker compose -f docker-compose.dev.yml up -d
+#
+# This configuration includes:
+# - PostgreSQL (with pgvector) and Redis with exposed ports for local development
+# - All services use development-specific container names and volumes
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: glean
+      POSTGRES_USER: glean
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "${HARNESS_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glean"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - glean-dev-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    ports:
+      - "${HARNESS_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - glean-dev-network
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  glean-dev-network:
+    driver: bridge

@@ -1,0 +1,328 @@
+{
+  "title": "设置",
+  "subtitle": "管理您的账号和偏好设置",
+  "tabs": {
+    "profile": "个人资料",
+    "readLater": "稍后阅读",
+    "appearance": "外观",
+    "manageFeeds": "管理订阅",
+    "apiTokens": "API 令牌",
+    "aiIntegration": "AI",
+    "translation": "翻译"
+  },
+  "profile": {
+    "title": "个人资料",
+    "desc": "管理您的账号信息",
+    "name": "姓名",
+    "notSet": "未设置",
+    "email": "邮箱",
+    "phone": "手机",
+    "accountStatus": "账号状态",
+    "active": "激活",
+    "inactive": "未激活",
+    "verified": "已验证",
+    "notVerified": "未验证",
+    "language": "语言",
+    "changePassword": "更改密码",
+    "deleteAccount": "删除账号"
+  },
+  "readLater": {
+    "title": "稍后阅读",
+    "desc": "配置您的稍后阅读列表行为",
+    "autoCleanup": "自动清理周期",
+    "autoCleanupDesc": "标记为\"稍后阅读\"的项目将在此期限后自动删除。设置为\"永不过期\"可无限期保留。",
+    "showRemainingTime": "显示剩余时间",
+    "showRemainingTimeDesc": "显示稍后阅读列表中项目过期前的剩余时间",
+    "settingsSaved": "设置已成功保存",
+    "cleanupPeriod": {
+      "1day": "1 天",
+      "7days": "7 天",
+      "30days": "30 天",
+      "never": "永不过期"
+    }
+  },
+  "appearance": {
+    "title": "外观",
+    "desc": "自定义外观和感觉",
+    "theme": "主题",
+    "chooseTheme": "选择您的主题",
+    "themes": {
+      "night": "夜间",
+      "nightDesc": "深色主题，适合舒适阅读",
+      "day": "白天",
+      "dayDesc": "浅色主题，适合日间使用",
+      "auto": "自动",
+      "autoDesc": "跟随系统偏好"
+    }
+  },
+  "manageFeeds": {
+    "title": "管理订阅",
+    "desc": "管理您的 RSS 订阅源",
+    "searchPlaceholder": "搜索订阅...",
+    "batchManage": "批量管理",
+    "exitBatchMode": "退出批量",
+    "selectAllOnPage": "选择当前页",
+    "selectAllVisible": "选择当前结果",
+    "selectedCount": "已选 {{count}} 个",
+    "unsubscribeSelected": "取消所选订阅",
+    "selectFeed": "选择订阅源",
+    "selectFolder": "选择文件夹",
+    "previewRecentArticles": "预览最近文章",
+    "hideRecentArticles": "收起最近文章",
+    "recentArticlesTitle": "最近 10 条文章预览",
+    "recentArticlesDescription": "先快速查看近期内容，再决定是否取消订阅。",
+    "recentArticlesCount": "{{count}} / 10 条",
+    "recentArticlesFailed": "加载最近文章失败",
+    "recentArticlesEmpty": "这个订阅源最近还没有可预览的文章。",
+    "previewArticleDetails": "预览文章详情",
+    "openArticle": "打开文章",
+    "articlePreviewEmpty": "这篇文章暂时没有可预览的摘要或正文。",
+    "contentBackfill": {
+      "pending": "待回填正文",
+      "processing": "正在回填正文",
+      "done": "正文已回填",
+      "failed": "正文回填失败",
+      "skipped": "已跳过正文回填",
+      "attempts": "尝试次数：{{count}}",
+      "errorLog": "错误日志：{{message}}"
+    },
+    "unknownAuthor": "未知作者",
+    "unread": "未读",
+    "importOPML": "导入 OPML",
+    "exportOPML": "导出 OPML",
+    "loading": "加载中...",
+    "subscriptionCount": "{{count}} 个订阅",
+    "subscriptionCount_plural": "{{count}} 个订阅",
+    "uncategorized": "未分组",
+    "emptyFolder": "文件夹为空",
+    "failedToLoad": "加载订阅失败",
+    "untitledFeed": "未命名订阅源",
+    "openFeed": "打开订阅源",
+    "refreshFeed": "刷新订阅源",
+    "refreshStatus": {
+      "queued": "已排队",
+      "deferred": "延后执行",
+      "refreshing": "刷新中",
+      "completed": "已完成",
+      "notFound": "未找到任务"
+    },
+    "refreshResult": {
+      "success": "成功",
+      "notModified": "无更新",
+      "failed": "失败"
+    },
+    "entriesSuffix": "条",
+    "lastSuccessLabel": "最后成功",
+    "feedFetchProgress": {
+      "button": "抓取进度",
+      "currentRun": "当前运行",
+      "description": "查看抓取进度、预计时间、阶段详情和最近历史。",
+      "progressLabel": "阶段进度",
+      "currentStage": "当前阶段",
+      "estimatedStart": "预计开始",
+      "estimatedFinish": "预计完成",
+      "predictionLabel": "基于最近运行记录的预测",
+      "path": "路径",
+      "pathValues": {
+        "directFeed": "直接订阅源",
+        "rsshubPrimary": "RSSHub 主路径",
+        "rsshubFallback": "RSSHub 回退路径",
+        "unknown": "未知"
+      },
+      "lastFinished": "上次完成",
+      "lastSuccess": "上次成功",
+      "nextFetch": "下次抓取",
+      "firstFetch": "首次抓取",
+      "nextFetchAfterRun": "当前运行完成后计算",
+      "historyTitle": "最近运行",
+      "historyEmpty": "还没有抓取历史。",
+      "historyLoading": "正在加载最近运行…",
+      "failureReason": "失败原因：{{reason}}",
+      "diagnosticTitle": "阶段诊断",
+      "lastProgress": "最近进展",
+      "queueTitle": "前方队列",
+      "queueSectionTitle": "队列活动",
+      "queueEmpty": "前方没有排队或进行中的任务。",
+      "queueEta": "预计完成",
+      "globalQueueLabel": "队列",
+      "globalQueueSummary": "{{running}} 个进行中 · {{queued}} 个排队中",
+      "globalQueueIdle": "空闲",
+      "queueGroups": {
+        "running": "进行中（{{count}}）",
+        "queued": "排队中（{{count}}）"
+      },
+      "filters": {
+        "all": "全部",
+        "running": "进行中",
+        "queued": "排队中"
+      },
+      "inline": {
+        "stage": "阶段",
+        "etaStart": "预计开始",
+        "etaFinish": "预计完成",
+        "nextFetch": "下次抓取"
+      },
+      "stageTiming": {
+        "start": "开始",
+        "finish": "结束",
+        "duration": "耗时"
+      },
+      "statuses": {
+        "queued": "已排队",
+        "in_progress": "刷新中",
+        "not_modified": "无变化",
+        "success": "已完成",
+        "error": "失败",
+        "scheduled": "已计划",
+        "not_started": "未开始"
+      },
+      "stageStatuses": {
+        "pending": "等待中",
+        "running": "进行中",
+        "success": "已完成",
+        "error": "失败",
+        "skipped": "已跳过"
+      },
+      "stages": {
+        "queue_wait": "排队等待",
+        "resolve_attempt_urls": "解析源路径",
+        "fetch_xml": "抓取 Feed XML",
+        "parse_feed": "解析 Feed",
+        "process_entries": "处理条目",
+        "backfill_content": "回填正文",
+        "store_results": "写入结果",
+        "complete": "完成"
+      },
+      "slowDiagnostics": {
+        "queue_wait": "正在等待 worker 空闲。",
+        "resolve_attempt_urls": "正在解析可用的订阅源路径。",
+        "fetch_xml": "正在等待订阅源响应。",
+        "parse_feed": "正在解析订阅内容。",
+        "process_entries": "正在处理订阅条目。",
+        "backfill_content": "正在回填文章正文。",
+        "store_results": "正在写入抓取结果。",
+        "complete": "正在完成本次抓取。"
+      },
+      "emptyStates": {
+        "noRunYet": "还没有持久化的抓取记录",
+        "waitingWindow": "正在等待下一个抓取窗口"
+      },
+      "summary": {
+        "newEntries": "新增 {{count}}",
+        "totalEntries": "共 {{count}}",
+        "backfillFailed": "正文回填失败 {{count}}",
+        "fallbackUsed": "已使用 RSSHub 回退路径"
+      }
+    },
+    "edit": "编辑",
+    "unsubscribe": "取消订阅",
+    "noSubscriptionsFound": "未找到订阅",
+    "tryDifferentSearch": "尝试调整搜索条件",
+    "addFirstFeed": "订阅您的第一个 RSS 订阅源以开始使用",
+    "addFeed": "添加订阅源",
+    "pageInfo": "第 {{page}} 页，共 {{totalPages}} 页 • 共 {{totalItems}} 个订阅",
+    "rowsPerPage": "每页显示",
+    "previous": "上一页",
+    "next": "下一页",
+    "unsubscribeConfirm": "取消订阅此源？",
+    "unsubscribeDescription": "确定要取消订阅此源吗？此操作无法撤销。",
+    "cancel": "取消",
+    "importing": "正在导入订阅..."
+  },
+  "translation": {
+    "title": "翻译",
+    "desc": "配置翻译服务提供商和 API 密钥",
+    "provider": "翻译服务",
+    "providerDesc": "选择您偏好的翻译服务",
+    "targetLanguage": "目标语言",
+    "targetLanguageDesc": "当检测到源文本与目标语言不同时自动翻译",
+    "targetLanguageOptions": {
+      "zh-CN": "简体中文",
+      "en": "English"
+    },
+    "google": {
+      "name": "Google 翻译",
+      "desc": "免费翻译服务，无需 API 密钥"
+    },
+    "deepl": {
+      "name": "DeepL",
+      "desc": "高质量翻译，措辞更自然"
+    },
+    "openai": {
+      "name": "OpenAI",
+      "desc": "使用 GPT 模型的 AI 翻译"
+    },
+    "mtran": {
+      "name": "MTranServer",
+      "desc": "自托管本地翻译服务"
+    },
+    "apiKey": "API 密钥",
+    "apiKeyPlaceholder": "输入您的 API 密钥",
+    "baseUrl": "MTran 服务地址",
+    "baseUrlPlaceholder": "http://your-mtran-host:8989",
+    "model": "模型",
+    "modelPlaceholder": "可选模型名",
+    "noKeyWarning": "{{provider}} 需要 API 密钥，将使用 Google 翻译作为备选。",
+    "settingsSaved": "翻译设置已保存",
+    "listAutoEnable": "默认开启列表翻译",
+    "listAutoEnableDesc": "在阅读列表中自动开启基于视窗的翻译",
+    "listEnglishOnly": "仅翻译英文内容",
+    "listEnglishOnlyDesc": "仅翻译以英文为主的列表条目"
+  },
+  "apiTokens": {
+    "title": "API 令牌",
+    "desc": "为 MCP 服务器访问创建长期有效的 API 令牌",
+    "description": "生成令牌以通过 MCP 服务器进行身份验证，用于 AI 助手和其他集成。",
+    "createToken": "创建令牌",
+    "createDescription": "创建新的 API 令牌用于 MCP 身份验证。",
+    "tokenName": "令牌名称",
+    "tokenNamePlaceholder": "我的 Claude Desktop 令牌",
+    "expiresIn": "过期时间",
+    "expiration": {
+      "never": "永不过期",
+      "30days": "30 天",
+      "90days": "90 天",
+      "1year": "1 年"
+    },
+    "create": "创建",
+    "tokenCreated": "令牌已创建",
+    "copyWarning": "请立即复制您的令牌，之后将无法再次查看！",
+    "copied": "已复制到剪贴板！",
+    "noTokens": "暂无 API 令牌",
+    "lastUsed": "上次使用：{{time}}",
+    "expiresAt": "过期时间：{{date}}",
+    "neverExpires": "永不过期",
+    "loadError": "加载 API 令牌失败",
+    "revokeTitle": "撤销令牌",
+    "revokeDescription": "确定要撤销令牌 \"{{name}}\" 吗？此操作无法撤销。",
+    "revoke": "撤销",
+    "mcpGuide": {
+      "title": "如何使用 MCP",
+      "description": "将您的 API 令牌添加到 MCP 客户端配置中，以便 AI 助手可以搜索和检索您订阅的文章。",
+      "configTitle": "Claude Desktop 配置",
+      "urlNote": "提示：使用 Docker 部署时，上方配置中的 URL 可直接使用（已自动填入当前域名）。自托管用户请确保 nginx 已配置 /mcp 路径代理。",
+      "tools": "可用工具：",
+      "toolSearch": "按关键词搜索文章",
+      "toolGet": "获取文章详情",
+      "toolList": "按日期范围列出文章",
+      "toolSubs": "列出您的订阅"
+    }
+  },
+  "aiIntegration": {
+    "title": "AI",
+    "desc": "配置你的本地 AI 使用偏好",
+    "systemDisabled": "管理员尚未开启本地 AI。开启后会使用你的个人设置。",
+    "enableLabel": "为我的账号开启本地 AI",
+    "enableDesc": "在今日收录显示 AI 摘要控制，并允许你的 API 令牌访问本地 AI 接口。",
+    "defaultView": "今日收录默认视图",
+    "defaultViewDesc": "进入今日收录时默认打开哪个视图。",
+    "defaultViewOptions": {
+      "list": "原始列表和文章详情",
+      "ai_summary": "AI 摘要"
+    },
+    "tokenGuideTitle": "本地 AI 请求令牌",
+    "tokenGuideDesc": "在 API 令牌标签页创建普通用户令牌，然后在本地 AI 客户端中作为 Bearer token 发送。",
+    "settingsSaved": "AI 设置已保存"
+  },
+  "version": "Glean v{{version}}"
+}

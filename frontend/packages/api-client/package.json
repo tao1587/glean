@@ -1,0 +1,33 @@
+{
+  "name": "@glean/api-client",
+  "version": "0.2.5",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf node_modules .turbo"
+  },
+  "dependencies": {
+    "@glean/logger": "workspace:*",
+    "@glean/types": "workspace:*",
+    "axios": "^1.6.0",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^24.0.0",
+    "jsdom": "^28.0.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.0.0",
+    "vitest": "^4.0.16"
+  }
+}

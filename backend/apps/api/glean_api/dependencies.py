@@ -1,0 +1,362 @@
+"""
+FastAPI dependencies.
+
+Provides dependency injection for database sessions, authentication, and services.
+"""
+
+from typing import Annotated, Any, TypedDict
+
+from arq.connections import ArqRedis
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from glean_core.auth import JWTConfig, verify_token
+from glean_core.schemas import UserResponse
+from glean_core.schemas.admin import AdminUserResponse
+from glean_core.services import (
+    AdminService,
+    AIIntegrationService,
+    APITokenService,
+    AuthService,
+    BookmarkService,
+    EntryService,
+    FeedService,
+    FolderService,
+    SystemConfigService,
+    TranslationService,
+    TypedConfigService,
+    UserService,
+)
+from glean_database.session import get_session
+
+from .config import settings
+
+# Security scheme for JWT bearer tokens
+security = HTTPBearer()
+
+
+class OIDCProviderInternalConfig(TypedDict, total=False):
+    """Server-only OIDC provider config (must never be returned in API payloads)."""
+
+    client_id: str
+    client_secret: str
+    issuer: str
+    scopes: list[str]
+    redirect_uri: str
+    discovery_url: str
+    jwks_cache_ttl_seconds: int
+
+
+async def get_redis_pool(request: Request) -> ArqRedis:
+    """
+    Get Redis connection pool for task queue.
+
+    Returns:
+        ArqRedis connection pool.
+    """
+    redis_pool = getattr(request.app.state, "redis_pool", None)
+    if redis_pool is None:
+        raise RuntimeError("Redis pool not initialized")
+    return redis_pool
+
+
+def get_jwt_config() -> JWTConfig:
+    """
+    Get JWT configuration.
+
+    Returns:
+        JWT configuration instance.
+    """
+    return JWTConfig(
+        secret_key=settings.secret_key,
+        algorithm=settings.jwt_algorithm,
+        access_token_expire_minutes=settings.jwt_access_token_expire_minutes,
+        refresh_token_expire_days=settings.jwt_refresh_token_expire_days,
+    )
+
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    jwt_config: Annotated[JWTConfig, Depends(get_jwt_config)],
+) -> UserResponse:
+    """
+    Get current authenticated user from JWT token.
+
+    Args:
+        credentials: HTTP bearer credentials.
+        session: Database session.
+        jwt_config: JWT configuration.
+
+    Returns:
+        Current user information.
+
+    Raises:
+        HTTPException: If token is invalid or user not found.
+    """
+    token = credentials.credentials
+    token_data = verify_token(token, jwt_config)
+
+    if not token_data or token_data.type != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    auth_service = AuthService(session, jwt_config)
+    try:
+        user = await auth_service.get_current_user(token)
+        return user
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from None
+
+
+async def get_current_api_token_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> UserResponse:
+    """Get current user from a Glean API token."""
+    token = credentials.credentials
+    token_service = APITokenService(session)
+    api_token = await token_service.verify_token(token)
+    if not api_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    await token_service.update_last_used(api_token.id)
+
+    user_service = UserService(session)
+    try:
+        return await user_service.get_user(api_token.user_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API token owner not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from None
+
+
+async def get_current_user_or_api_token_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    jwt_config: Annotated[JWTConfig, Depends(get_jwt_config)],
+) -> UserResponse:
+    """Get current user from either a browser JWT or a Glean API token."""
+    token = credentials.credentials
+    token_data = verify_token(token, jwt_config)
+    if token_data and token_data.type == "access":
+        auth_service = AuthService(session, jwt_config)
+        try:
+            return await auth_service.get_current_user(token)
+        except ValueError:
+            pass
+
+    token_service = APITokenService(session)
+    api_token = await token_service.verify_token(token)
+    if api_token:
+        await token_service.update_last_used(api_token.id)
+        user_service = UserService(session)
+        try:
+            return await user_service.get_user(api_token.user_id)
+        except ValueError:
+            pass
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid authentication credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+# Service dependencies
+def get_auth_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    jwt_config: Annotated[JWTConfig, Depends(get_jwt_config)],
+) -> AuthService:
+    """Get authentication service instance with provider configs."""
+    from glean_core.config import auth_provider_config
+
+    # Build provider configs from settings
+    provider_configs: dict[str, dict[str, Any]] = {}
+
+    if auth_provider_config.oidc_enabled:
+        oidc_config: OIDCProviderInternalConfig = {
+            "client_id": auth_provider_config.oidc_client_id,
+            # Internal-only secret consumed by backend provider clients.
+            "client_secret": auth_provider_config.oidc_client_secret,
+            "issuer": auth_provider_config.oidc_issuer,
+            "scopes": auth_provider_config.oidc_scopes.split(),
+            "redirect_uri": auth_provider_config.oidc_redirect_uri,
+            "jwks_cache_ttl_seconds": auth_provider_config.oidc_jwks_cache_ttl_seconds,
+        }
+
+        # Optional discovery URL override
+        if auth_provider_config.oidc_discovery_url:
+            oidc_config["discovery_url"] = auth_provider_config.oidc_discovery_url
+
+        provider_configs["oidc"] = dict(oidc_config)
+
+    return AuthService(session, jwt_config, provider_configs)
+
+
+def get_user_service(session: Annotated[AsyncSession, Depends(get_session)]) -> UserService:
+    """Get user service instance."""
+    return UserService(session)
+
+
+def get_feed_service(session: Annotated[AsyncSession, Depends(get_session)]) -> FeedService:
+    """Get feed service instance."""
+    return FeedService(session)
+
+
+async def get_entry_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    redis_pool: Annotated[ArqRedis, Depends(get_redis_pool)],
+) -> EntryService:
+    """Get entry service instance."""
+    return EntryService(session, redis_pool)
+
+
+def get_admin_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> AdminService:
+    """Get admin service instance."""
+    return AdminService(session)
+
+
+def get_system_config_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> SystemConfigService:
+    """Get system config service instance."""
+    return SystemConfigService(session)
+
+
+# M2 service dependencies
+def get_folder_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> FolderService:
+    """Get folder service instance."""
+    return FolderService(session)
+
+
+async def get_bookmark_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    redis_pool: Annotated[ArqRedis, Depends(get_redis_pool)],
+) -> BookmarkService:
+    """Get bookmark service instance."""
+    return BookmarkService(session, redis_pool)
+
+
+async def get_translation_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    redis_pool: Annotated[ArqRedis, Depends(get_redis_pool)],
+) -> TranslationService:
+    """Get translation service instance."""
+    return TranslationService(session, redis_pool)
+
+
+def get_typed_config_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> TypedConfigService:
+    """Get typed config service instance."""
+    return TypedConfigService(session)
+
+
+def get_ai_integration_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> AIIntegrationService:
+    """Get AI integration service instance."""
+    return AIIntegrationService(session)
+
+
+# MCP service dependencies
+def get_api_token_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> APITokenService:
+    """Get API token service instance."""
+    return APITokenService(session)
+
+
+async def get_current_admin(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    jwt_config: Annotated[JWTConfig, Depends(get_jwt_config)],
+) -> AdminUserResponse:
+    """
+    Get current authenticated admin from JWT token.
+
+    Args:
+        credentials: HTTP bearer credentials.
+        session: Database session.
+        jwt_config: JWT configuration.
+
+    Returns:
+        Current admin information.
+
+    Raises:
+        HTTPException: If token is invalid, not admin token, or admin not found.
+    """
+    from jose import JWTError, jwt
+
+    token = credentials.credentials
+
+    # Decode admin token directly instead of using verify_token
+    # (which expects "access" or "refresh" type, not "admin")
+    try:
+        payload = jwt.decode(token, jwt_config.secret_key, algorithms=[jwt_config.algorithm])
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from None
+
+    # Check if token is admin type
+    if payload.get("type") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+
+    # Get admin ID from token
+    admin_id = payload.get("sub")
+    if not admin_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Get admin from database
+    admin_service = AdminService(session)
+    admin = await admin_service.get_admin_by_id(admin_id)
+
+    if not admin or not admin.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin not found or inactive",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Build response with explicit field values to avoid lazy loading issues
+    # Handle both enum (in-memory) and string (from database) cases
+    role_value = admin.role.value if hasattr(admin.role, "value") else admin.role
+
+    return AdminUserResponse(
+        id=admin.id,
+        username=admin.username,
+        role=role_value,
+        is_active=admin.is_active,
+        last_login_at=admin.last_login_at,
+        created_at=admin.created_at,
+        updated_at=admin.updated_at,
+    )

@@ -1,0 +1,142 @@
+{
+  "title": "归档",
+  "subtitle": "您保存的归档内容",
+  "actions": {
+    "addBookmark": "添加归档",
+    "removeBookmark": "移除归档",
+    "editBookmark": "编辑归档",
+    "moveToFolder": "移动到文件夹",
+    "addToFolder": "添加到文件夹",
+    "removeFromFolder": "从文件夹中移除",
+    "addTags": "添加标签",
+    "removeTags": "移除标签"
+  },
+  "folders": {
+    "title": "文件夹",
+    "create": "创建文件夹",
+    "rename": "重命名文件夹",
+    "delete": "删除文件夹",
+    "deleteConfirm": "确定要删除此文件夹吗？",
+    "folderName": "文件夹名称",
+    "createSubfolder": "创建子文件夹",
+    "moveToFolder": "移动到文件夹",
+    "noFolders": "暂无文件夹",
+    "createFirst": "创建您的第一个文件夹"
+  },
+  "tags": {
+    "title": "标签",
+    "add": "添加标签",
+    "create": "创建标签",
+    "rename": "重命名标签",
+    "delete": "删除标签",
+    "deleteConfirm": "确定要删除此标签吗？",
+    "tagName": "标签名称",
+    "noTags": "暂无标签",
+    "addFirst": "添加您的第一个标签",
+    "noTagsYet": "暂无标签。输入以创建。",
+    "creating": "创建中..."
+  },
+  "empty": {
+    "title": "暂无归档",
+    "description": "保存您想长期留存的文章或链接",
+    "addBookmark": "添加归档",
+    "noBookmarks": "未找到归档内容",
+    "noBookmarksDescription": "保存文章或添加外部链接以建立您的个人归档库",
+    "addFirstBookmark": "添加您的第一条归档"
+  },
+  "metadata": {
+    "title": "标题",
+    "url": "链接",
+    "notes": "笔记",
+    "folder": "文件夹",
+    "tags": "标签",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间"
+  },
+  "placeholders": {
+    "searchBookmarks": "搜索归档...",
+    "searchTag": "搜索或创建标签...",
+    "articleTitle": "文章标题",
+    "addNote": "添加笔记...",
+    "bookmarkTitle": "归档标题",
+    "bookmarkNotes": "添加笔记...",
+    "searchFolder": "搜索或创建文件夹..."
+  },
+  "common": {
+    "savedFromFeed": "从订阅保存",
+    "openExternalLink": "打开外部链接",
+    "edit": "编辑",
+    "delete": "删除",
+    "cancel": "取消",
+    "save": "保存",
+    "create": "创建",
+    "close": "关闭",
+    "enterFullscreen": "进入全屏",
+    "exitFullscreen": "退出全屏"
+  },
+  "pagination": {
+    "showing": "显示 {{count}} / {{total}} 条归档",
+    "previous": "上一页",
+    "next": "下一页"
+  },
+  "delete": {
+    "confirm": "此操作无法撤销。该归档将被永久删除。",
+    "deleting": "删除中...",
+    "delete": "删除"
+  },
+  "emptyState": {
+    "articleNotFound": "文章未找到",
+    "articleNotFoundDescription": "文章可能已被移除或不再可用。",
+    "close": "关闭",
+    "noContent": "无法从此页面提取内容。"
+  },
+  "dialogs": {
+    "createBookmark": {
+      "title": "添加归档",
+      "description": "保存链接或创建笔记，纳入您的个人归档。",
+      "url": "链接",
+      "bookmarkTitle": "标题",
+      "notes": "笔记",
+      "folders": "文件夹",
+      "tags": "标签",
+      "error": {
+        "urlOrTitleRequired": "请提供链接或标题",
+        "failedToCreate": "创建归档失败"
+      },
+      "cancel": "取消",
+      "saving": "保存中...",
+      "save": "保存归档"
+    },
+    "editBookmark": {
+      "title": "编辑归档",
+      "description": "更新归档内容的详情与文件夹信息。",
+      "bookmarkTitle": "标题",
+      "notes": "笔记",
+      "source": {
+        "savedFromFeed": "从订阅保存",
+        "externalLink": "外部链接",
+        "noSource": "无来源"
+      },
+      "folders": "文件夹",
+      "tags": "标签",
+      "error": {
+        "titleRequired": "标题是必需的",
+        "failedToUpdate": "更新归档失败"
+      },
+      "cancel": "取消",
+      "saving": "保存中...",
+      "save": "保存更改"
+    }
+  },
+  "filters": {
+    "label": "筛选："
+  },
+  "view": {
+    "grid": "网格视图",
+    "list": "列表视图"
+  },
+  "displayMode": {
+    "source": "来源分组",
+    "results": "筛选结果"
+  }
+}

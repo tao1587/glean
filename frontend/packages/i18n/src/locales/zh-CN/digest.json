@@ -1,0 +1,169 @@
+{
+  "sidebar": {
+    "feeds": "订阅源",
+    "saved": "稍后读",
+    "settings": "设置"
+  },
+  "feeds": {
+    "title": "订阅源",
+    "subtitleCount": "{{count}} 个订阅",
+    "addFeed": "添加订阅",
+    "empty": "暂无订阅",
+    "createFolder": "新建文件夹",
+    "createFolderPrompt": "文件夹名称",
+    "folderMenu": "文件夹选项",
+    "rename": "重命名",
+    "renamePrompt": "新的文件夹名称",
+    "delete": "删除",
+    "deleteConfirm": "删除文件夹「{{name}}」？其中的订阅将移至未分类。",
+    "removeFromFolder": "拖到这里移出文件夹"
+  },
+  "saved": {
+    "title": "稍后读",
+    "subtitleCount": "{{count}} 篇待读",
+    "empty": "暂无稍后读",
+    "unknownSource": "未知来源"
+  },
+  "addFeed": {
+    "title": "添加订阅",
+    "description": "输入 RSS / Atom 链接或网站地址",
+    "placeholder": "https://example.com/feed",
+    "cancel": "取消",
+    "submit": "订阅",
+    "submitting": "订阅中…",
+    "errorFallback": "订阅失败，请检查链接",
+    "success": "订阅成功！",
+    "modeUrl": "普通 URL",
+    "modeRsshub": "RSSHub",
+    "rsshubDescription": "输入 RSSHub 路径（如 /bilibili/user/dynamic/…）"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "外观 · 阅读 · 语言 · 账户",
+    "appearance": {
+      "title": "外观",
+      "theme": "主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "自动"
+    },
+    "language": {
+      "title": "语言 / Language",
+      "uiLanguage": "界面语言"
+    },
+    "translation": {
+      "title": "翻译",
+      "targetLanguage": "翻译目标语言",
+      "off": "不翻译",
+      "zh": "中文",
+      "en": "English",
+      "listAutoEnable": "默认开启列表翻译",
+      "listAutoEnableSub": "仅翻译与目标语言不同的内容"
+    },
+    "reading": {
+      "title": "阅读",
+      "autoMarkRead": "自动标记已读",
+      "autoMarkReadSub": "打开文章后自动标为已读",
+      "showRemaining": "显示剩余时间",
+      "showRemainingSub": "稍后读列表中显示到期时间",
+      "readLaterCleanup": "稍后读自动清理",
+      "days1": "1天",
+      "days7": "7天",
+      "days30": "30天",
+      "never": "永不"
+    },
+    "data": {
+      "title": "数据",
+      "importOpml": "导入 OPML",
+      "exportOpml": "导出 OPML"
+    },
+    "account": {
+      "title": "账户",
+      "notLoggedIn": "未登录"
+    },
+    "links": {
+      "manageFeeds": "管理订阅",
+      "manageFeedsSub": "feed CRUD",
+      "translation": "翻译设置",
+      "translationSub": "目标语言/服务",
+      "ai": "AI 集成",
+      "aiSub": "模型配置",
+      "apiTokens": "API 令牌",
+      "apiTokensSub": "访问令牌管理"
+    }
+  },
+  "masthead": {
+    "headline": "今日收录",
+    "articles": "篇文章",
+    "sources": "个订阅源",
+    "topics": "个主题",
+    "estimatedReading": "预计阅读",
+    "progress": "{{unread}} 待读 / {{total}} 全部",
+    "todayDate": "今日 · {{month}}月{{day}}日",
+    "date": "{{month}}月{{day}}日",
+    "clearFilter": "全部",
+    "backToDigest": "今日视图"
+  },
+  "topnav": {
+    "prevDay": "前一天 (←)",
+    "nextDay": "后一天 (→)",
+    "selectDate": "选择日期",
+    "search": "搜索 (⌘K)",
+    "addFeed": "添加订阅",
+    "translating": "翻译中…"
+  },
+  "weekdays": {
+    "sun": "周日",
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六"
+  },
+  "section": {
+    "count": "{{entries}} 篇 · {{sources}} 个源",
+    "markAllRead": "全部已读",
+    "expand": "展开",
+    "collapse": "折叠",
+    "viewAll": "查看全部 {{count}} 篇 ↓",
+    "collapseViewAll": "收起",
+    "otherFolder": "其他",
+    "readTail": "已读 {{count}} 篇"
+  },
+  "card": {
+    "unknownSource": "未知来源",
+    "markUnread": "标为未读",
+    "markRead": "标为已读",
+    "unsave": "取消稍后读",
+    "save": "稍后读"
+  },
+  "empty": {
+    "headline": "今日静默",
+    "description": "{{date}} 暂无收录文章",
+    "yesterday": "回顾昨日收录 →"
+  },
+  "error": {
+    "title": "加载失败"
+  },
+  "search": {
+    "placeholder": "搜索文章...",
+    "scope": {
+      "all": "全部",
+      "date": "今天",
+      "week": "本周"
+    },
+    "empty": {
+      "title": "无结果",
+      "hint": "尝试更换范围或关键词"
+    },
+    "hints": "↑↓ 导航 · ↵ 打开 · ⌘↵ 原文 · esc 关闭",
+    "group": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "thisWeek": "本周",
+      "older": "更早"
+    },
+    "took": "{{count}} 条，耗时 {{ms}}ms"
+  }
+}

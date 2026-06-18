@@ -1,0 +1,328 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your account and preferences",
+  "tabs": {
+    "profile": "Profile",
+    "readLater": "Read Later",
+    "appearance": "Appearance",
+    "manageFeeds": "Manage Feeds",
+    "apiTokens": "API Tokens",
+    "aiIntegration": "AI",
+    "translation": "Translation"
+  },
+  "profile": {
+    "title": "Profile",
+    "desc": "Manage your account information",
+    "name": "Name",
+    "notSet": "Not set",
+    "email": "Email",
+    "phone": "Phone",
+    "accountStatus": "Account Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "language": "Language",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account"
+  },
+  "readLater": {
+    "title": "Read Later",
+    "desc": "Configure your read later list behavior",
+    "autoCleanup": "Auto-cleanup Period",
+    "autoCleanupDesc": "Items marked as \"Read Later\" will be automatically removed after this period. Set to \"Never expire\" to keep them indefinitely.",
+    "showRemainingTime": "Show Remaining Time",
+    "showRemainingTimeDesc": "Display how much time is left before items expire in the Read Later list",
+    "settingsSaved": "Settings saved successfully",
+    "cleanupPeriod": {
+      "1day": "1 day",
+      "7days": "7 days",
+      "30days": "30 days",
+      "never": "Never expire"
+    }
+  },
+  "appearance": {
+    "title": "Appearance",
+    "desc": "Customize the look and feel",
+    "theme": "Theme",
+    "chooseTheme": "Choose your theme",
+    "themes": {
+      "night": "Night",
+      "nightDesc": "Dark theme for comfortable reading",
+      "day": "Day",
+      "dayDesc": "Light theme for daytime use",
+      "auto": "Auto",
+      "autoDesc": "Follow your system preference"
+    }
+  },
+  "manageFeeds": {
+    "title": "Manage Feeds",
+    "desc": "Manage your RSS feed subscriptions",
+    "searchPlaceholder": "Search subscriptions...",
+    "batchManage": "Bulk manage",
+    "exitBatchMode": "Exit bulk mode",
+    "selectAllOnPage": "Select this page",
+    "selectAllVisible": "Select visible results",
+    "selectedCount": "{{count}} selected",
+    "unsubscribeSelected": "Unsubscribe selected",
+    "selectFeed": "Select feed",
+    "selectFolder": "Select folder",
+    "previewRecentArticles": "Preview recent articles",
+    "hideRecentArticles": "Hide recent articles",
+    "recentArticlesTitle": "Recent 10 article preview",
+    "recentArticlesDescription": "Review recent content before deciding whether to unsubscribe.",
+    "recentArticlesCount": "{{count}} / 10 items",
+    "recentArticlesFailed": "Failed to load recent articles",
+    "recentArticlesEmpty": "No recent articles available for preview.",
+    "previewArticleDetails": "Preview article details",
+    "openArticle": "Open article",
+    "articlePreviewEmpty": "No summary or article content is available for preview yet.",
+    "contentBackfill": {
+      "pending": "Needs content fill",
+      "processing": "Filling article content",
+      "done": "Content filled",
+      "failed": "Content fill failed",
+      "skipped": "Content fill skipped",
+      "attempts": "Attempts: {{count}}",
+      "errorLog": "Error log: {{message}}"
+    },
+    "unknownAuthor": "Unknown author",
+    "unread": "Unread",
+    "importOPML": "Import OPML",
+    "exportOPML": "Export OPML",
+    "loading": "Loading...",
+    "subscriptionCount": "{{count}} subscription",
+    "subscriptionCount_plural": "{{count}} subscriptions",
+    "uncategorized": "Uncategorized",
+    "emptyFolder": "Folder is empty",
+    "failedToLoad": "Failed to load subscriptions",
+    "untitledFeed": "Untitled Feed",
+    "openFeed": "Open feed",
+    "refreshFeed": "Refresh feed",
+    "refreshStatus": {
+      "queued": "Queued",
+      "deferred": "Deferred",
+      "refreshing": "Refreshing",
+      "completed": "Completed",
+      "notFound": "Not Found"
+    },
+    "refreshResult": {
+      "success": "Success",
+      "notModified": "No update",
+      "failed": "Failed"
+    },
+    "entriesSuffix": "entries",
+    "lastSuccessLabel": "Last success",
+    "feedFetchProgress": {
+      "button": "Fetch progress",
+      "currentRun": "Current run",
+      "description": "Feed fetch progress, ETA, stage details, and recent history.",
+      "progressLabel": "Stage progress",
+      "currentStage": "Current stage",
+      "estimatedStart": "Estimated start",
+      "estimatedFinish": "Estimated finish",
+      "predictionLabel": "Prediction based on recent runs",
+      "path": "Path",
+      "pathValues": {
+        "directFeed": "Direct feed",
+        "rsshubPrimary": "RSSHub primary",
+        "rsshubFallback": "RSSHub fallback",
+        "unknown": "Unknown"
+      },
+      "lastFinished": "Last finished",
+      "lastSuccess": "Last success",
+      "nextFetch": "Next fetch",
+      "firstFetch": "First fetch",
+      "nextFetchAfterRun": "Calculated after the current run finishes",
+      "historyTitle": "Recent runs",
+      "historyEmpty": "No fetch history yet.",
+      "historyLoading": "Loading recent runs…",
+      "failureReason": "Failure reason: {{reason}}",
+      "diagnosticTitle": "Stage diagnostic",
+      "lastProgress": "Last progress",
+      "queueTitle": "Ahead in queue",
+      "queueSectionTitle": "Queue activity",
+      "queueEmpty": "No queued or running tasks ahead.",
+      "queueEta": "ETA finish",
+      "globalQueueLabel": "Queue",
+      "globalQueueSummary": "{{running}} running · {{queued}} queued",
+      "globalQueueIdle": "Idle",
+      "queueGroups": {
+        "running": "Running ({{count}})",
+        "queued": "Queued ({{count}})"
+      },
+      "filters": {
+        "all": "All",
+        "running": "Running",
+        "queued": "Queued"
+      },
+      "inline": {
+        "stage": "Stage",
+        "etaStart": "ETA start",
+        "etaFinish": "ETA finish",
+        "nextFetch": "Next fetch"
+      },
+      "stageTiming": {
+        "start": "Start",
+        "finish": "Finish",
+        "duration": "Duration"
+      },
+      "statuses": {
+        "queued": "Queued",
+        "in_progress": "Refreshing",
+        "not_modified": "No changes",
+        "success": "Completed",
+        "error": "Failed",
+        "scheduled": "Scheduled",
+        "not_started": "Not started"
+      },
+      "stageStatuses": {
+        "pending": "Pending",
+        "running": "Running",
+        "success": "Done",
+        "error": "Failed",
+        "skipped": "Skipped"
+      },
+      "stages": {
+        "queue_wait": "Queue wait",
+        "resolve_attempt_urls": "Resolve source path",
+        "fetch_xml": "Fetch feed XML",
+        "parse_feed": "Parse feed",
+        "process_entries": "Process entries",
+        "backfill_content": "Backfill content",
+        "store_results": "Store results",
+        "complete": "Complete"
+      },
+      "slowDiagnostics": {
+        "queue_wait": "Waiting for worker capacity.",
+        "resolve_attempt_urls": "Resolving available feed source paths.",
+        "fetch_xml": "Waiting for the feed source to respond.",
+        "parse_feed": "Parsing the feed payload.",
+        "process_entries": "Processing feed entries.",
+        "backfill_content": "Backfilling article content.",
+        "store_results": "Writing feed updates to storage.",
+        "complete": "Finalizing the fetch run."
+      },
+      "emptyStates": {
+        "noRunYet": "No persisted fetch run yet",
+        "waitingWindow": "Waiting for the next fetch window"
+      },
+      "summary": {
+        "newEntries": "New {{count}}",
+        "totalEntries": "Total {{count}}",
+        "backfillFailed": "Backfill failed {{count}}",
+        "fallbackUsed": "RSSHub fallback used"
+      }
+    },
+    "edit": "Edit",
+    "unsubscribe": "Unsubscribe",
+    "noSubscriptionsFound": "No subscriptions found",
+    "tryDifferentSearch": "Try adjusting your search terms",
+    "addFirstFeed": "Subscribe to your first RSS feed to get started",
+    "addFeed": "Add Feed",
+    "pageInfo": "Page {{page}} of {{totalPages}} • {{totalItems}} total subscription{{plural}}",
+    "rowsPerPage": "Rows per page",
+    "previous": "Previous",
+    "next": "Next",
+    "unsubscribeConfirm": "Unsubscribe from feed?",
+    "unsubscribeDescription": "Are you sure you want to unsubscribe from this feed? This action cannot be undone.",
+    "cancel": "Cancel",
+    "importing": "Importing subscriptions..."
+  },
+  "translation": {
+    "title": "Translation",
+    "desc": "Configure your translation provider and API keys",
+    "provider": "Translation Provider",
+    "providerDesc": "Choose your preferred translation service",
+    "targetLanguage": "Target Language",
+    "targetLanguageDesc": "Auto-translate into this language when source content differs",
+    "targetLanguageOptions": {
+      "zh-CN": "Simplified Chinese",
+      "en": "English"
+    },
+    "google": {
+      "name": "Google Translate",
+      "desc": "Free translation service, no API key required"
+    },
+    "deepl": {
+      "name": "DeepL",
+      "desc": "High-quality translation with natural phrasing"
+    },
+    "openai": {
+      "name": "OpenAI",
+      "desc": "AI-powered translation using GPT models"
+    },
+    "mtran": {
+      "name": "MTranServer",
+      "desc": "Self-hosted local translation service"
+    },
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "Enter your API key",
+    "baseUrl": "MTran Base URL",
+    "baseUrlPlaceholder": "http://your-mtran-host:8989",
+    "model": "Model",
+    "modelPlaceholder": "Optional model name",
+    "noKeyWarning": "An API key is required for {{provider}}. Google Translate will be used as fallback.",
+    "settingsSaved": "Translation settings saved",
+    "listAutoEnable": "Enable list translation by default",
+    "listAutoEnableDesc": "Automatically turn on viewport-based translation in the reader list",
+    "listEnglishOnly": "Translate English text only",
+    "listEnglishOnlyDesc": "Only translate list items that are primarily English"
+  },
+  "apiTokens": {
+    "title": "API Tokens",
+    "desc": "Create long-lived API tokens for MCP server access",
+    "description": "Generate tokens to authenticate with the MCP server for AI assistants and other integrations.",
+    "createToken": "Create Token",
+    "createDescription": "Create a new API token for MCP authentication.",
+    "tokenName": "Token Name",
+    "tokenNamePlaceholder": "My Claude Desktop Token",
+    "expiresIn": "Expires In",
+    "expiration": {
+      "never": "Never expires",
+      "30days": "30 days",
+      "90days": "90 days",
+      "1year": "1 year"
+    },
+    "create": "Create",
+    "tokenCreated": "Token Created",
+    "copyWarning": "Make sure to copy your token now. You won't be able to see it again!",
+    "copied": "Copied to clipboard!",
+    "noTokens": "No API tokens yet",
+    "lastUsed": "Last used {{time}}",
+    "expiresAt": "Expires {{date}}",
+    "neverExpires": "Never expires",
+    "loadError": "Failed to load API tokens",
+    "revokeTitle": "Revoke Token",
+    "revokeDescription": "Are you sure you want to revoke the token \"{{name}}\"? This action cannot be undone.",
+    "revoke": "Revoke",
+    "mcpGuide": {
+      "title": "How to use with MCP",
+      "description": "Add your API token to your MCP client configuration to enable AI assistants to search and retrieve articles from your subscriptions.",
+      "configTitle": "Claude Desktop Configuration",
+      "urlNote": "Tip: When using Docker deployment, the URL in the configuration above can be used directly (it's automatically filled with your current domain). Self-hosted users should ensure nginx is configured to proxy the /mcp path.",
+      "tools": "Available tools:",
+      "toolSearch": "Search articles by keyword",
+      "toolGet": "Get full article details",
+      "toolList": "List articles by date range",
+      "toolSubs": "List your subscriptions"
+    }
+  },
+  "aiIntegration": {
+    "title": "AI",
+    "desc": "Configure your local AI experience",
+    "systemDisabled": "Local AI is disabled by the administrator. Your personal settings will apply after it is enabled.",
+    "enableLabel": "Enable local AI for my account",
+    "enableDesc": "Show AI summary controls in Today's Intake and allow your API tokens to use local AI endpoints.",
+    "defaultView": "Default Today's Intake view",
+    "defaultViewDesc": "Choose what opens first when you enter Today's Intake.",
+    "defaultViewOptions": {
+      "list": "Original list and article detail",
+      "ai_summary": "AI summary"
+    },
+    "tokenGuideTitle": "Local AI request token",
+    "tokenGuideDesc": "Create a normal API token on the API Tokens tab, then send it as a Bearer token from your local AI client.",
+    "settingsSaved": "AI settings saved"
+  },
+  "version": "Glean v{{version}}"
+}

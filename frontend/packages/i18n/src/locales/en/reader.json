@@ -1,0 +1,103 @@
+{
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "readLater": "Later"
+  },
+  "actions": {
+    "markRead": "Mark Read",
+    "markUnread": "Mark Unread",
+    "readLater": "Read Later",
+    "savedForLater": "Saved for Later",
+    "archive": "Archive",
+    "archived": "Archived",
+    "archiving": "Archiving...",
+    "unarchiving": "Unarchiving...",
+    "openOriginal": "Original",
+    "open": "Open",
+    "backShort": "Back",
+    "backToArticle": "Back to Article",
+    "openOriginalLoading": "Loading original page in app...",
+    "openOriginalBlocked": "This site blocks in-app embedding. Open externally.",
+    "openOriginalAutoOpened": "This site blocks in-app embedding. Opened in a new tab.",
+    "openExternally": "Open Externally",
+    "more": "More",
+    "moreDescription": "Translation, read-later, and archive actions",
+    "close": "Close",
+    "fullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "archiveFailed": "Archive failed",
+    "translationIncomplete": "The translation could not be completed."
+  },
+  "entries": {
+    "loadError": "Failed to load entries",
+    "noEntries": "No entries found",
+    "loadingMore": "Loading more...",
+    "noMoreEntries": "No more entries",
+    "markAll": "Mark all as read",
+    "marking": "Marking...",
+    "markConfirm": "Mark all entries as read?",
+    "markConfirmDescription": "This will mark all {{scope}} as read. This action cannot be undone.",
+    "scope": {
+      "feed": "entries in this feed",
+      "folder": "entries in this folder",
+      "all": "entries"
+    },
+    "pagination": {
+      "next": "Next",
+      "previous": "Previous"
+    }
+  },
+  "todayBoard": {
+    "title": "Today's Intake",
+    "empty": "Nothing collected today yet",
+    "historicalEmpty": "Nothing collected on {{date}}",
+    "today": "Today",
+    "dateSelectorLabel": "Select intake date",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "readComplete": "Read",
+    "unknownFeed": "Unknown feed",
+    "ai": {
+      "title": "AI Summary",
+      "showSummary": "Show AI summary",
+      "showList": "Show intake list",
+      "fallbackTitle": "Today's Brief",
+      "emptyTitle": "No AI summary yet",
+      "emptyDescription": "Run your local AI client against today's intake API, then write the summary back here.",
+      "highlights": "Highlights",
+      "highlightFallback": "Highlight",
+      "topics": "Topics",
+      "recommended": "Recommended reading"
+    }
+  },
+  "empty": {
+    "selectArticle": "Select an article",
+    "selectArticleDescription": "Choose an article from the list to start reading",
+    "tryChangingFilter": "Try changing the filter or adding more feeds"
+  },
+  "article": {
+    "noContent": "No content available",
+    "viewOriginal": "View Original Article"
+  },
+  "translation": {
+    "translate": "Translate",
+    "translating": "Translating...",
+    "showOriginal": "Show Original",
+    "showTranslation": "Show Bilingual",
+    "bilingualMode": "Bilingual: {{language}}",
+    "failed": "Translation failed",
+    "retry": "Retry",
+    "hideTranslation": "Hide Translation",
+    "preToggleTitle": "Preformatted blocks detected",
+    "preToggleDesc": "Some blocks may be commands or logs. Translate them?",
+    "preToggleLabel": "Translate preformatted blocks"
+  },
+  "feedback": {
+    "title": "Help improve recommendations?",
+    "description": "If this article was useful, leave quick feedback to tune future recommendations.",
+    "later": "Later"
+  }
+}

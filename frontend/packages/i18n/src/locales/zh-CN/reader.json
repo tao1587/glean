@@ -1,0 +1,103 @@
+{
+  "filters": {
+    "all": "全部",
+    "unread": "未读",
+    "readLater": "稍后阅读"
+  },
+  "actions": {
+    "markRead": "标记已读",
+    "markUnread": "标记未读",
+    "readLater": "稍后阅读",
+    "savedForLater": "已保存稍后阅读",
+    "archive": "归档",
+    "archived": "已归档",
+    "archiving": "归档中...",
+    "unarchiving": "正在取消归档...",
+    "openOriginal": "原文",
+    "open": "打开",
+    "backShort": "返回",
+    "backToArticle": "返回文章",
+    "openOriginalLoading": "正在应用内加载原网页...",
+    "openOriginalBlocked": "该网站禁止嵌入显示，请改为外链打开。",
+    "openOriginalAutoOpened": "该网站禁止嵌入显示，已为你自动外链打开。",
+    "openExternally": "外链打开",
+    "more": "更多",
+    "moreDescription": "翻译、稍后阅读和归档操作",
+    "close": "关闭",
+    "fullscreen": "进入全屏",
+    "exitFullscreen": "退出全屏",
+    "archiveFailed": "归档失败",
+    "translationIncomplete": "译文未能补齐完成。"
+  },
+  "entries": {
+    "loadError": "加载条目失败",
+    "noEntries": "没有找到条目",
+    "loadingMore": "加载更多...",
+    "noMoreEntries": "没有更多内容了",
+    "markAll": "全部标记为已读",
+    "marking": "标记中...",
+    "markConfirm": "将所有条目标记为已读？",
+    "markConfirmDescription": "这将把{{scope}}的所有条目标记为已读。此操作无法撤销。",
+    "scope": {
+      "feed": "此订阅中的条目",
+      "folder": "此文件夹中的条目",
+      "all": "所有条目"
+    },
+    "pagination": {
+      "next": "下一页",
+      "previous": "上一页"
+    }
+  },
+  "todayBoard": {
+    "title": "今日收录",
+    "empty": "今天还没有新收录",
+    "historicalEmpty": "{{date}}没有新收录",
+    "today": "今天",
+    "dateSelectorLabel": "选择收录日期",
+    "previousDay": "前一天",
+    "nextDay": "后一天",
+    "expand": "展开",
+    "collapse": "收起",
+    "readComplete": "已阅",
+    "unknownFeed": "未知订阅",
+    "ai": {
+      "title": "AI 总结",
+      "showSummary": "查看 AI 总结",
+      "showList": "查看收录列表",
+      "fallbackTitle": "今日简报",
+      "emptyTitle": "暂无 AI 总结",
+      "emptyDescription": "让本地 AI 客户端读取今日收录接口后，把总结写回这里。",
+      "highlights": "重点",
+      "highlightFallback": "重点内容",
+      "topics": "主题",
+      "recommended": "推荐阅读"
+    }
+  },
+  "empty": {
+    "selectArticle": "选择文章",
+    "selectArticleDescription": "从列表中选择一篇文章开始阅读",
+    "tryChangingFilter": "尝试更改筛选条件或添加更多订阅"
+  },
+  "article": {
+    "noContent": "没有可用内容",
+    "viewOriginal": "查看原文"
+  },
+  "translation": {
+    "translate": "翻译",
+    "translating": "翻译中...",
+    "showOriginal": "显示原文",
+    "showTranslation": "显示双语",
+    "bilingualMode": "双语对照：{{language}}",
+    "failed": "翻译失败",
+    "retry": "重试",
+    "hideTranslation": "隐藏翻译",
+    "preToggleTitle": "检测到预格式化内容",
+    "preToggleDesc": "部分内容可能是命令或日志，是否翻译？",
+    "preToggleLabel": "翻译预格式化内容"
+  },
+  "feedback": {
+    "title": "帮助优化推荐？",
+    "description": "如果这篇文章对你有帮助，给个快速反馈可帮助后续推荐更准确。",
+    "later": "稍后"
+  }
+}

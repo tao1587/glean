@@ -1,0 +1,90 @@
+{
+  "appId": "com.glean.app",
+  "productName": "Glean",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "dist-electron/**/*",
+    "!node_modules",
+    "!src",
+    "!electron",
+    "!**/*.ts",
+    "!**/*.map"
+  ],
+  // GitHub Releases auto-update configuration
+  "publish": {
+    "provider": "github",
+    "owner": "LeslieLeung",
+    "repo": "glean",
+    "releaseType": "release"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "build/icon.ico",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "Glean"
+  },
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "zip",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "icon": "build/icon.icns",
+    "category": "public.app-category.productivity",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  },
+  "dmg": {
+    "background": "build/dmg-background.png",
+    "icon": "build/icon.icns",
+    "iconSize": 100,
+    "contents": [
+      {
+        "x": 380,
+        "y": 180,
+        "type": "link",
+        "path": "/Applications"
+      },
+      {
+        "x": 130,
+        "y": 180,
+        "type": "file"
+      }
+    ],
+    "window": {
+      "width": 540,
+      "height": 380
+    }
+  },
+  "linux": {
+    "target": ["AppImage", "deb", "rpm"],
+    "icon": "build/icon.png",
+    "category": "Utility",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "maintainer": "Leslie Leung <leslieleung@proton.me>"
+  }
+}

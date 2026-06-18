@@ -1,0 +1,114 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# Python lib folders (not frontend src/lib)
+/lib/
+/lib64/
+backend/lib/
+backend/lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.mypy_cache/
+.turbo
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+.claude
+.cursor
+.cursorrules
+.ccb
+.superpowers/
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Build outputs
+dist/
+build/
+# Allow electron build assets
+!frontend/apps/web/build/
+*.log
+
+# Electron
+dist-electron/
+release/
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (keep for reproducibility)
+# uv.lock
+# pnpm-lock.yaml
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.harness/
+.harness-registry.json
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker
+.docker/
+docker-compose.personal.yml
+
+# Database
+*.db
+*.sqlite3
+
+# Local caches / runtime (added for local git init)
+.uv-cache/
+.ruff_cache/
+.pytest_cache/
+logs/
+.playwright-mcp/

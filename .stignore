@@ -1,0 +1,65 @@
+// Git
+.git
+.git/**
+.github/**
+.github
+
+// Node / frontend
+node_modules
+node_modules/**
+.pnpm-store
+.pnpm-store/**
+.turbo
+.turbo/**
+frontend/node_modules
+frontend/node_modules/**
+
+// Python / backend
+__pycache__
+__pycache__/**
+*.py[cod]
+.venv
+.venv/**
+venv
+venv/**
+env
+env/**
+.mypy_cache
+.mypy_cache/**
+.pytest_cache
+.pytest_cache/**
+.ruff_cache
+.ruff_cache/**
+.uv
+.uv/**
+.uv-cache
+.uv-cache/**
+
+// Build artifacts
+build
+build/**
+dist
+dist/**
+htmlcov
+htmlcov/**
+.coverage
+coverage.xml
+logs
+logs/**
+
+// IDE / local agent tools
+.idea
+.idea/**
+.vscode
+.vscode/**
+.claude
+.claude/**
+.cursor
+.cursor/**
+.ccb
+.ccb/**
+.superpowers
+.superpowers/**
+
+// macOS
+(?d).DS_Store
