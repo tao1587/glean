@@ -329,3 +329,7 @@ export interface FeedFetchActiveRunItem extends FeedFetchRun {
 export interface FeedFetchActiveRunsResponse {
   items: FeedFetchActiveRunItem[]
 }
+
+export interface SourceAffinityResponse {
+  affinity: Record<string, number>
+}

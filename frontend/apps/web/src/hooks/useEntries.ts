@@ -189,6 +189,17 @@ export function useUpdateEntryState() {
   })
 }
 
+export function useSourceAffinity(enabled: boolean) {
+  return useQuery({
+    queryKey: ['source-affinity'],
+    queryFn: ({ signal }) => entryService.getSourceAffinity({ signal }),
+    staleTime: 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled,
+  })
+}
+
 /**
  * Hook to mark all entries as read.
  */

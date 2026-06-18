@@ -7,13 +7,17 @@ import { getPeriodRange, shiftPeriod, type PeriodKind } from '@/pages/reader/sha
 import { buildTodayBoardEntries, buildTodayBoardGroups, type TodayBoardEntry } from '@/pages/reader/shared/todayBoard'
 import { SourceSection } from './SourceSection'
 import { useHiddenUndo } from './useHiddenUndo'
+import { orderGroupsByAffinity } from './orderGroupsByAffinity'
 
-export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePeriod, onOpenEntry }: {
+export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePeriod, onOpenEntry, sort, affinity, onChangeSort }: {
   periodKind: PeriodKind
   anchorDate: string
   todayDateKey: string
   onChangePeriod: (kind: 'day' | PeriodKind, anchor: string) => void
   onOpenEntry: (e: TodayBoardEntry) => void
+  sort: 'time' | 'interest'
+  affinity: Record<string, number>
+  onChangeSort: (s: 'time' | 'interest') => void
 }) {
   const range = useMemo(() => getPeriodRange(anchorDate, periodKind), [anchorDate, periodKind])
   const q = useRangeEntries({ period: periodKind, anchorDate, enabled: true })
@@ -27,6 +31,8 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
       visibleUnreadLimit: Number.POSITIVE_INFINITY,
     })
   }, [q.entries, undo.hidden])
+
+  const orderedGroups = orderGroupsByAffinity(groups, sort, affinity)
 
   const hide = (e: TodayBoardEntry) => { undo.add(e); update.mutate({ entryId: e.id, data: { is_hidden: true } }) }
   const unhide = (e: TodayBoardEntry) => { undo.remove(e); update.mutate({ entryId: e.id, data: { is_hidden: false } }) }
@@ -54,6 +60,14 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
         </div>
         <div className="flex items-center gap-2">
           <div className="border-border/60 inline-flex overflow-hidden rounded-md border text-xs">
+            {(['time', 'interest'] as const).map((s) => (
+              <button key={s} type="button" onClick={() => onChangeSort(s)}
+                className={cn('px-2.5 py-1', s === sort ? 'bg-primary/10 text-primary font-medium' : 'text-stone-500')}>
+                {s === 'time' ? '时间' : '按兴趣'}
+              </button>
+            ))}
+          </div>
+          <div className="border-border/60 inline-flex overflow-hidden rounded-md border text-xs">
             {(['day', 'week', 'month'] as const).map((k) => (
               <button key={k} type="button" onClick={() => onChangePeriod(k, anchorDate)}
                 className={cn('px-2.5 py-1', k === periodKind ? 'bg-primary/10 text-primary font-medium' : 'text-stone-500')}>
@@ -70,13 +84,13 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
         </div>
       </div>
 
-      {!q.isLoading && groups.length === 0 ? (
+      {!q.isLoading && orderedGroups.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
           <Inbox className="mb-3 h-8 w-8 text-stone-400" />
           <p className="text-sm text-stone-500">这段时间没有未读内容</p>
         </div>
       ) : (
-        groups.map((g) => (
+        orderedGroups.map((g) => (
           <SourceSection key={g.feedId} group={g} period={periodKind} anchorDate={anchorDate} justHidden={undo.hidden[g.feedId] ?? []}
             onOpen={onOpenEntry} onHide={hide} onUndo={unhide} onToggleSave={toggleSave} />
         ))

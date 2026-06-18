@@ -136,6 +136,7 @@ vi.mock('@/hooks/useEntries', () => ({
   }),
   useUpdateEntryState: () => ({ mutateAsync: updateEntryStateSpy }),
   useMarkAllRead: () => ({ mutateAsync: vi.fn() }),
+  useSourceAffinity: () => ({ data: undefined, isLoading: false }),
   entryKeys: {
     lists: () => ['entries', 'list'],
     detail: (id: string) => ['entries', 'detail', id],

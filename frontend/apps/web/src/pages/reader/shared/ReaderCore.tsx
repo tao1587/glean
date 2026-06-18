@@ -6,6 +6,7 @@ import {
   useEntry,
   useUpdateEntryState,
   useMarkAllRead,
+  useSourceAffinity,
   entryKeys,
 } from '../../../hooks/useEntries'
 import { useAllSubscriptions } from '../../../hooks/useSubscriptions'
@@ -90,6 +91,8 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
     periodKind,
     periodAnchor,
     setPeriodView,
+    sort,
+    setSort,
   } = useReaderController()
   const { user } = useAuthStore()
   const { data: subscriptions = [] } = useAllSubscriptions()
@@ -106,6 +109,8 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
     },
     [setDigestDate, setPeriodView]
   )
+
+  const affinityQuery = useSourceAffinity(!!periodKind)
 
   // Store the original position data of the selected entry when it was first clicked.
   const selectedEntryOriginalDataRef = useRef<{
@@ -815,6 +820,9 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
             todayDateKey={todayBoardTodayDate}
             onChangePeriod={handleChangePeriod}
             onOpenEntry={(e) => selectEntry(e.id)}
+            sort={sort}
+            affinity={affinityQuery.data?.affinity ?? {}}
+            onChangeSort={setSort}
           />
         </div>
 

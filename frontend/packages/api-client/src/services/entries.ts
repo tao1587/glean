@@ -3,6 +3,7 @@ import type {
   EntryListResponse,
   EntrySearchResponse,
   ParagraphTranslationsResponse,
+  SourceAffinityResponse,
   TranslateTextsResponse,
   TranslationResponse,
   UpdateEntryStateRequest,
@@ -134,6 +135,13 @@ export class EntryService {
       source_language: sourceLanguage,
       entry_id: entryId,
     })
+  }
+
+  /**
+   * Get source affinity scores (per-feed engagement scores).
+   */
+  async getSourceAffinity(options?: { signal?: AbortSignal }): Promise<SourceAffinityResponse> {
+    return this.client.get<SourceAffinityResponse>('/entries/source-affinity', { signal: options?.signal })
   }
 
   /**

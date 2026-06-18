@@ -144,6 +144,23 @@ export function useReaderController() {
     [setSearchParams, todayBoardTodayDate]
   )
 
+  const sort: 'time' | 'interest' = searchParams.get('sort') === 'interest' ? 'interest' : 'time'
+
+  const setSort = useCallback(
+    (next: 'time' | 'interest') => {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev)
+          if (next === 'interest') p.set('sort', 'interest')
+          else p.delete('sort')
+          return p
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
+
   const periodKind: PeriodViewKind | null = isWeekView ? 'week' : isMonthView ? 'month' : null
   const periodAnchor =
     isWeekView || isMonthView
@@ -239,5 +256,7 @@ export function useReaderController() {
     periodKind,
     periodAnchor,
     setPeriodView,
+    sort,
+    setSort,
   }
 }
