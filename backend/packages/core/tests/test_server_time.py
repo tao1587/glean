@@ -1,6 +1,5 @@
 """Tests for server_time helpers."""
 
-import os
 from datetime import date
 
 import pytest
