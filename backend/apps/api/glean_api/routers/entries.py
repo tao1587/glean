@@ -25,7 +25,7 @@ from glean_core.schemas import (
     UpdateEntryStateRequest,
     UserResponse,
 )
-from glean_core.server_time import get_server_date, get_server_day_range
+from glean_core.server_time import get_server_date, get_server_day_range, get_server_period_range
 from glean_core.services import EntryService, TranslationService
 from glean_core.services.translation_providers import create_translation_provider
 
@@ -51,6 +51,8 @@ async def list_entries(
     is_hidden: bool | None = None,
     collected_after: datetime | None = Query(None),
     collected_before: datetime | None = Query(None),
+    period: Literal["week", "month"] | None = None,
+    period_anchor: date | None = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     view: str = Query("timeline", regex="^(timeline|today-board)$"),
@@ -67,6 +69,8 @@ async def list_entries(
         read_later: Optional filter by read later status.
         collected_after: Optional inclusive lower bound for collection time filtering.
         collected_before: Optional exclusive upper bound for collection time filtering.
+        period: Optional period kind ("week" or "month"); requires period_anchor.
+        period_anchor: ISO date anchor for period range; requires period.
         page: Page number (1-indexed).
         per_page: Items per page (max 100).
         view: View mode ("timeline" or "today-board").
@@ -74,6 +78,8 @@ async def list_entries(
     Returns:
         Paginated list of entries.
     """
+    if period is not None and period_anchor is not None:
+        collected_after, collected_before, _tz = get_server_period_range(period_anchor, period)
     return await entry_service.get_entries(
         user_id=current_user.id,
         feed_id=feed_id,

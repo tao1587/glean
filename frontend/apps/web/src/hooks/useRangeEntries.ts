@@ -10,18 +10,18 @@ import {
 const PER_PAGE = 50
 
 export function useRangeEntries(params: {
-  collected_after: string
-  collected_before: string
+  period: 'week' | 'month'
+  anchorDate: string
   enabled: boolean
 }) {
-  const { collected_after, collected_before, enabled } = params
+  const { period, anchorDate, enabled } = params
   const query = useInfiniteQuery({
-    queryKey: ['range-entries', collected_after, collected_before],
+    queryKey: ['range-entries', period, anchorDate],
     queryFn: ({ pageParam = 1, signal }) =>
       entryService.getEntries(
         {
-          collected_after,
-          collected_before,
+          period,
+          period_anchor: anchorDate,
           is_read: false,
           is_hidden: false,
           page: pageParam as number,
@@ -46,22 +46,22 @@ export function useRangeEntries(params: {
 
 export function useRangeReadEntries(
   feedId: string,
-  range: { collected_after: string; collected_before: string },
+  params: { period: 'week' | 'month'; anchorDate: string },
   enabled: boolean
 ) {
   const query = useInfiniteQuery({
     queryKey: [
       'range-read-entries',
       feedId,
-      range.collected_after,
-      range.collected_before,
+      params.period,
+      params.anchorDate,
     ],
     queryFn: ({ pageParam = 1, signal }) =>
       entryService.getEntries(
         {
           feed_id: feedId,
-          collected_after: range.collected_after,
-          collected_before: range.collected_before,
+          period: params.period,
+          period_anchor: params.anchorDate,
           is_read: true,
           is_hidden: false,
           page: pageParam as number,

@@ -28,6 +28,8 @@ export class EntryService {
     is_hidden?: boolean
     collected_after?: string
     collected_before?: string
+    period?: 'week' | 'month'
+    period_anchor?: string
     page?: number
     per_page?: number
     view?: 'timeline' | 'today-board'

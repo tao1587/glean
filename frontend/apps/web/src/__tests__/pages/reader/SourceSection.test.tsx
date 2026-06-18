@@ -12,20 +12,19 @@ const baseGroup = {
   visibleEntries: [{ id: 'e1', title: 'Hello', summary: '', read_later: false, effective_timestamp: new Date(), feed_id: 'f1' }],
   entries: [],
 }
-const range = { collected_after: 'X', collected_before: 'Y' }
 
 afterEach(() => cleanup())
 
 it('Hide calls onHide', () => {
   const onHide = vi.fn()
-  wrap(<SourceSection group={baseGroup as never} range={range} justHidden={[]}
+  wrap(<SourceSection group={baseGroup as never} period="week" anchorDate="2026-06-17" justHidden={[]}
     onOpen={() => {}} onHide={onHide} onUndo={() => {}} onToggleSave={() => {}} />)
   fireEvent.click(screen.getByLabelText('不感兴趣'))
   expect(onHide).toHaveBeenCalledWith(expect.objectContaining({ id: 'e1' }))
 })
 
 it('renders an undo line for a just-hidden entry', () => {
-  wrap(<SourceSection group={{ ...baseGroup, visibleEntries: [] } as never} range={range}
+  wrap(<SourceSection group={{ ...baseGroup, visibleEntries: [] } as never} period="week" anchorDate="2026-06-17"
     justHidden={[{ id: 'e1', title: 'Hello' } as never]}
     onOpen={() => {}} onHide={() => {}} onUndo={() => {}} onToggleSave={() => {}} />)
   expect(screen.getByText(/Hello/)).toBeInTheDocument()

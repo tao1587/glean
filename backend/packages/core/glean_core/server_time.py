@@ -1,8 +1,10 @@
 """Server timezone helpers."""
 
+import calendar
 import os
 from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
+from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 SERVER_TIMEZONE_FALLBACK = "UTC"
@@ -57,3 +59,18 @@ def get_server_day_range(server_date: date) -> tuple[datetime, datetime, str]:
     start_local = datetime.combine(server_date, time.min, timezone)
     end_local = start_local + timedelta(days=1)
     return start_local.astimezone(UTC), end_local.astimezone(UTC), timezone_name
+
+
+def get_server_period_range(
+    anchor: date, period: Literal["week", "month"]
+) -> tuple[datetime, datetime, str]:
+    """Server-timezone [start, end) UTC instants for the week (Mon–Sun) or month containing anchor."""
+    if period == "week":
+        first = anchor - timedelta(days=anchor.weekday())  # Monday
+        last = first + timedelta(days=6)                    # Sunday
+    else:
+        first = anchor.replace(day=1)
+        last = anchor.replace(day=calendar.monthrange(anchor.year, anchor.month)[1])
+    after, _a_end, tz = get_server_day_range(first)
+    _b_start, before, _tz = get_server_day_range(last)
+    return after, before, tz

@@ -5,10 +5,11 @@ import type { TodayBoardEntry, TodayBoardFeedGroup } from '@/pages/reader/shared
 import { PeriodEntryCard } from './PeriodEntryCard'
 
 export function SourceSection({
-  group, range, justHidden, onOpen, onHide, onUndo, onToggleSave,
+  group, period, anchorDate, justHidden, onOpen, onHide, onUndo, onToggleSave,
 }: {
   group: TodayBoardFeedGroup
-  range: { collected_after: string; collected_before: string }
+  period: 'week' | 'month'
+  anchorDate: string
   justHidden: TodayBoardEntry[]
   onOpen: (e: TodayBoardEntry) => void
   onHide: (e: TodayBoardEntry) => void
@@ -16,7 +17,7 @@ export function SourceSection({
   onToggleSave: (e: TodayBoardEntry) => void
 }) {
   const [readOpen, setReadOpen] = useState(false)
-  const read = useRangeReadEntries(group.feedId, range, readOpen)
+  const read = useRangeReadEntries(group.feedId, { period, anchorDate }, readOpen)
   return (
     <section className="border-border/60 border-t px-[18px] py-4 first:border-t-0">
       <div className="mb-3 flex items-center gap-2">

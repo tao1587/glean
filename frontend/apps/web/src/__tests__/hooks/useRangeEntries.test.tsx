@@ -17,14 +17,14 @@ beforeEach(() => {
   })
 })
 
-it('fetches unread non-hidden entries for the range', async () => {
+it('fetches unread non-hidden entries for the period', async () => {
   const { result } = renderHook(
-    () => useRangeEntries({ collected_after: 'X', collected_before: 'Y', enabled: true }),
+    () => useRangeEntries({ period: 'week', anchorDate: '2026-06-17', enabled: true }),
     { wrapper }
   )
   await waitFor(() => expect(result.current.entries.length).toBe(1))
   expect(entryService.getEntries).toHaveBeenCalledWith(
-    expect.objectContaining({ is_read: false, is_hidden: false, collected_after: 'X', collected_before: 'Y' }),
+    expect.objectContaining({ is_read: false, is_hidden: false, period: 'week', period_anchor: '2026-06-17' }),
     expect.anything()
   )
 })

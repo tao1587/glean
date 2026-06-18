@@ -16,7 +16,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
   onOpenEntry: (e: TodayBoardEntry) => void
 }) {
   const range = useMemo(() => getPeriodRange(anchorDate, periodKind), [anchorDate, periodKind])
-  const q = useRangeEntries({ ...range, enabled: true })
+  const q = useRangeEntries({ period: periodKind, anchorDate, enabled: true })
   const update = useUpdateEntryState()
   const undo = useHiddenUndo()
 
@@ -41,7 +41,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
     })
     io.observe(el)
     return () => io.disconnect()
-  }, [q.hasNextPage, q.isFetchingNextPage, q.fetchNextPage, range.collected_after])
+  }, [q.hasNextPage, q.isFetchingNextPage, q.fetchNextPage, anchorDate])
 
   const isCurrent = getPeriodRange(todayDateKey, periodKind).collected_after === range.collected_after
 
@@ -77,7 +77,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
         </div>
       ) : (
         groups.map((g) => (
-          <SourceSection key={g.feedId} group={g} range={range} justHidden={undo.hidden[g.feedId] ?? []}
+          <SourceSection key={g.feedId} group={g} period={periodKind} anchorDate={anchorDate} justHidden={undo.hidden[g.feedId] ?? []}
             onOpen={onOpenEntry} onHide={hide} onUndo={unhide} onToggleSave={toggleSave} />
         ))
       )}
