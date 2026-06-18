@@ -8,9 +8,10 @@ import { buildTodayBoardEntries, buildTodayBoardGroups, type TodayBoardEntry } f
 import { SourceSection } from './SourceSection'
 import { useHiddenUndo } from './useHiddenUndo'
 
-export function PeriodView({ periodKind, anchorDate, onChangePeriod, onOpenEntry }: {
+export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePeriod, onOpenEntry }: {
   periodKind: PeriodKind
   anchorDate: string
+  todayDateKey: string
   onChangePeriod: (kind: 'day' | PeriodKind, anchor: string) => void
   onOpenEntry: (e: TodayBoardEntry) => void
 }) {
@@ -38,14 +39,16 @@ export function PeriodView({ periodKind, anchorDate, onChangePeriod, onOpenEntry
     })
     io.observe(el)
     return () => io.disconnect()
-  }, [q.hasNextPage, q.isFetchingNextPage, q.fetchNextPage])
+  }, [q.hasNextPage, q.isFetchingNextPage, q.fetchNextPage, range.collected_after])
+
+  const isCurrent = getPeriodRange(todayDateKey, periodKind).collected_after === range.collected_after
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto bg-[var(--color-background-secondary,#f7f5f0)]">
       <div className="border-border/60 sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-white/95 px-[18px] py-3 backdrop-blur">
         <div className="text-base font-medium text-stone-800">
-          {periodKind === 'week' ? '本周' : '本月'}
-          <span className="ml-2 text-xs font-normal text-stone-500">{range.label}</span>
+          {isCurrent ? (periodKind === 'week' ? '本周' : '本月') : range.label}
+          {isCurrent && <span className="ml-2 text-xs font-normal text-stone-500">{range.label}</span>}
         </div>
         <div className="flex items-center gap-2">
           <div className="border-border/60 inline-flex overflow-hidden rounded-md border text-xs">

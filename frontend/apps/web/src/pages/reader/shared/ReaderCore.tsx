@@ -796,13 +796,66 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
   }, [isMobile, isReaderVisibleOnMobile, filterType]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (periodKind) {
+    const handlePeriodEntryClose = () => {
+      clearSelectedEntry(true)
+      void queryClient.invalidateQueries({ queryKey: entryKeys.lists() })
+    }
     return (
-      <PeriodView
-        periodKind={periodKind}
-        anchorDate={periodAnchor}
-        onChangePeriod={handleChangePeriod}
-        onOpenEntry={(e) => selectEntry(e.id)}
-      />
+      <div className="relative flex h-full w-full min-w-0">
+        <div
+          className={cn(
+            'flex min-w-0 flex-1',
+            isMobile && selectedEntryId && 'pointer-events-none opacity-0'
+          )}
+          aria-hidden={isMobile && !!selectedEntryId}
+        >
+          <PeriodView
+            periodKind={periodKind}
+            anchorDate={periodAnchor}
+            todayDateKey={todayBoardTodayDate}
+            onChangePeriod={handleChangePeriod}
+            onOpenEntry={(e) => selectEntry(e.id)}
+          />
+        </div>
+
+        {/* Desktop: side-by-side reader pane */}
+        {!isMobile && selectedEntryId && (
+          <div className="border-border flex min-w-0 flex-1 flex-col border-l">
+            {isLoadingEntry && !resolvedSelectedEntry ? (
+              <ArticleReaderSkeleton />
+            ) : resolvedSelectedEntry ? (
+              <ArticleReader
+                key={resolvedSelectedEntry.id}
+                entry={resolvedSelectedEntry}
+                onClose={handlePeriodEntryClose}
+                isFullscreen={isFullscreen}
+                onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+                showCloseButton
+                showFullscreenButton
+              />
+            ) : null}
+          </div>
+        )}
+
+        {/* Mobile: full overlay reader */}
+        {isMobile && selectedEntryId ? (
+          <div className="absolute inset-0 z-20 flex min-w-0 flex-1 flex-col">
+            {isLoadingEntry && !resolvedSelectedEntry ? (
+              <ArticleReaderSkeleton />
+            ) : resolvedSelectedEntry ? (
+              <ArticleReader
+                key={resolvedSelectedEntry.id}
+                entry={resolvedSelectedEntry}
+                onClose={handlePeriodEntryClose}
+                isFullscreen={false}
+                onToggleFullscreen={() => undefined}
+                showCloseButton
+                enableMobileCloseGesture={false}
+              />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     )
   }
 

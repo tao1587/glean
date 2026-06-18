@@ -181,6 +181,13 @@ export function useUpdateEntryState() {
       // Invalidate subscription queries to update unread counts
       // This is needed for accurate sidebar counts
       queryClient.invalidateQueries({ queryKey: subscriptionKeys.all })
+
+      // Invalidate period-view caches when a hide/unhide happens so hidden
+      // entries don't reappear after SPA navigation within the cache window.
+      if (variables.data.is_hidden !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ['range-entries'] })
+        queryClient.invalidateQueries({ queryKey: ['range-read-entries'] })
+      }
     },
   })
 }

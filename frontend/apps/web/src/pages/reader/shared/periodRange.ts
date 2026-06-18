@@ -11,10 +11,6 @@ import {
 
 export type PeriodKind = 'week' | 'month'
 
-function localStartIso(d: Date): string {
-  return `${format(d, 'yyyy-MM-dd')}T00:00:00.000`
-}
-
 export function getPeriodRange(anchorDateKey: string, period: PeriodKind) {
   const anchor = parseISO(anchorDateKey)
   const start =
@@ -28,8 +24,8 @@ export function getPeriodRange(anchorDateKey: string, period: PeriodKind) {
   const exclusiveEnd = new Date(endInclusive)
   exclusiveEnd.setHours(24, 0, 0, 0)
   return {
-    collected_after: localStartIso(start),
-    collected_before: localStartIso(exclusiveEnd),
+    collected_after: start.toISOString(),
+    collected_before: exclusiveEnd.toISOString(),
     label:
       period === 'week'
         ? `${format(start, 'M月d日')} – ${format(endInclusive, 'M月d日')}`
