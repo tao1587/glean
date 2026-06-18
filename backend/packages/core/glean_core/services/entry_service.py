@@ -85,6 +85,7 @@ class EntryService:
         folder_id: str | None = None,
         is_read: bool | None = None,
         read_later: bool | None = None,
+        is_hidden: bool | None = None,
         collected_after: datetime | None = None,
         collected_before: datetime | None = None,
         page: int = 1,
@@ -164,6 +165,11 @@ class EntryService:
                 stmt = stmt.where((UserEntry.is_read.is_(False)) | (UserEntry.is_read.is_(None)))
         if read_later is not None:
             stmt = stmt.where(UserEntry.read_later == read_later)
+        if is_hidden is not None:
+            if is_hidden:
+                stmt = stmt.where(UserEntry.is_hidden.is_(True))
+            else:
+                stmt = stmt.where((UserEntry.is_hidden.is_(False)) | (UserEntry.is_hidden.is_(None)))
         if collected_after is not None:
             stmt = stmt.where(collection_timestamp >= collected_after)
         if collected_before is not None:
@@ -202,6 +208,7 @@ class EntryService:
                     created_at=entry.created_at,
                     is_read=bool(user_entry.is_read) if user_entry else False,
                     read_later=bool(user_entry.read_later) if user_entry else False,
+                    is_hidden=bool(user_entry.is_hidden) if user_entry else False,
                     read_later_until=(user_entry.read_later_until if user_entry else None),
                     read_at=user_entry.read_at if user_entry else None,
                     is_bookmarked=bookmark_id is not None,
@@ -295,6 +302,7 @@ class EntryService:
             created_at=entry.created_at,
             is_read=bool(user_entry.is_read) if user_entry else False,
             read_later=bool(user_entry.read_later) if user_entry else False,
+            is_hidden=bool(user_entry.is_hidden) if user_entry else False,
             read_later_until=user_entry.read_later_until if user_entry else None,
             read_at=user_entry.read_at if user_entry else None,
             is_bookmarked=bookmark_id is not None,
@@ -379,6 +387,9 @@ class EntryService:
             else:
                 # Clearing read_later, also clear read_later_until
                 user_entry.read_later_until = None
+
+        if "is_hidden" in update_data and update.is_hidden is not None:
+            user_entry.is_hidden = update.is_hidden
 
         await self.session.commit()
 
@@ -505,6 +516,7 @@ class EntryService:
                     created_at=entry.created_at,
                     is_read=bool(user_entry.is_read) if user_entry else False,
                     read_later=bool(user_entry.read_later) if user_entry else False,
+                    is_hidden=bool(user_entry.is_hidden) if user_entry else False,
                     read_later_until=user_entry.read_later_until if user_entry else None,
                     read_at=user_entry.read_at if user_entry else None,
                     is_bookmarked=bookmark_id is not None,

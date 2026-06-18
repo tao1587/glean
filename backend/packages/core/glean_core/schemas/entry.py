@@ -40,6 +40,7 @@ class EntryResponse(BaseModel):
     # User-specific fields (from UserEntry)
     is_read: bool = False
     read_later: bool = False
+    is_hidden: bool = False
     read_later_until: datetime | None = None
     read_at: datetime | None = None
     is_bookmarked: bool = False
@@ -64,6 +65,7 @@ class UpdateEntryStateRequest(BaseModel):
 
     is_read: bool | None = None
     read_later: bool | None = None
+    is_hidden: bool | None = None
     # Days until read-later expires (0 = never expire)
     read_later_days: int | None = None
 

@@ -331,3 +331,42 @@ class TestMarkAllRead:
         response = await client.post("/api/entries/mark-all-read")
 
         assert response.status_code == 401
+
+
+class TestHiddenState:
+    """Hide (not-interested) state."""
+
+    @pytest.mark.asyncio
+    async def test_patch_sets_is_hidden(self, client: AsyncClient, auth_headers, test_entries):
+        entry_id = str(test_entries[0].id)
+        resp = await client.patch(
+            f"/api/entries/{entry_id}", headers=auth_headers, json={"is_hidden": True}
+        )
+        assert resp.status_code == 200
+        assert resp.json()["is_hidden"] is True
+
+    @pytest.mark.asyncio
+    async def test_is_hidden_false_filter_excludes_hidden(
+        self, client: AsyncClient, auth_headers, test_entries
+    ):
+        entry_id = str(test_entries[0].id)
+        await client.patch(
+            f"/api/entries/{entry_id}", headers=auth_headers, json={"is_hidden": True}
+        )
+        resp = await client.get("/api/entries?is_hidden=false", headers=auth_headers)
+        assert resp.status_code == 200
+        ids = {item["id"] for item in resp.json()["items"]}
+        assert entry_id not in ids
+
+    @pytest.mark.asyncio
+    async def test_undo_hidden(self, client: AsyncClient, auth_headers, test_entries):
+        entry_id = str(test_entries[0].id)
+        await client.patch(
+            f"/api/entries/{entry_id}", headers=auth_headers, json={"is_hidden": True}
+        )
+        await client.patch(
+            f"/api/entries/{entry_id}", headers=auth_headers, json={"is_hidden": False}
+        )
+        resp = await client.get("/api/entries?is_hidden=false", headers=auth_headers)
+        ids = {item["id"] for item in resp.json()["items"]}
+        assert entry_id in ids
