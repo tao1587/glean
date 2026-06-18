@@ -78,6 +78,7 @@ export interface UpdateSubscriptionRequest {
 export interface UpdateEntryStateRequest {
   is_read?: boolean
   read_later?: boolean
+  is_hidden?: boolean
   read_later_days?: number
   triage_state?: 'now' | 'later' | 'archive' | 'trial'
   defer_until?: string | null

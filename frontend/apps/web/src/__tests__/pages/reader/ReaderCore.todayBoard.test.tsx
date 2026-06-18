@@ -72,6 +72,7 @@ function makeEntry(overrides: Partial<EntryWithState> = {}): EntryWithState {
     created_at: overrides.created_at ?? '2026-04-10T02:00:00.000Z',
     is_read: overrides.is_read ?? false,
     read_later: overrides.read_later ?? false,
+    is_hidden: overrides.is_hidden ?? false,
     read_later_until: overrides.read_later_until ?? null,
     triage_state: overrides.triage_state,
     defer_until: overrides.defer_until ?? null,

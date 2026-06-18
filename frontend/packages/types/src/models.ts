@@ -106,6 +106,7 @@ export interface Entry {
 export interface EntryWithState extends Entry {
   is_read: boolean
   read_later: boolean
+  is_hidden: boolean
   read_later_until: string | null // ISO date string when read later expires
   triage_state?: 'now' | 'later' | 'archive' | 'trial'
   defer_until?: string | null

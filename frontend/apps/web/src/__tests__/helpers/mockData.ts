@@ -87,6 +87,7 @@ export const createMockEntry = (overrides: Partial<EntryWithState> = {}): EntryW
   created_at: '2024-01-01T00:00:00Z',
   is_read: false,
   read_later: false,
+  is_hidden: false,
   read_later_until: null,
   read_at: null,
   is_bookmarked: false,

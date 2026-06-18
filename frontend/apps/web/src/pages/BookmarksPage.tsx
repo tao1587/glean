@@ -70,6 +70,7 @@ function convertBookmarkToEntry(bookmark: Bookmark): EntryWithState {
     // User state fields
     is_read: true, // Bookmarks are considered read
     read_later: false,
+    is_hidden: false,
     read_later_until: null,
     read_at: bookmark.created_at,
     is_bookmarked: true, // Already a bookmark

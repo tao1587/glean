@@ -27,6 +27,7 @@ export interface EntryFilters {
   folder_id?: string
   is_read?: boolean
   read_later?: boolean
+  is_hidden?: boolean
   collected_after?: string
   collected_before?: string
   collected_date?: string

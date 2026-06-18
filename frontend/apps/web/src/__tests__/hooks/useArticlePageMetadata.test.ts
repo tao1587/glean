@@ -21,6 +21,7 @@ function createEntry(overrides: Partial<EntryWithState> = {}): EntryWithState {
     created_at: '2026-04-05T12:34:56.000Z',
     is_read: false,
     read_later: false,
+    is_hidden: false,
     read_later_until: null,
     read_at: null,
     is_bookmarked: false,
