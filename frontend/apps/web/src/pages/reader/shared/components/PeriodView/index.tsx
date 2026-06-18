@@ -23,7 +23,9 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
   const groups = useMemo(() => {
     const built = buildTodayBoardEntries(q.entries, { filterBySelectedDate: false })
     const hiddenIds = new Set(Object.values(undo.hidden).flat().map((e) => e.id))
-    return buildTodayBoardGroups(built.filter((e) => !hiddenIds.has(e.id)))
+    return buildTodayBoardGroups(built.filter((e) => !hiddenIds.has(e.id)), {
+      visibleUnreadLimit: Number.POSITIVE_INFINITY,
+    })
   }, [q.entries, undo.hidden])
 
   const hide = (e: TodayBoardEntry) => { undo.add(e); update.mutate({ entryId: e.id, data: { is_hidden: true } }) }
