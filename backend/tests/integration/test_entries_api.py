@@ -370,3 +370,22 @@ class TestHiddenState:
         resp = await client.get("/api/entries?is_hidden=false", headers=auth_headers)
         ids = {item["id"] for item in resp.json()["items"]}
         assert entry_id in ids
+
+
+class TestSourceAffinity:
+    @pytest.mark.asyncio
+    async def test_affinity_reflects_engagement(
+        self, client: AsyncClient, auth_headers, test_entries, test_feed
+    ):
+        await client.patch(f"/api/entries/{test_entries[0].id}", headers=auth_headers, json={"is_read": True})
+        await client.patch(f"/api/entries/{test_entries[1].id}", headers=auth_headers, json={"is_hidden": True})
+        resp = await client.get("/api/entries/source-affinity", headers=auth_headers)
+        assert resp.status_code == 200
+        affinity = resp.json()["affinity"]
+        assert affinity.get(str(test_feed.id)) == 0  # +1 read, -1 hide on same feed
+
+    @pytest.mark.asyncio
+    async def test_affinity_empty_when_no_interactions(self, client: AsyncClient, auth_headers, test_entries):
+        resp = await client.get("/api/entries/source-affinity", headers=auth_headers)
+        assert resp.status_code == 200
+        assert resp.json()["affinity"] == {}

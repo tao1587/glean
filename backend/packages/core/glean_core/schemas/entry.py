@@ -7,7 +7,7 @@ Request and response models for entry-related operations.
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EntryBase(BaseModel):
@@ -120,3 +120,9 @@ class EntrySearchResponse(BaseModel):
     query: str
     scope: Literal["all", "date", "week"]
     took_ms: int
+
+
+class SourceAffinityResponse(BaseModel):
+    """Per-feed engagement affinity for the current user (feed_id -> score)."""
+
+    affinity: dict[str, float] = Field(default_factory=dict)

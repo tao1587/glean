@@ -528,6 +528,29 @@ class EntryService:
 
         return items, total, took_ms
 
+    async def get_source_affinity(self, user_id: str) -> dict[str, float]:
+        """Per-feed affinity from this user's engagement: reads + saves - hides.
+
+        Transparent, no ML: aggregates existing UserEntry state grouped by feed.
+        Feeds with no interaction are simply absent (callers treat as 0).
+        """
+        stmt = (
+            select(
+                Entry.feed_id,
+                func.count().filter(UserEntry.is_read.is_(True)).label("reads"),
+                func.count().filter(UserEntry.read_later.is_(True)).label("saves"),
+                func.count().filter(UserEntry.is_hidden.is_(True)).label("hides"),
+            )
+            .join(UserEntry, UserEntry.entry_id == Entry.id)
+            .where(UserEntry.user_id == user_id)
+            .group_by(Entry.feed_id)
+        )
+        result = await self.session.execute(stmt)
+        return {
+            str(feed_id): float((reads or 0) + (saves or 0) - (hides or 0))
+            for feed_id, reads, saves, hides in result.all()
+        }
+
     async def mark_all_read(
         self, user_id: str, feed_id: str | None = None, folder_id: str | None = None
     ) -> None:

@@ -18,6 +18,7 @@ from glean_core.schemas import (
     EntryResponse,
     EntrySearchResponse,
     ParagraphTranslationsResponse,
+    SourceAffinityResponse,
     TranslateEntryRequest,
     TranslateTextsRequest,
     TranslateTextsResponse,
@@ -167,6 +168,16 @@ async def search_entries(
         scope=scope,
         took_ms=took_ms,
     )
+
+
+@router.get("/source-affinity")
+async def get_source_affinity(
+    current_user: Annotated[UserResponse, Depends(get_current_user)],
+    entry_service: Annotated[EntryService, Depends(get_entry_service)],
+) -> SourceAffinityResponse:
+    """Per-feed engagement affinity for the current user (used by the 按兴趣 sort)."""
+    affinity = await entry_service.get_source_affinity(current_user.id)
+    return SourceAffinityResponse(affinity=affinity)
 
 
 @router.get("/{entry_id}")
