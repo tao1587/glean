@@ -3,7 +3,8 @@
 **Date:** 2026-06-17
 **Status:** Draft (pending user review)
 **Revised:** 2026-06-17 — added an optional, non-destructive preference **sort** to v1.
-**Area:** Reader views — `frontend/apps/web/src/pages/reader/shared` (reuses `DigestView`, `TodayBoard` components and `todayBoard.ts` helpers); backend entry list, a new per-entry "hidden" state, and a revived minimal preference score.
+**Superseded (2026-06-17):** the `按兴趣` sort shipped as a **transparent per-source affinity** ranking (`reads + saves − hides` per feed) with **no embeddings/vectors and no new tables** — the embedding-similarity design described under "Sort & preference scoring" below is superseded (the embedding subsystem was found dormant: no ORM models, 0 rows). See plan [`2026-06-17-preference-sort.md`](../plans/2026-06-17-preference-sort.md).
+**Area:** Reader views — `frontend/apps/web/src/pages/reader/shared` (reuses `DigestView`, `TodayBoard` components and `todayBoard.ts` helpers); backend entry list, a new per-entry "hidden" state, and a transparent source-affinity sort.
 
 ## Overview
 
