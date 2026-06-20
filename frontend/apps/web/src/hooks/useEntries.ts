@@ -186,6 +186,7 @@ export function useUpdateEntryState() {
       queryClient.invalidateQueries({ queryKey: ['range-entries'] })
       queryClient.invalidateQueries({ queryKey: ['range-read-entries'] })
       queryClient.invalidateQueries({ queryKey: ['range-hidden-entries'] })
+      queryClient.invalidateQueries({ queryKey: ['range-tab-entries'] })
       queryClient.invalidateQueries({ queryKey: ['source-affinity'] })
     },
   })

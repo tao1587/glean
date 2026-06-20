@@ -9,6 +9,43 @@ import {
 
 const PER_PAGE = 50
 
+export type PeriodTab = 'unread' | 'read' | 'hidden'
+
+function tabFilter(tab: PeriodTab): { is_read?: boolean; is_hidden?: boolean } {
+  if (tab === 'unread') return { is_read: false, is_hidden: false }
+  if (tab === 'read') return { is_read: true, is_hidden: false }
+  return { is_hidden: true } // hidden: any read state
+}
+
+export function useTabEntries(params: {
+  period: 'week' | 'month'
+  anchorDate: string
+  tab: PeriodTab
+  enabled: boolean
+}) {
+  const { period, anchorDate, tab, enabled } = params
+  const filter = tabFilter(tab)
+  const query = useInfiniteQuery({
+    queryKey: ['range-tab-entries', tab, period, anchorDate],
+    queryFn: ({ pageParam = 1, signal }) =>
+      entryService.getEntries(
+        { period, period_anchor: anchorDate, ...filter, page: pageParam, per_page: PER_PAGE },
+        { signal }
+      ),
+    getNextPageParam: (last) => (last.page < last.total_pages ? last.page + 1 : undefined),
+    initialPageParam: 1,
+    staleTime: 45 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled,
+  })
+  const entries: EntryWithState[] = useMemo(
+    () => query.data?.pages.flatMap((p) => p.items) ?? [],
+    [query.data]
+  )
+  return { ...query, entries }
+}
+
 export function useRangeEntries(params: {
   period: 'week' | 'month'
   anchorDate: string
