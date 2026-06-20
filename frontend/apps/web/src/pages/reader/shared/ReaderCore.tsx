@@ -818,6 +818,10 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
             periodKind={periodKind}
             anchorDate={periodAnchor}
             todayDateKey={todayBoardTodayDate}
+            todayAnchor={(() => {
+              const [y, m, d] = todayBoardTodayDate.split('-').map(Number)
+              return new Date(y, m - 1, d)
+            })()}
             onChangePeriod={handleChangePeriod}
             onOpenEntry={(e) => selectEntry(e.id)}
             sort={sort}

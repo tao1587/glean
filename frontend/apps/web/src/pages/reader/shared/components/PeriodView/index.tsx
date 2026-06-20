@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Languages } from 'lucide-react'
+import { Languages } from 'lucide-react'
 import { useUpdateEntryState } from '@/hooks/useEntries'
 import { useTabEntries, type PeriodTab } from '@/hooks/useRangeEntries'
 import { useListEntriesTranslation } from '@/hooks/useListEntriesTranslation'
@@ -8,6 +8,9 @@ import { buildTodayBoardEntries, buildTodayBoardGroups, type TodayBoardEntry } f
 import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { DIGEST_LIGHT_VARS, DIGEST_DARK_VARS } from '../DigestView/digestTheme'
+import { DigestTopNav } from '../DigestView/DigestMasthead'
+import { AddFeedModal } from '../DigestView/AddFeedModal'
+import { SearchModal } from '@/components/SearchModal'
 import { SourceSection } from './SourceSection'
 import { useHiddenUndo } from './useHiddenUndo'
 import { orderGroupsByAffinity } from './orderGroupsByAffinity'
@@ -18,10 +21,11 @@ const TABS: { key: PeriodTab; label: string }[] = [
   { key: 'hidden', label: '隐藏' },
 ]
 
-export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePeriod, onOpenEntry, sort, affinity, onChangeSort }: {
+export function PeriodView({ periodKind, anchorDate, todayDateKey, todayAnchor, onChangePeriod, onOpenEntry, sort, affinity, onChangeSort }: {
   periodKind: PeriodKind
   anchorDate: string
   todayDateKey: string
+  todayAnchor: Date
   onChangePeriod: (kind: 'day' | PeriodKind, anchor: string) => void
   onOpenEntry: (e: TodayBoardEntry) => void
   sort: 'time' | 'interest'
@@ -32,6 +36,9 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
   const digestVars = resolvedTheme === 'dark' ? DIGEST_DARK_VARS : DIGEST_LIGHT_VARS
 
   const [tab, setTab] = useState<PeriodTab>('unread')
+  const [addFeedOpen, setAddFeedOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
   const range = useMemo(() => getPeriodRange(anchorDate, periodKind), [anchorDate, periodKind])
   const isCurrent = getPeriodRange(todayDateKey, periodKind).collected_after === range.collected_after
 
@@ -86,76 +93,36 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
       className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto"
       style={{ ...digestVars, background: 'var(--digest-bg)', color: 'var(--digest-text)' } as React.CSSProperties}
     >
-      {/* Sticky masthead */}
-      <div
-        className="sticky top-0 z-10"
-        style={{ background: 'var(--digest-bg)', borderBottom: '0.5px solid var(--digest-divider)' }}
-      >
-        {/* Row 1: period label + controls */}
-        <div className="flex items-center justify-between gap-3 px-6 py-3">
-          <div>
-            <span className="text-base font-semibold" style={{ fontFamily: "'Noto Serif SC', Georgia, serif", color: 'var(--digest-text)' }}>
-              {isCurrent ? (periodKind === 'week' ? '本周' : '本月') : range.label}
-            </span>
-            {isCurrent && (
-              <span className="ml-2 text-xs" style={{ color: 'var(--digest-text-tertiary)' }}>{range.label}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Translate toggle */}
-            <button
-              type="button"
-              aria-label="翻译"
-              title="翻译"
-              onClick={() => setTranslateOn((v) => !v)}
-              style={{ color: translateActive ? 'var(--digest-text)' : 'var(--digest-text-tertiary)' }}
-            >
-              <Languages className={`h-4 w-4${translateLoading ? ' animate-pulse' : ''}`} />
-            </button>
-            {/* Sort segmented */}
-            <div className="inline-flex overflow-hidden rounded-md text-xs" style={{ border: '0.5px solid var(--digest-divider)' }}>
-              {(['time', 'interest'] as const).map((s) => (
-                <button key={s} type="button" onClick={() => onChangeSort(s)}
-                  className="px-2.5 py-1 transition-colors"
-                  style={s === sort
-                    ? { background: 'var(--digest-bg-hover)', color: 'var(--digest-text)', fontWeight: 500 }
-                    : { color: 'var(--digest-text-tertiary)' }}>
-                  {s === 'time' ? '时间' : '按兴趣'}
-                </button>
-              ))}
-            </div>
-            {/* Period segmented */}
-            <div className="inline-flex overflow-hidden rounded-md text-xs" style={{ border: '0.5px solid var(--digest-divider)' }}>
-              {(['day', 'week', 'month'] as const).map((k) => (
-                <button key={k} type="button" onClick={() => onChangePeriod(k, anchorDate)}
-                  className="px-2.5 py-1 transition-colors"
-                  style={k === periodKind
-                    ? { background: 'var(--digest-bg-hover)', color: 'var(--digest-text)', fontWeight: 500 }
-                    : { color: 'var(--digest-text-tertiary)' }}>
-                  {k === 'day' ? '日' : k === 'week' ? '周' : '月'}
-                </button>
-              ))}
-            </div>
-            {/* Prev/next */}
-            <button type="button" aria-label="上一期" onClick={() => onChangePeriod(periodKind, shiftPeriod(anchorDate, periodKind, -1))}
-              style={{ color: 'var(--digest-text-tertiary)' }}>
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button type="button" aria-label="下一期" onClick={() => onChangePeriod(periodKind, shiftPeriod(anchorDate, periodKind, 1))}
-              style={{ color: 'var(--digest-text-tertiary)' }}>
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+      {/* Shared top nav — sticky, same as day view */}
+      <DigestTopNav
+        date={anchorDate}
+        dateLabel={range.label}
+        activeKind={periodKind}
+        todayDate={todayDateKey}
+        nextDisabled={isCurrent}
+        onPrevDay={() => onChangePeriod(periodKind, shiftPeriod(anchorDate, periodKind, -1))}
+        onNextDay={() => onChangePeriod(periodKind, shiftPeriod(anchorDate, periodKind, 1))}
+        onChangePeriod={onChangePeriod}
+        onDateChange={(dayKey) => onChangePeriod(periodKind, dayKey)}
+        onAddFeed={() => setAddFeedOpen(true)}
+        onOpenSearch={() => setSearchOpen(true)}
+        todayAnchor={todayAnchor}
+        isTranslating={translateLoading}
+      />
 
-        {/* Row 2: tabs 未读 / 读过 / 隐藏 */}
-        <div className="flex px-6" style={{ borderTop: '0.5px solid var(--digest-divider)' }}>
+      {/* Secondary row: tabs (left) + sort + translate (right) — non-sticky, scrolls away */}
+      <div
+        className="flex items-center justify-between px-6 py-2.5"
+        style={{ borderBottom: '0.5px solid var(--digest-divider)' }}
+      >
+        {/* 未读 / 读过 / 隐藏 tabs */}
+        <div className="flex">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className="mr-5 py-2.5 text-sm transition-colors"
+              className="mr-5 py-1 text-sm transition-colors"
               style={tab === key
                 ? { borderBottom: '2px solid var(--digest-text)', color: 'var(--digest-text)', fontWeight: 500 }
                 : { borderBottom: '2px solid transparent', color: 'var(--digest-text-tertiary)' }}
@@ -163,6 +130,32 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
               {label}
             </button>
           ))}
+        </div>
+
+        {/* Sort segmented + translate toggle */}
+        <div className="flex items-center gap-2">
+          {/* Sort segmented */}
+          <div className="inline-flex overflow-hidden rounded-md text-xs" style={{ border: '0.5px solid var(--digest-divider)' }}>
+            {(['time', 'interest'] as const).map((s) => (
+              <button key={s} type="button" onClick={() => onChangeSort(s)}
+                className="px-2.5 py-1 transition-colors"
+                style={s === sort
+                  ? { background: 'var(--digest-bg-hover)', color: 'var(--digest-text)', fontWeight: 500 }
+                  : { color: 'var(--digest-text-tertiary)' }}>
+                {s === 'time' ? '时间' : '按兴趣'}
+              </button>
+            ))}
+          </div>
+          {/* Translate toggle */}
+          <button
+            type="button"
+            aria-label="翻译"
+            title="翻译"
+            onClick={() => setTranslateOn((v) => !v)}
+            style={{ color: translateActive ? 'var(--digest-text)' : 'var(--digest-text-tertiary)' }}
+          >
+            <Languages className={`h-4 w-4${translateLoading ? ' animate-pulse' : ''}`} />
+          </button>
         </div>
       </div>
 
@@ -189,6 +182,18 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
         ))
       )}
       <div ref={sentinelRef} className="h-8" />
+
+      {/* Modals */}
+      <AddFeedModal open={addFeedOpen} onClose={() => setAddFeedOpen(false)} />
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        initialDate={anchorDate}
+        onSelectEntry={(entry) => {
+          setSearchOpen(false)
+          onOpenEntry(entry as TodayBoardEntry)
+        }}
+      />
     </div>
   )
 }
