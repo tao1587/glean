@@ -1,3 +1,4 @@
+import { EyeOff } from 'lucide-react'
 import type { EntryWithState } from '@glean/types'
 import { useTranslation } from '@glean/i18n'
 import { FeedIcon } from './FeedIcon'
@@ -9,6 +10,9 @@ interface DigestArticleCardProps {
   onClick: () => void
   isFocused?: boolean
   translation?: ListEntryTranslation
+  /** Optional action button rendered in the top-right corner of the card. */
+  action?: 'hide' | 'restore' | 'none'
+  onAction?: (entry: EntryWithState) => void
 }
 
 function formatPublishedAt(dateStr: string | null): string {
@@ -25,7 +29,7 @@ function formatPublishedAt(dateStr: string | null): string {
   }
 }
 
-export function DigestArticleCard({ entry, onClick, isFocused = false, translation }: DigestArticleCardProps) {
+export function DigestArticleCard({ entry, onClick, isFocused = false, translation, action = 'none', onAction }: DigestArticleCardProps) {
   const { t } = useTranslation('digest')
 
   const feedName = entry.feed_title || t('card.unknownSource')
@@ -50,6 +54,29 @@ export function DigestArticleCard({ entry, onClick, isFocused = false, translati
         className="pointer-events-none absolute left-0 top-6 h-[18px] w-[3px] rounded-sm opacity-0 transition-opacity group-hover/card:opacity-100"
         style={{ background: 'var(--digest-accent, #B8312F)' }}
       />
+
+      {/* Action button: hide (hover-reveal) or restore (always visible) */}
+      {action === 'hide' && (
+        <button
+          type="button"
+          aria-label="隐藏"
+          className="absolute right-2.5 top-2.5 z-10 rounded p-1 opacity-0 transition-opacity group-hover/card:opacity-100 focus-visible:opacity-100"
+          style={{ color: 'var(--digest-text-tertiary, #9A968C)', background: 'var(--digest-bg-card, #FFFFFF)' }}
+          onClick={(e) => { e.stopPropagation(); onAction?.(entry) }}
+        >
+          <EyeOff className="h-4 w-4" />
+        </button>
+      )}
+      {action === 'restore' && (
+        <button
+          type="button"
+          className="absolute right-2.5 top-2.5 z-10 rounded px-1.5 py-0.5 text-xs underline"
+          style={{ color: 'var(--digest-text, #1A1A1A)', background: 'var(--digest-bg-card, #FFFFFF)' }}
+          onClick={(e) => { e.stopPropagation(); onAction?.(entry) }}
+        >
+          恢复
+        </button>
+      )}
 
       {/* Header: feed name on left, time on right */}
       <div className="flex items-baseline justify-between gap-2">

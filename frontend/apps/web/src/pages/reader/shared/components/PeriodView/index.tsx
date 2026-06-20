@@ -108,7 +108,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
               aria-label="翻译"
               title="翻译"
               onClick={() => setTranslateOn((v) => !v)}
-              style={{ color: translateActive ? 'var(--digest-accent)' : 'var(--digest-text-tertiary)' }}
+              style={{ color: translateActive ? 'var(--digest-text)' : 'var(--digest-text-tertiary)' }}
             >
               <Languages className={`h-4 w-4${translateLoading ? ' animate-pulse' : ''}`} />
             </button>
@@ -118,7 +118,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
                 <button key={s} type="button" onClick={() => onChangeSort(s)}
                   className="px-2.5 py-1 transition-colors"
                   style={s === sort
-                    ? { background: 'var(--digest-accent-soft)', color: 'var(--digest-accent)', fontWeight: 500 }
+                    ? { background: 'var(--digest-bg-hover)', color: 'var(--digest-text)', fontWeight: 500 }
                     : { color: 'var(--digest-text-tertiary)' }}>
                   {s === 'time' ? '时间' : '按兴趣'}
                 </button>
@@ -130,7 +130,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
                 <button key={k} type="button" onClick={() => onChangePeriod(k, anchorDate)}
                   className="px-2.5 py-1 transition-colors"
                   style={k === periodKind
-                    ? { background: 'var(--digest-accent-soft)', color: 'var(--digest-accent)', fontWeight: 500 }
+                    ? { background: 'var(--digest-bg-hover)', color: 'var(--digest-text)', fontWeight: 500 }
                     : { color: 'var(--digest-text-tertiary)' }}>
                   {k === 'day' ? '日' : k === 'week' ? '周' : '月'}
                 </button>
@@ -157,7 +157,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
               onClick={() => setTab(key)}
               className="mr-5 py-2.5 text-sm transition-colors"
               style={tab === key
-                ? { borderBottom: '2px solid var(--digest-accent)', color: 'var(--digest-text)', fontWeight: 500 }
+                ? { borderBottom: '2px solid var(--digest-text)', color: 'var(--digest-text)', fontWeight: 500 }
                 : { borderBottom: '2px solid transparent', color: 'var(--digest-text-tertiary)' }}
             >
               {label}

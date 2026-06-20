@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 import type { TodayBoardEntry, TodayBoardFeedGroup } from '@/pages/reader/shared/todayBoard'
-import { PeriodEntryCard, type CardAction } from './PeriodEntryCard'
+import { DigestArticleCard } from '../DigestView/DigestArticleCard'
 
-const DEFAULT_VISIBLE = 4
+export type CardAction = 'hide' | 'restore' | 'none'
+
+const DEFAULT_VISIBLE = 6
 
 export function SourceSection({ group, action, justHidden = [], onOpen, onAction, onUndo, translations, translateActive }: {
   group: TodayBoardFeedGroup
@@ -18,28 +19,84 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
   const [expanded, setExpanded] = useState(false)
   const all = group.entries
   const visible = expanded ? all : all.slice(0, DEFAULT_VISIBLE)
+
   return (
-    <section className="px-6 py-5" style={{ borderTop: '0.5px solid var(--digest-divider)' }}>
-      <div className="mb-3.5 flex items-center gap-2.5">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md text-[13px] font-medium" style={{ background: 'var(--digest-bg-hover)', color: 'var(--digest-text-secondary)' }}>{(group.feedTitle ?? '?').slice(0, 1)}</span>
-        <span className="text-[15px] font-medium" style={{ color: 'var(--digest-text)' }}>{group.feedTitle ?? '未知来源'}</span>
+    <section className="px-6">
+      {/* Section header matching DigestSection */}
+      <div
+        className="mb-3 mt-8 border-b-2 pb-2"
+        style={{ borderColor: 'var(--digest-text, #1A1A1A)' }}
+      >
+        <h2
+          className="text-[22px] font-bold tracking-[-0.01em]"
+          style={{
+            fontFamily: "'Noto Serif SC', Georgia, serif",
+            color: 'var(--digest-text, #1A1A1A)',
+          }}
+        >
+          {group.feedTitle ?? '未知来源'}
+          <span
+            className="ml-3 text-[12px] font-normal"
+            style={{ color: 'var(--digest-text-tertiary, #9A968C)' }}
+          >
+            共 {group.entries.length} 条
+          </span>
+        </h2>
       </div>
-      <div className="flex flex-col gap-3.5">
+
+      {/* Cards in digest grid */}
+      <div
+        className="grid border-l"
+        style={{
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          borderColor: 'var(--digest-divider, #E5E0D2)',
+        }}
+      >
         {visible.map((e) => (
-          <PeriodEntryCard key={e.id} entry={e} action={action} onOpen={onOpen} onAction={onAction} translated={translateActive ? translations?.[e.id] : undefined} />
+          <DigestArticleCard
+            key={e.id}
+            entry={e}
+            onClick={() => onOpen(e)}
+            action={action}
+            onAction={() => onAction(e)}
+            translation={translateActive ? translations?.[e.id] : undefined}
+          />
         ))}
       </div>
+
+      {/* Undo rows for just-hidden entries */}
       {justHidden.map((e) => (
-        <div key={e.id} className="mt-2 flex items-center gap-2 text-[11px]" style={{ color: 'var(--digest-text-tertiary)' }}>
+        <div key={e.id} className="mt-2 flex items-center gap-2 text-[11px]" style={{ color: 'var(--digest-text-tertiary, #9A968C)' }}>
           <span className="truncate">已隐藏 ·「{e.title}」</span>
-          {onUndo ? <button type="button" className="underline" style={{ color: 'var(--digest-accent)' }} onClick={() => onUndo(e)}>撤销</button> : null}
+          {onUndo ? (
+            <button
+              type="button"
+              className="underline"
+              style={{ color: 'var(--digest-text, #1A1A1A)' }}
+              onClick={() => onUndo(e)}
+            >
+              撤销
+            </button>
+          ) : null}
         </div>
       ))}
-      {all.length > DEFAULT_VISIBLE ? (
-        <button type="button" onClick={() => setExpanded((v) => !v)} className="mt-3.5 flex items-center gap-1 text-[13px]" style={{ color: 'var(--digest-accent)' }}>
-          {expanded ? '收起' : `展开全部 ${all.length} 条`}{!expanded ? <ChevronDown className="h-3.5 w-3.5" /> : null}
-        </button>
-      ) : null}
+
+      {/* Per-source collapse / expand */}
+      {all.length > DEFAULT_VISIBLE && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="rounded-md px-4 py-2 text-sm transition-colors"
+            style={{
+              color: 'var(--digest-text, #1A1A1A)',
+              border: '1px solid var(--digest-divider, #E5E0D2)',
+            }}
+          >
+            {expanded ? '收起' : `展开全部 ${all.length} 条`}
+          </button>
+        </div>
+      )}
     </section>
   )
 }
