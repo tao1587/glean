@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Languages } from 'lucide-react'
 import { useUpdateEntryState } from '@/hooks/useEntries'
 import { useTabEntries, type PeriodTab } from '@/hooks/useRangeEntries'
+import { useListEntriesTranslation } from '@/hooks/useListEntriesTranslation'
 import { getPeriodRange, shiftPeriod, type PeriodKind } from '@/pages/reader/shared/periodRange'
 import { buildTodayBoardEntries, buildTodayBoardGroups, type TodayBoardEntry } from '@/pages/reader/shared/todayBoard'
 import { useThemeStore } from '@/stores/themeStore'
+import { useAuthStore } from '@/stores/authStore'
 import { DIGEST_LIGHT_VARS, DIGEST_DARK_VARS } from '../DigestView/digestTheme'
 import { SourceSection } from './SourceSection'
 import { useHiddenUndo } from './useHiddenUndo'
@@ -54,6 +56,13 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
   const cardAction = tab === 'unread' ? 'hide' : tab === 'hidden' ? 'restore' : 'none'
   const onAction = tab === 'hidden' ? restore : hide
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const autoTranslate = useAuthStore((s) => s.user?.settings?.list_translation_auto_enabled ?? false)
+  const [translateOn, setTranslateOn] = useState(autoTranslate)
+  const { translations, isActive: translateActive, isLoading: translateLoading } =
+    useListEntriesTranslation({ entries: q.entries, containerRef: scrollRef, enabled: translateOn })
+
   const sentinelRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = sentinelRef.current
@@ -72,6 +81,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
 
   return (
     <div
+      ref={scrollRef}
       className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto"
       style={{ ...digestVars, background: 'var(--digest-bg)', color: 'var(--digest-text)' } as React.CSSProperties}
     >
@@ -91,6 +101,16 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
             )}
           </div>
           <div className="flex items-center gap-2">
+            {/* Translate toggle */}
+            <button
+              type="button"
+              aria-label="翻译"
+              title="翻译"
+              onClick={() => setTranslateOn((v) => !v)}
+              style={{ color: translateActive ? 'var(--digest-accent)' : 'var(--digest-text-tertiary)' }}
+            >
+              <Languages className={`h-4 w-4${translateLoading ? ' animate-pulse' : ''}`} />
+            </button>
             {/* Sort segmented */}
             <div className="inline-flex overflow-hidden rounded-md text-xs" style={{ border: '0.5px solid var(--digest-divider)' }}>
               {(['time', 'interest'] as const).map((s) => (
@@ -162,6 +182,8 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
             onOpen={onOpenEntry}
             onAction={onAction}
             onUndo={unhide}
+            translations={translations}
+            translateActive={translateActive}
           />
         ))
       )}

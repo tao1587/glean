@@ -15,7 +15,7 @@ export function PeriodEntryCard({ entry, action, onOpen, onAction, translated }:
   const title = translated?.title ?? entry.title
   const summary = truncateTodayBoardSummary(translated?.summary ?? stripHtmlTags(entry.summary || ''))
   return (
-    <div className="group relative rounded-lg border" style={{ background: 'var(--digest-bg-card)', borderColor: 'var(--digest-divider)', padding: '18px 20px' }}>
+    <div data-entry-id={entry.id} className="group relative rounded-lg border" style={{ background: 'var(--digest-bg-card)', borderColor: 'var(--digest-divider)', padding: '18px 20px' }}>
       {action === 'hide' ? (
         <button type="button" aria-label="隐藏" title="隐藏" onClick={(e) => { e.stopPropagation(); onAction(entry) }}
           className="absolute right-4 top-4 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-visible:opacity-100" style={{ color: 'var(--digest-text-tertiary)' }}>
