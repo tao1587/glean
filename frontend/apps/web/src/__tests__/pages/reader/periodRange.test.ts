@@ -25,4 +25,12 @@ describe('periodRange', () => {
     expect(shiftPeriod('2026-06-17', 'week', -1)).toBe('2026-06-10')
     expect(shiftPeriod('2026-06-17', 'month', 1)).toBe('2026-07-17')
   })
+  it('does not throw on an empty/invalid anchor (falls back to today)', () => {
+    expect(() => getPeriodRange('', 'week')).not.toThrow()
+    expect(() => getPeriodRange('not-a-date', 'month')).not.toThrow()
+    expect(() => shiftPeriod('', 'week', -1)).not.toThrow()
+    const r = getPeriodRange('', 'week')
+    expect(Number.isNaN(Date.parse(r.collected_after))).toBe(false)
+    expect(Number.isNaN(Date.parse(r.collected_before))).toBe(false)
+  })
 })

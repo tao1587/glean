@@ -7,12 +7,23 @@ import {
   addMonths,
   format,
   parseISO,
+  isValid,
 } from 'date-fns'
 
 export type PeriodKind = 'week' | 'month'
 
+/**
+ * Empty/invalid anchors (e.g. before server time has loaded, or a deep-link to
+ * ?view=week without a date) fall back to today so the date math never produces
+ * an Invalid Date (which would throw in toISOString).
+ */
+function resolveAnchor(anchorDateKey: string): Date {
+  const parsed = parseISO(anchorDateKey)
+  return isValid(parsed) ? parsed : new Date()
+}
+
 export function getPeriodRange(anchorDateKey: string, period: PeriodKind) {
-  const anchor = parseISO(anchorDateKey)
+  const anchor = resolveAnchor(anchorDateKey)
   const start =
     period === 'week'
       ? startOfWeek(anchor, { weekStartsOn: 1 })
@@ -38,7 +49,7 @@ export function shiftPeriod(
   period: PeriodKind,
   delta: number
 ): string {
-  const anchor = parseISO(anchorDateKey)
+  const anchor = resolveAnchor(anchorDateKey)
   const next = period === 'week' ? addWeeks(anchor, delta) : addMonths(anchor, delta)
   return format(next, 'yyyy-MM-dd')
 }

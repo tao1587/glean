@@ -35,7 +35,8 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
   const range = useMemo(() => getPeriodRange(anchorDate, periodKind), [anchorDate, periodKind])
   const isCurrent = getPeriodRange(todayDateKey, periodKind).collected_after === range.collected_after
 
-  const q = useTabEntries({ period: periodKind, anchorDate, tab, enabled: true })
+  const hasValidAnchor = !!anchorDate
+  const q = useTabEntries({ period: periodKind, anchorDate, tab, enabled: hasValidAnchor })
   const update = useUpdateEntryState()
   const undo = useHiddenUndo()
 
@@ -166,7 +167,7 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, onChangePerio
       </div>
 
       {/* Body */}
-      {q.isLoading ? (
+      {!hasValidAnchor || q.isLoading ? (
         <div className="py-12 text-center text-sm" style={{ color: 'var(--digest-text-tertiary)' }}>加载中…</div>
       ) : groups.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
