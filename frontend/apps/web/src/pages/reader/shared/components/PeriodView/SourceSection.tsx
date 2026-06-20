@@ -4,7 +4,8 @@ import { DigestArticleCard } from '../DigestView/DigestArticleCard'
 
 export type CardAction = 'hide' | 'restore' | 'none'
 
-const DEFAULT_VISIBLE = 6
+const DEFAULT_VISIBLE = 5
+const STEP = 5
 
 export function SourceSection({ group, action, justHidden = [], onOpen, onAction, onUndo, translations, translateActive }: {
   group: TodayBoardFeedGroup
@@ -16,9 +17,12 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
   translations?: Record<string, { title?: string; summary?: string }>
   translateActive?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE)
   const all = group.entries
-  const visible = expanded ? all : all.slice(0, DEFAULT_VISIBLE)
+  const visible = all.slice(0, visibleCount)
+  const hasMore = visibleCount < all.length
+  const isExpanded = visibleCount > DEFAULT_VISIBLE
+  const remaining = all.length - visibleCount
 
   return (
     <section className="px-6">
@@ -81,20 +85,38 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
         </div>
       ))}
 
-      {/* Per-source collapse / expand */}
-      {all.length > DEFAULT_VISIBLE && (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="rounded-md px-4 py-2 text-sm transition-colors"
-            style={{
-              color: 'var(--digest-text, #1A1A1A)',
-              border: '1px solid var(--digest-divider, #E5E0D2)',
-            }}
-          >
-            {expanded ? '收起' : `展开全部 ${all.length} 条`}
-          </button>
+      {/* Per-source incremental expand (+5) with a 收起 that sticks within this
+          source's content window so it stays reachable while scrolling. */}
+      {(hasMore || isExpanded) && (
+        <div className={`mt-6 flex justify-center gap-2${isExpanded ? ' sticky bottom-3 z-10' : ''}`}>
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => Math.min(c + STEP, all.length))}
+              className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
+              style={{
+                color: 'var(--digest-text, #1A1A1A)',
+                border: '1px solid var(--digest-divider, #E5E0D2)',
+                background: 'var(--digest-bg-card, #FFFFFF)',
+              }}
+            >
+              展开更多{remaining > 0 ? ` · 还有 ${remaining} 条` : ''}
+            </button>
+          )}
+          {isExpanded && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount(DEFAULT_VISIBLE)}
+              className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
+              style={{
+                color: 'var(--digest-text, #1A1A1A)',
+                border: '1px solid var(--digest-divider, #E5E0D2)',
+                background: 'var(--digest-bg-card, #FFFFFF)',
+              }}
+            >
+              收起
+            </button>
+          )}
         </div>
       )}
     </section>

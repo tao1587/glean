@@ -67,7 +67,7 @@ it("action='restore' → clicking 恢复 calls onAction", () => {
   expect(onAction).toHaveBeenCalledWith(expect.objectContaining({ id: 'e1' }))
 })
 
-it('collapse: 8-entry group with action=none shows only 6, then all 8 after expand', () => {
+it('expand: 8-entry group shows 5, reveals +5 per click, and 收起 collapses back', () => {
   const entries = Array.from({ length: 8 }, (_, i) => makeEntry(`e${i + 1}`, `Article ${i + 1}`))
   render(
     <SourceSection
@@ -79,17 +79,15 @@ it('collapse: 8-entry group with action=none shows only 6, then all 8 after expa
     { wrapper }
   )
 
-  // First 6 visible
-  expect(screen.getByText('Article 1')).toBeInTheDocument()
-  expect(screen.getByText('Article 6')).toBeInTheDocument()
-  // 7 and 8 hidden
-  expect(screen.queryByText('Article 7')).not.toBeInTheDocument()
-  expect(screen.queryByText('Article 8')).not.toBeInTheDocument()
+  // First 5 visible, 6+ hidden
+  expect(screen.getByText('Article 5')).toBeInTheDocument()
+  expect(screen.queryByText('Article 6')).not.toBeInTheDocument()
 
-  // Expand button present and correct label
-  fireEvent.click(screen.getByText('展开全部 8 条'))
-
-  // Now all 8 visible
-  expect(screen.getByText('Article 7')).toBeInTheDocument()
+  // Reveal 5 more (capped at the remaining 3 → all 8)
+  fireEvent.click(screen.getByText('展开更多 · 还有 3 条'))
   expect(screen.getByText('Article 8')).toBeInTheDocument()
+
+  // 收起 collapses back to 5
+  fireEvent.click(screen.getByText('收起'))
+  expect(screen.queryByText('Article 6')).not.toBeInTheDocument()
 })
