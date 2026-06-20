@@ -152,6 +152,21 @@ interface DigestTopNavProps {
   isTranslating?: boolean
   /** Called when the user clicks the search button or presses cmd+k. */
   onOpenSearch?: () => void
+  /**
+   * Override the central date button label. When omitted the day view default
+   * `formatNavDate(date, t)` is used — day view passes nothing, unchanged.
+   */
+  dateLabel?: string
+  /**
+   * Which segment in the 日/周/月 toggle is highlighted as active.
+   * Defaults to `'day'` so the day view (no prop) is unchanged.
+   */
+  activeKind?: 'day' | 'week' | 'month'
+  /**
+   * Disable the "next" chevron button. When omitted falls back to `isToday`
+   * so the day view (no prop) is unchanged.
+   */
+  nextDisabled?: boolean
 }
 
 export function DigestTopNav({
@@ -165,6 +180,9 @@ export function DigestTopNav({
   todayAnchor,
   isTranslating = false,
   onOpenSearch,
+  dateLabel,
+  activeKind,
+  nextDisabled,
 }: DigestTopNavProps) {
   const { t } = useTranslation('digest')
   const isToday = date === todayDate
@@ -281,21 +299,22 @@ export function DigestTopNav({
               e.currentTarget.style.color = 'var(--digest-text, #1A1A1A)'
             }}
           >
-            {formatNavDate(date, t)}
+            {dateLabel ?? formatNavDate(date, t)}
           </button>
           <button
             type="button"
             onClick={onNextDay}
-            disabled={isToday}
+            disabled={nextDisabled ?? isToday}
             title={t('topnav.nextDay')}
             className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] transition-colors disabled:cursor-default disabled:opacity-30"
             style={{ color: 'var(--digest-text-secondary, #5E5A52)' }}
             onMouseEnter={(e) => {
-              if (isToday) return
+              if (nextDisabled ?? isToday) return
               e.currentTarget.style.background = 'var(--digest-bg-hover, #F1EDE2)'
               e.currentTarget.style.color = 'var(--digest-text, #1A1A1A)'
             }}
             onMouseLeave={(e) => {
+              if (nextDisabled ?? isToday) return
               e.currentTarget.style.background = ''
               e.currentTarget.style.color = 'var(--digest-text-secondary, #5E5A52)'
             }}
@@ -359,36 +378,39 @@ export function DigestTopNav({
         {/* Period view toggle: 日 / 周 / 月 */}
         {onChangePeriod && (
           <div className="inline-flex overflow-hidden rounded-[5px] border text-xs" style={{ borderColor: 'var(--digest-divider, #E5E0D2)' }}>
-            {(['day', 'week', 'month'] as const).map((kind) => (
+            {(['day', 'week', 'month'] as const).map((kind) => {
+              const isActive = kind === (activeKind ?? 'day')
+              return (
               <button
                 key={kind}
                 type="button"
                 onClick={() => onChangePeriod(kind, date)}
                 className={cn(
                   'px-2.5 py-1 transition-colors',
-                  kind === 'day'
+                  isActive
                     ? 'font-medium'
                     : '',
                 )}
                 style={
-                  kind === 'day'
+                  isActive
                     ? { background: 'var(--digest-text, #1A1A1A)', color: 'var(--digest-bg, #FAF8F3)' }
                     : { color: 'var(--digest-text-secondary, #5E5A52)' }
                 }
                 onMouseEnter={(e) => {
-                  if (kind === 'day') return
+                  if (isActive) return
                   e.currentTarget.style.background = 'var(--digest-bg-hover, #F1EDE2)'
                   e.currentTarget.style.color = 'var(--digest-text, #1A1A1A)'
                 }}
                 onMouseLeave={(e) => {
-                  if (kind === 'day') return
+                  if (isActive) return
                   e.currentTarget.style.background = ''
                   e.currentTarget.style.color = 'var(--digest-text-secondary, #5E5A52)'
                 }}
               >
                 {kind === 'day' ? '日' : kind === 'week' ? '周' : '月'}
               </button>
-            ))}
+              )
+            })}
           </div>
         )}
 

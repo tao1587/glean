@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from '@glean/i18n'
 import type { TodayBoardEntry, TodayBoardFeedGroup } from '@/pages/reader/shared/todayBoard'
 import { DigestArticleCard } from '../DigestView/DigestArticleCard'
 
 export type CardAction = 'hide' | 'restore' | 'none'
 
 const DEFAULT_VISIBLE = 5
-const STEP = 5
 
 export function SourceSection({ group, action, justHidden = [], onOpen, onAction, onUndo, translations, translateActive }: {
   group: TodayBoardFeedGroup
@@ -17,12 +17,10 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
   translations?: Record<string, { title?: string; summary?: string }>
   translateActive?: boolean
 }) {
-  const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE)
+  const { t } = useTranslation('digest')
+  const [showAll, setShowAll] = useState(false)
   const all = group.entries
-  const visible = all.slice(0, visibleCount)
-  const hasMore = visibleCount < all.length
-  const isExpanded = visibleCount > DEFAULT_VISIBLE
-  const remaining = all.length - visibleCount
+  const visible = showAll ? all : all.slice(0, DEFAULT_VISIBLE)
 
   return (
     <section className="px-6">
@@ -85,14 +83,13 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
         </div>
       ))}
 
-      {/* Per-source incremental expand (+5) with a 收起 that sticks within this
-          source's content window so it stays reachable while scrolling. */}
-      {(hasMore || isExpanded) && (
-        <div className={`mt-6 flex justify-center gap-2${isExpanded ? ' sticky bottom-3 z-10' : ''}`}>
-          {hasMore && (
+      {/* Per-source expand / collapse using the same i18n keys as DigestSection */}
+      {all.length > DEFAULT_VISIBLE && (
+        <div className={`mt-6 flex justify-center${showAll ? ' sticky bottom-3 z-10' : ''}`}>
+          {!showAll ? (
             <button
               type="button"
-              onClick={() => setVisibleCount((c) => Math.min(c + STEP, all.length))}
+              onClick={() => setShowAll(true)}
               className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
               style={{
                 color: 'var(--digest-text, #1A1A1A)',
@@ -100,13 +97,12 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
                 background: 'var(--digest-bg-card, #FFFFFF)',
               }}
             >
-              展开更多{remaining > 0 ? ` · 还有 ${remaining} 条` : ''}
+              {t('section.viewAll', { count: all.length })}
             </button>
-          )}
-          {isExpanded && (
+          ) : (
             <button
               type="button"
-              onClick={() => setVisibleCount(DEFAULT_VISIBLE)}
+              onClick={() => setShowAll(false)}
               className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
               style={{
                 color: 'var(--digest-text, #1A1A1A)',
@@ -114,7 +110,7 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
                 background: 'var(--digest-bg-card, #FFFFFF)',
               }}
             >
-              收起
+              {t('section.collapseViewAll')}
             </button>
           )}
         </div>

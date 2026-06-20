@@ -1,9 +1,23 @@
-import { afterEach, it, expect, vi } from 'vitest'
+import { afterEach, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SourceSection } from '@/pages/reader/shared/components/PeriodView/SourceSection'
 
 afterEach(() => cleanup())
+
+// Mock @glean/i18n so tests don't depend on real translation files and
+// produce predictable button labels for section.viewAll / section.collapseViewAll.
+beforeEach(() => {
+  vi.mock('@glean/i18n', () => ({
+    useTranslation: () => ({
+      t: (key: string, opts?: { count?: number }) => {
+        if (key === 'section.viewAll') return `viewAll:${opts?.count ?? ''}`
+        if (key === 'section.collapseViewAll') return 'collapseViewAll'
+        return key
+      },
+    }),
+  }))
+})
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -67,7 +81,7 @@ it("action='restore' → clicking 恢复 calls onAction", () => {
   expect(onAction).toHaveBeenCalledWith(expect.objectContaining({ id: 'e1' }))
 })
 
-it('expand: 8-entry group shows 5, reveals +5 per click, and 收起 collapses back', () => {
+it('expand: 8-entry group shows 5 by default, view-all reveals all 8, collapse returns to 5', () => {
   const entries = Array.from({ length: 8 }, (_, i) => makeEntry(`e${i + 1}`, `Article ${i + 1}`))
   render(
     <SourceSection
@@ -83,11 +97,21 @@ it('expand: 8-entry group shows 5, reveals +5 per click, and 收起 collapses ba
   expect(screen.getByText('Article 5')).toBeInTheDocument()
   expect(screen.queryByText('Article 6')).not.toBeInTheDocument()
 
-  // Reveal 5 more (capped at the remaining 3 → all 8)
-  fireEvent.click(screen.getByText('展开更多 · 还有 3 条'))
-  expect(screen.getByText('Article 8')).toBeInTheDocument()
+  // "view all" button shows total count (8)
+  const viewAllBtn = screen.getByText('viewAll:8')
+  expect(viewAllBtn).toBeInTheDocument()
 
-  // 收起 collapses back to 5
-  fireEvent.click(screen.getByText('收起'))
+  // Click to expand → all 8 visible
+  fireEvent.click(viewAllBtn)
+  expect(screen.getByText('Article 8')).toBeInTheDocument()
+  expect(screen.queryByText('viewAll:8')).not.toBeInTheDocument()
+
+  // Collapse button is now shown
+  const collapseBtn = screen.getByText('collapseViewAll')
+  expect(collapseBtn).toBeInTheDocument()
+
+  // Click collapse → back to 5
+  fireEvent.click(collapseBtn)
   expect(screen.queryByText('Article 6')).not.toBeInTheDocument()
+  expect(screen.getByText('Article 5')).toBeInTheDocument()
 })
