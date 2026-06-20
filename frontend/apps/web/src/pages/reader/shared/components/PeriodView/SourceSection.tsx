@@ -1,75 +1,44 @@
 import { useState } from 'react'
-import { ChevronRight, ChevronDown } from 'lucide-react'
-import { useRangeReadEntries, useRangeHiddenEntries } from '@/hooks/useRangeEntries'
+import { ChevronDown } from 'lucide-react'
 import type { TodayBoardEntry, TodayBoardFeedGroup } from '@/pages/reader/shared/todayBoard'
-import { PeriodEntryCard } from './PeriodEntryCard'
+import { PeriodEntryCard, type CardAction } from './PeriodEntryCard'
 
-export function SourceSection({
-  group, period, anchorDate, justHidden, onOpen, onHide, onUndo, onToggleSave, onRestore,
-}: {
+const DEFAULT_VISIBLE = 4
+
+export function SourceSection({ group, action, justHidden = [], onOpen, onAction, onUndo, translations, translateActive }: {
   group: TodayBoardFeedGroup
-  period: 'week' | 'month'
-  anchorDate: string
-  justHidden: TodayBoardEntry[]
+  action: CardAction
+  justHidden?: TodayBoardEntry[]
   onOpen: (e: TodayBoardEntry) => void
-  onHide: (e: TodayBoardEntry) => void
-  onUndo: (e: TodayBoardEntry) => void
-  onToggleSave: (e: TodayBoardEntry) => void
-  onRestore: (e: TodayBoardEntry) => void
+  onAction: (e: TodayBoardEntry) => void
+  onUndo?: (e: TodayBoardEntry) => void
+  translations?: Record<string, { title?: string; summary?: string }>
+  translateActive?: boolean
 }) {
-  const [readOpen, setReadOpen] = useState(false)
-  const [hiddenOpen, setHiddenOpen] = useState(false)
-  const read = useRangeReadEntries(group.feedId, { period, anchorDate }, readOpen)
-  const hiddenQ = useRangeHiddenEntries(group.feedId, { period, anchorDate }, hiddenOpen)
+  const [expanded, setExpanded] = useState(false)
+  const all = group.entries
+  const visible = expanded ? all : all.slice(0, DEFAULT_VISIBLE)
   return (
-    <section className="border-border/60 border-t px-[18px] py-4 first:border-t-0">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="bg-muted text-muted-foreground flex h-[22px] w-[22px] items-center justify-center rounded-md text-xs font-medium">
-          {(group.feedTitle ?? '?').slice(0, 1)}
-        </span>
-        <span className="text-sm font-medium text-stone-800">{group.feedTitle ?? '未知来源'}</span>
+    <section className="px-6 py-5" style={{ borderTop: '0.5px solid var(--digest-divider)' }}>
+      <div className="mb-3.5 flex items-center gap-2.5">
+        <span className="flex h-6 w-6 items-center justify-center rounded-md text-[13px] font-medium" style={{ background: 'var(--digest-bg-hover)', color: 'var(--digest-text-secondary)' }}>{(group.feedTitle ?? '?').slice(0, 1)}</span>
+        <span className="text-[15px] font-medium" style={{ color: 'var(--digest-text)' }}>{group.feedTitle ?? '未知来源'}</span>
       </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-        {group.visibleEntries.map((e) => (
-          <PeriodEntryCard key={e.id} entry={e} onOpen={onOpen} onHide={onHide} onToggleSave={onToggleSave} />
+      <div className="flex flex-col gap-3.5">
+        {visible.map((e) => (
+          <PeriodEntryCard key={e.id} entry={e} action={action} onOpen={onOpen} onAction={onAction} translated={translateActive ? translations?.[e.id] : undefined} />
         ))}
       </div>
       {justHidden.map((e) => (
-        <div key={e.id} className="mt-2 flex items-center gap-2 text-[11px] text-stone-400">
+        <div key={e.id} className="mt-2 flex items-center gap-2 text-[11px]" style={{ color: 'var(--digest-text-tertiary)' }}>
           <span className="truncate">已隐藏 ·「{e.title}」</span>
-          <button type="button" className="text-primary underline" onClick={() => onUndo(e)}>撤销</button>
+          {onUndo ? <button type="button" className="underline" style={{ color: 'var(--digest-accent)' }} onClick={() => onUndo(e)}>撤销</button> : null}
         </div>
       ))}
-      <button type="button" onClick={() => setReadOpen((v) => !v)}
-        className="mt-3 flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600">
-        {readOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-        看过的
-      </button>
-      {readOpen ? (
-        <div className="mt-2 grid grid-cols-1 gap-2.5 opacity-70 sm:grid-cols-2">
-          {read.entries.map((e) => (
-            <PeriodEntryCard key={e.id} entry={e} onOpen={onOpen} onHide={onHide} onToggleSave={onToggleSave} />
-          ))}
-        </div>
-      ) : null}
-      <button type="button" onClick={() => setHiddenOpen((v) => !v)}
-        className="mt-3 flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600">
-        {hiddenOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-        隐藏的
-      </button>
-      {hiddenOpen ? (
-        <div className="mt-2 space-y-1">
-          {hiddenQ.entries.length === 0 ? (
-            <p className="text-xs text-stone-400">没有隐藏的内容</p>
-          ) : (
-            hiddenQ.entries.map((e) => (
-              <div key={e.id} className="flex items-center gap-2 text-[11px]">
-                <span className="truncate text-stone-600">{e.title}</span>
-                <button type="button" className="text-primary underline shrink-0" onClick={() => onRestore(e)}>恢复</button>
-              </div>
-            ))
-          )}
-        </div>
+      {all.length > DEFAULT_VISIBLE ? (
+        <button type="button" onClick={() => setExpanded((v) => !v)} className="mt-3.5 flex items-center gap-1 text-[13px]" style={{ color: 'var(--digest-accent)' }}>
+          {expanded ? '收起' : `展开全部 ${all.length} 条`}{!expanded ? <ChevronDown className="h-3.5 w-3.5" /> : null}
+        </button>
       ) : null}
     </section>
   )
