@@ -90,11 +90,10 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
             <button
               type="button"
               onClick={() => setShowAll(true)}
-              className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
+              className="rounded-md px-4 py-2 text-sm transition-colors"
               style={{
                 color: 'var(--digest-text, #1A1A1A)',
                 border: '1px solid var(--digest-divider, #E5E0D2)',
-                background: 'var(--digest-bg-card, #FFFFFF)',
               }}
             >
               {t('section.viewAll', { count: all.length })}
@@ -103,11 +102,11 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
             <button
               type="button"
               onClick={() => setShowAll(false)}
-              className="rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
+              className="rounded-md px-4 py-2 text-sm transition-colors"
               style={{
                 color: 'var(--digest-text, #1A1A1A)',
                 border: '1px solid var(--digest-divider, #E5E0D2)',
-                background: 'var(--digest-bg-card, #FFFFFF)',
+                background: 'var(--digest-bg, #FAF8F3)',
               }}
             >
               {t('section.collapseViewAll')}

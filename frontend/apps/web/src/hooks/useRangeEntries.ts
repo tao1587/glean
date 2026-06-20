@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { entryService } from '@glean/api-client'
 import type { EntryWithState } from '@glean/types'
@@ -7,7 +7,7 @@ import {
   type TodayBoardEntry,
 } from '@/pages/reader/shared/todayBoard'
 
-const PER_PAGE = 50
+const PER_PAGE = 100
 
 export type PeriodTab = 'unread' | 'read' | 'hidden'
 
@@ -39,6 +39,12 @@ export function useTabEntries(params: {
     refetchOnWindowFocus: false,
     enabled,
   })
+  // Eagerly load every page for the period so per-source counts reflect the
+  // true total (not "loaded so far"), and all unread show without scroll-paging.
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
+  useEffect(() => {
+    if (enabled && hasNextPage && !isFetchingNextPage) void fetchNextPage()
+  }, [enabled, hasNextPage, isFetchingNextPage, fetchNextPage, query.data])
   const entries: EntryWithState[] = useMemo(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
     [query.data]
