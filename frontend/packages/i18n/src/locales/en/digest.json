@@ -127,6 +127,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "viewAll": "View all {{count}} ↓",
+    "showRemaining": "Show {{count}} more ↓",
     "collapseViewAll": "Collapse",
     "otherFolder": "Other",
     "readTail": "{{count}} read"

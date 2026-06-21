@@ -96,7 +96,7 @@ export function SourceSection({ group, action, justHidden = [], onOpen, onAction
                 border: '1px solid var(--digest-divider, #E5E0D2)',
               }}
             >
-              {t('section.viewAll', { count: all.length })}
+              {t('section.showRemaining', { count: all.length - DEFAULT_VISIBLE })}
             </button>
           ) : (
             <button

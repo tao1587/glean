@@ -127,6 +127,7 @@
     "expand": "展开",
     "collapse": "折叠",
     "viewAll": "查看全部 {{count}} 篇 ↓",
+    "showRemaining": "展开剩余 {{count}} 篇 ↓",
     "collapseViewAll": "收起",
     "otherFolder": "其他",
     "readTail": "已读 {{count}} 篇"

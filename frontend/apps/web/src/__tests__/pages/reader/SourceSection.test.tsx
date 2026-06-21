@@ -12,6 +12,7 @@ beforeEach(() => {
     useTranslation: () => ({
       t: (key: string, opts?: { count?: number }) => {
         if (key === 'section.viewAll') return `viewAll:${opts?.count ?? ''}`
+        if (key === 'section.showRemaining') return `showRemaining:${opts?.count ?? ''}`
         if (key === 'section.collapseViewAll') return 'collapseViewAll'
         return key
       },
@@ -97,14 +98,14 @@ it('expand: 8-entry group shows 5 by default, view-all reveals all 8, collapse r
   expect(screen.getByText('Article 5')).toBeInTheDocument()
   expect(screen.queryByText('Article 6')).not.toBeInTheDocument()
 
-  // "view all" button shows total count (8)
-  const viewAllBtn = screen.getByText('viewAll:8')
+  // expand button shows the REMAINING (not-shown) count: 8 total − 5 shown = 3
+  const viewAllBtn = screen.getByText('showRemaining:3')
   expect(viewAllBtn).toBeInTheDocument()
 
   // Click to expand → all 8 visible
   fireEvent.click(viewAllBtn)
   expect(screen.getByText('Article 8')).toBeInTheDocument()
-  expect(screen.queryByText('viewAll:8')).not.toBeInTheDocument()
+  expect(screen.queryByText('showRemaining:3')).not.toBeInTheDocument()
 
   // Collapse button is now shown
   const collapseBtn = screen.getByText('collapseViewAll')
