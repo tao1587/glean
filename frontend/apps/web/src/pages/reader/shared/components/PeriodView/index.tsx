@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Languages } from 'lucide-react'
 import { useUpdateEntryState } from '@/hooks/useEntries'
 import { useTabEntries, type PeriodTab } from '@/hooks/useRangeEntries'
@@ -14,6 +14,11 @@ import { SearchModal } from '@/components/SearchModal'
 import { SourceSection } from './SourceSection'
 import { useHiddenUndo } from './useHiddenUndo'
 import { orderGroupsByAffinity } from './orderGroupsByAffinity'
+import { SparseSourceGrid } from './SparseSourceGrid'
+import { computeBandCols, partitionGroupsByDensity } from './density'
+
+// px-6 (1.5rem) left + right padding on the source sections.
+const SECTION_PADDING_X = 48
 
 const TABS: { key: PeriodTab; label: string }[] = [
   { key: 'unread', label: '未读' },
@@ -66,6 +71,31 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, todayAnchor, 
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const [paneWidth, setPaneWidth] = useState(0)
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const measure = () => setPaneWidth(el.clientWidth)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const bandCols = computeBandCols(paneWidth - SECTION_PADDING_X)
+  const { bands, sparse } = useMemo(
+    () => partitionGroupsByDensity(groups, bandCols),
+    [groups, bandCols],
+  )
+
+  const sparseFeedIds = useMemo(() => new Set(sparse.map((g) => g.feedId)), [sparse])
+  const sparseJustHidden =
+    tab === 'unread'
+      ? Object.entries(undo.hidden)
+          .filter(([feedId]) => sparseFeedIds.has(feedId))
+          .flatMap(([, list]) => list)
+      : []
+
   const autoTranslate = useAuthStore((s) => s.user?.settings?.list_translation_auto_enabled ?? false)
   const [translateOn, setTranslateOn] = useState(autoTranslate)
   const { translations, isActive: translateActive, isLoading: translateLoading } =
@@ -91,7 +121,14 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, todayAnchor, 
     <div
       ref={scrollRef}
       className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto"
-      style={{ ...digestVars, background: 'var(--digest-bg)', color: 'var(--digest-text)' } as React.CSSProperties}
+      style={
+        {
+          ...digestVars,
+          background: 'var(--digest-bg)',
+          color: 'var(--digest-text)',
+          scrollbarGutter: 'stable',
+        } as React.CSSProperties
+      }
     >
       {/* Shared top nav — sticky, same as day view */}
       <DigestTopNav
@@ -167,19 +204,32 @@ export function PeriodView({ periodKind, anchorDate, todayDateKey, todayAnchor, 
           <p className="text-sm" style={{ color: 'var(--digest-text-tertiary)' }}>{emptyMessage}</p>
         </div>
       ) : (
-        groups.map((g) => (
-          <SourceSection
-            key={g.feedId}
-            group={g}
+        <>
+          {bands.map((g) => (
+            <SourceSection
+              key={g.feedId}
+              group={g}
+              action={cardAction}
+              justHidden={tab === 'unread' ? (undo.hidden[g.feedId] ?? []) : []}
+              onOpen={onOpenEntry}
+              onAction={onAction}
+              onUndo={unhide}
+              translations={translations}
+              translateActive={translateActive}
+            />
+          ))}
+          <SparseSourceGrid
+            groups={sparse}
             action={cardAction}
-            justHidden={tab === 'unread' ? (undo.hidden[g.feedId] ?? []) : []}
+            justHidden={sparseJustHidden}
+            showSeparator={bands.length > 0}
             onOpen={onOpenEntry}
             onAction={onAction}
             onUndo={unhide}
             translations={translations}
             translateActive={translateActive}
           />
-        ))
+        </>
       )}
       <div ref={sentinelRef} className="h-8" />
 
