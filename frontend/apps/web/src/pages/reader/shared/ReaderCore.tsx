@@ -806,10 +806,11 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
       void queryClient.invalidateQueries({ queryKey: entryKeys.lists() })
     }
     return (
-      <div className="relative flex h-full w-full min-w-0">
+      <div className="relative flex h-screen max-h-screen min-h-0 w-full min-w-0 overflow-hidden">
         <div
           className={cn(
-            'flex min-w-0 flex-1',
+            'flex h-full min-h-0 min-w-0 overflow-hidden',
+            selectedEntryId ? 'w-[360px] shrink-0' : 'flex-1',
             isMobile && selectedEntryId && 'pointer-events-none opacity-0'
           )}
           aria-hidden={isMobile && !!selectedEntryId}
@@ -832,7 +833,7 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
 
         {/* Desktop: side-by-side reader pane */}
         {!isMobile && selectedEntryId && (
-          <div className="border-border flex min-w-0 flex-1 flex-col border-l">
+          <div className="border-border flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l">
             {isLoadingEntry && !resolvedSelectedEntry ? (
               <ArticleReaderSkeleton />
             ) : resolvedSelectedEntry ? (
@@ -851,7 +852,7 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
 
         {/* Mobile: full overlay reader */}
         {isMobile && selectedEntryId ? (
-          <div className="absolute inset-0 z-20 flex min-w-0 flex-1 flex-col">
+          <div className="absolute inset-0 z-20 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             {isLoadingEntry && !resolvedSelectedEntry ? (
               <ArticleReaderSkeleton />
             ) : resolvedSelectedEntry ? (
@@ -1299,4 +1300,3 @@ function StreamViewShell({
     </div>
   )
 }
-

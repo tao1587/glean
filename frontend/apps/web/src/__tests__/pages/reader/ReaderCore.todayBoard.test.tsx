@@ -7,6 +7,7 @@ import { ReaderCore } from '@/pages/reader/shared/ReaderCore'
 const {
   articleReaderSpy,
   navigateSpy,
+  periodViewSpy,
   todayBoardSpy,
   useInfiniteEntriesSpy,
   updateEntryStateSpy,
@@ -17,6 +18,7 @@ const {
     <div data-testid="article-reader">{props.entry.id}</div>
   )),
   navigateSpy: vi.fn(),
+  periodViewSpy: vi.fn(() => <div data-testid="period-view-probe" />),
   todayBoardSpy: vi.fn(
     (props: {
       entries: Array<{ id: string; is_read?: boolean }>
@@ -38,6 +40,17 @@ const {
       { key: '2026-04-07', date: new Date(2026, 3, 7), isToday: false },
     ],
     setTodayBoardDate: vi.fn(),
+    viewParam: 'today-board',
+    isTodayBoardView: true,
+    isDigestView: false,
+    todayBoardTodayDate: '2026-04-10',
+    digestDate: '2026-04-10',
+    setDigestDate: vi.fn(),
+    periodKind: null as 'week' | 'month' | null,
+    periodAnchor: '2026-04-10',
+    setPeriodView: vi.fn(),
+    sort: 'time' as 'time' | 'interest',
+    setSort: vi.fn(),
     isLoading: false,
     listTranslationAutoEnabled: false,
     entries: null as EntryWithState[] | null,
@@ -200,17 +213,26 @@ vi.mock('@/pages/reader/shared/useReaderController', () => ({
     selectedFeedId: undefined,
     selectedFolderId: undefined,
     entryIdFromUrl: readerControllerState.entryIdFromUrl,
-    viewParam: 'today-board',
+    viewParam: readerControllerState.viewParam,
     isSmartView: false,
-    isTodayBoardView: true,
+    isTodayBoardView: readerControllerState.isTodayBoardView,
+    isDigestView: readerControllerState.isDigestView,
     filterType: 'all',
     setFilterType: vi.fn(),
     selectedEntryId: readerControllerState.selectedEntryId,
     selectEntry: vi.fn(),
     clearSelectedEntry: vi.fn(),
     todayBoardDate: readerControllerState.todayBoardDate,
+    todayBoardTodayDate: readerControllerState.todayBoardTodayDate,
     recentTodayBoardDates: readerControllerState.recentTodayBoardDates,
     setTodayBoardDate: readerControllerState.setTodayBoardDate,
+    digestDate: readerControllerState.digestDate,
+    setDigestDate: readerControllerState.setDigestDate,
+    periodKind: readerControllerState.periodKind,
+    periodAnchor: readerControllerState.periodAnchor,
+    setPeriodView: readerControllerState.setPeriodView,
+    sort: readerControllerState.sort,
+    setSort: readerControllerState.setSort,
   }),
 }))
 
@@ -228,6 +250,10 @@ vi.mock('@/pages/reader/shared/components/TodayBoard', () => ({
   TodayBoard: todayBoardSpy,
 }))
 
+vi.mock('@/pages/reader/shared/components/PeriodView', () => ({
+  PeriodView: periodViewSpy,
+}))
+
 describe('ReaderCore today-board route', () => {
   afterEach(() => {
     cleanup()
@@ -237,6 +263,14 @@ describe('ReaderCore today-board route', () => {
     readerControllerState.entryIdFromUrl = null
     readerControllerState.selectedEntryId = null
     readerControllerState.todayBoardDate = '2026-04-10'
+    readerControllerState.viewParam = 'today-board'
+    readerControllerState.isTodayBoardView = true
+    readerControllerState.isDigestView = false
+    readerControllerState.todayBoardTodayDate = '2026-04-10'
+    readerControllerState.digestDate = '2026-04-10'
+    readerControllerState.periodKind = null
+    readerControllerState.periodAnchor = '2026-04-10'
+    readerControllerState.sort = 'time'
     readerControllerState.isLoading = false
     readerControllerState.listTranslationAutoEnabled = false
     readerControllerState.entries = null
@@ -349,6 +383,37 @@ describe('ReaderCore today-board route', () => {
         renderDetail: expect.any(Function),
       }),
       expect.anything()
+    )
+  })
+
+  it('keeps the desktop week/month list narrow and scroll-isolated after opening an article detail', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-10T12:00:00+08:00'))
+    readerControllerState.viewParam = 'week'
+    readerControllerState.isTodayBoardView = false
+    readerControllerState.periodKind = 'week'
+    readerControllerState.selectedEntryId = 'period-entry'
+
+    Object.defineProperty(window, 'ResizeObserver', {
+      writable: true,
+      value: class {
+        observe() {}
+        disconnect() {}
+      },
+    })
+
+    const { container } = render(<ReaderCore isMobile={false} />)
+
+    const periodPane = screen.getByTestId('period-view-probe').parentElement
+    expect(periodPane).toHaveClass('w-[360px]', 'shrink-0', 'min-h-0', 'overflow-hidden')
+    expect(periodPane).not.toHaveClass('flex-1')
+    expect(screen.getByTestId('article-reader')).toHaveTextContent('period-entry')
+    expect(container.firstElementChild).toHaveClass('w-full')
+    expect(container.firstElementChild).toHaveClass(
+      'h-screen',
+      'max-h-screen',
+      'min-h-0',
+      'overflow-hidden'
     )
   })
 
