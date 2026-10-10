@@ -24,3 +24,5 @@ Check the exact deployed upstream version: the installed build has no host-rate-
 ## Remaining external failures
 
 Separate a removed endpoint (404), a CDN challenge (403 plus challenge metadata), a provider/account rate limit (429), a network failure and an unavailable RSSHub instance. Do not label all failures as queue errors or manufacture an alternative source without verifying publisher identity. Sources requiring publisher-side recovery, approved access or valid account credentials should remain clearly listed with the observed reason.
+
+The [2026-10-10 completed repair review](../agent-workflows/reviews/2026-10-10-remaining-source-repair/index.md) records deployed revisions, seven tracked recoveries, independent verification and rollback evidence. Personal source inventories remain outside public documentation.
