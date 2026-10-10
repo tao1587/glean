@@ -18,3 +18,4 @@ This section defines how agents should work in this repository.
 - [2026-10-10 NAS reliability deployment](./reviews/2026-10-10-nas-reliability/index.md) — live summary removal, translation limits, RSSHub route repair, log audit and rollback evidence.
 - [2026-10-10 Remaining source repair](./reviews/2026-10-10-remaining-source-repair/index.md) — all-account triage, seven tracked recoveries, bounded RSSHub retries/details, verified CA chain completion and final deployment assessment.
 - [2026-10-10 Source address recovery](./reviews/2026-10-10-source-address-recovery/index.md) — author-controlled Atom mirror recovery, article/state preservation, original-publication research and fixed historical RSS limits.
+- [2026-10-10 Latest NAS log audit](./reviews/2026-10-10-latest-nas-log-audit/index.md) — exact error-event counts, translation/RSS follow-up, subscribed-only automatic selection, interpreter pin and worker deployment acceptance.

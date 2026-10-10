@@ -12,3 +12,5 @@ Use this section for deployment, runtime operations, local development workflows
 - [source-failure-triage.md](./source-failure-triage.md)
 - [backend-logging-baseline.md](./backend-logging-baseline.md)
 - [cloudflare-tunnel-optimization.md](./cloudflare-tunnel-optimization.md)
+
+The [latest NAS log audit and scheduling repair](../agent-workflows/reviews/2026-10-10-latest-nas-log-audit/index.md) records deployed worker eligibility, current translation/RSS evidence and protected rollback.
