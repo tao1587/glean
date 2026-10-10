@@ -1,5 +1,7 @@
 # Translation reliability repair handoff
 
+This records generator-phase evidence. The subsequent [deployment handoff](./2026-10-10-nas-deployment-handoff.md) and [final independent assessment](./2026-10-10-nas-reliability-evaluation.md) close the rollout gates described below.
+
 ## Reproduced cause and live evidence
 
 - NAS fixed-text canary (`Hello world`, en → zh-CN) through Google failed with `TooManyRequests` in 2,044 ms. The same canary through configured MTran succeeded in 478 ms, with a changed/nonempty result containing Chinese characters. No article text, tokens or user IDs were exported.

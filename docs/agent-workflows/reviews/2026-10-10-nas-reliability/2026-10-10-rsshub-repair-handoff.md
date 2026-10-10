@@ -1,5 +1,7 @@
 # RSSHub reliability generator handoff
 
+This records generator-phase evidence. The subsequent [deployment handoff](./2026-10-10-nas-deployment-handoff.md) and [final independent assessment](./2026-10-10-nas-reliability-evaluation.md) close the rollout gates described below.
+
 ## What changed
 
 - Confirmed separate failure classes: live local RSSHub healthy roots, Anthropic empty-route 503 from obsolete `page.sections` extraction, working Twitter XML, and mixed RSSHub origins including one unreachable root. No raw logs or subscription URLs were exported.
