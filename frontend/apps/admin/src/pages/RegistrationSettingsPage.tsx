@@ -15,7 +15,6 @@ import {
 } from '@glean/ui'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '@glean/i18n'
-import type { AIIntegrationConfigResponse, AIIntegrationConfigUpdateRequest } from '@glean/types'
 import api from '../lib/api'
 
 interface RSSHubSettings {
@@ -34,7 +33,6 @@ export default function RegistrationSettingsPage() {
   const [registrationEnabled, setRegistrationEnabled] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [savingRsshub, setSavingRsshub] = useState(false)
-  const [savingAIIntegration, setSavingAIIntegration] = useState(false)
   const [rsshubSettings, setRsshubSettings] = useState<RSSHubSettings>({
     enabled: false,
     base_url: '',
@@ -61,11 +59,6 @@ export default function RegistrationSettingsPage() {
     custom_rules: [],
   })
   const [rsshubCustomRulesText, setRsshubCustomRulesText] = useState('[]')
-  const [aiIntegrationSettings, setAIIntegrationSettings] = useState<AIIntegrationConfigResponse>({
-    enabled: false,
-    allow_today_synthesis: true,
-  })
-
   useEffect(() => {
     fetchSettings()
   }, [])
@@ -73,16 +66,14 @@ export default function RegistrationSettingsPage() {
   const fetchSettings = async () => {
     try {
       setLoading(true)
-      const [registrationRes, rsshubRes, aiIntegrationRes] = await Promise.all([
+      const [registrationRes, rsshubRes] = await Promise.all([
         api.get('/settings/registration'),
         api.get('/settings/rsshub'),
-        api.get('/settings/ai-integration'),
       ])
       setRegistrationEnabled(registrationRes.data.enabled)
       const nextRsshub = rsshubRes.data as RSSHubSettings
       setRsshubSettings(nextRsshub)
       setRsshubCustomRulesText(JSON.stringify(nextRsshub.custom_rules ?? [], null, 2))
-      setAIIntegrationSettings(aiIntegrationRes.data as AIIntegrationConfigResponse)
       setError(null)
     } catch (err) {
       console.error('Failed to fetch settings:', err)
@@ -134,21 +125,6 @@ export default function RegistrationSettingsPage() {
       setError('Failed to update RSSHub settings')
     } finally {
       setSavingRsshub(false)
-    }
-  }
-
-  const handleSaveAIIntegrationSettings = async () => {
-    try {
-      setSavingAIIntegration(true)
-      const payload: AIIntegrationConfigUpdateRequest = aiIntegrationSettings
-      const response = await api.post('/settings/ai-integration', payload)
-      setAIIntegrationSettings(response.data as AIIntegrationConfigResponse)
-      setError(null)
-    } catch (err) {
-      console.error('Failed to update local AI settings:', err)
-      setError('Failed to update local AI settings')
-    } finally {
-      setSavingAIIntegration(false)
     }
   }
 
@@ -337,65 +313,6 @@ export default function RegistrationSettingsPage() {
               <div className="flex justify-end">
                 <Button onClick={handleSaveRsshubSettings} disabled={savingRsshub}>
                   {savingRsshub ? 'Saving...' : 'Save RSSHub Settings'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Local AI Integration</CardTitle>
-              <CardDescription>
-                Generate daily and weekly reading summaries on the Today Board, powered by
-                an OpenAI-compatible LLM (DeepSeek by default). Configure the API key via the
-                <code className="mx-1 rounded bg-muted px-1 py-0.5 text-xs">LLM_API_KEY</code>
-                environment variable on the backend.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="flex items-center justify-between space-x-2">
-                <Label
-                  htmlFor="ai-integration-enabled"
-                  className="flex flex-col items-start space-y-1"
-                >
-                  <span>Enable AI integration</span>
-                  <span className="text-muted-foreground font-normal">
-                    Master switch. When off, the AI view toggle is hidden in the reader UI
-                    and the per-user setting has no effect.
-                  </span>
-                </Label>
-                <Switch
-                  id="ai-integration-enabled"
-                  checked={aiIntegrationSettings.enabled}
-                  onCheckedChange={(checked) =>
-                    setAIIntegrationSettings((prev) => ({ ...prev, enabled: checked }))
-                  }
-                  disabled={savingAIIntegration}
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex items-center justify-between space-x-2 rounded-md border p-3">
-                  <Label htmlFor="ai-today-synthesis" className="text-sm">
-                    Today synthesis (daily reduce)
-                  </Label>
-                  <Switch
-                    id="ai-today-synthesis"
-                    checked={aiIntegrationSettings.allow_today_synthesis}
-                    onCheckedChange={(checked) =>
-                      setAIIntegrationSettings((prev) => ({
-                        ...prev,
-                        allow_today_synthesis: checked,
-                      }))
-                    }
-                    disabled={savingAIIntegration}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button onClick={handleSaveAIIntegrationSettings} disabled={savingAIIntegration}>
-                  {savingAIIntegration ? 'Saving...' : 'Save Local AI Settings'}
                 </Button>
               </div>
             </CardContent>

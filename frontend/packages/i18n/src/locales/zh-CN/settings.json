@@ -7,7 +7,6 @@
     "appearance": "外观",
     "manageFeeds": "管理订阅",
     "apiTokens": "API 令牌",
-    "aiIntegration": "AI",
     "translation": "翻译"
   },
   "profile": {
@@ -307,22 +306,6 @@
       "toolList": "按日期范围列出文章",
       "toolSubs": "列出您的订阅"
     }
-  },
-  "aiIntegration": {
-    "title": "AI",
-    "desc": "配置你的本地 AI 使用偏好",
-    "systemDisabled": "管理员尚未开启本地 AI。开启后会使用你的个人设置。",
-    "enableLabel": "为我的账号开启本地 AI",
-    "enableDesc": "在今日收录显示 AI 摘要控制，并允许你的 API 令牌访问本地 AI 接口。",
-    "defaultView": "今日收录默认视图",
-    "defaultViewDesc": "进入今日收录时默认打开哪个视图。",
-    "defaultViewOptions": {
-      "list": "原始列表和文章详情",
-      "ai_summary": "AI 摘要"
-    },
-    "tokenGuideTitle": "本地 AI 请求令牌",
-    "tokenGuideDesc": "在 API 令牌标签页创建普通用户令牌，然后在本地 AI 客户端中作为 Bearer token 发送。",
-    "settingsSaved": "AI 设置已保存"
   },
   "version": "Glean v{{version}}"
 }

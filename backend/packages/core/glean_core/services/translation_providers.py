@@ -28,6 +28,16 @@ MTRAN_BATCH_SIZE = 24
 MTRAN_MAX_PAYLOAD_SIZE = 100 * 1024  # 100KB limit for MTranServer
 
 
+def _encode_mtran_payload(payload: dict[str, Any]) -> bytes:
+    """Serialize an MTran request exactly as it will be sent."""
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+
+
 class TranslationProvider(ABC):
     """Base class for translation providers."""
 
@@ -79,8 +89,10 @@ def _parse_openai_batch_response(raw: str, expected_count: int) -> list[str] | N
         except Exception:
             return None
 
-        if isinstance(data, list) and len(data) == expected_count and all(
-            isinstance(item, str) for item in data
+        if (
+            isinstance(data, list)
+            and len(data) == expected_count
+            and all(isinstance(item, str) for item in data)
         ):
             return [item.strip() for item in data]
 
@@ -414,16 +426,124 @@ class MTranProvider(TranslationProvider):
     def _latin_word_count(self, text: str) -> int:
         return len(re.findall(r"[A-Za-z][A-Za-z'-]*", text))
 
-    def _payload(self, text: str, source: str, target: str) -> dict[str, Any]:
+    def _resolved_source_code(self, text: str, source: str) -> str:
         source_code = self._language_code(source)
         if source_code == "auto":
             source_code = self._detect_client_side(text)
+        return source_code
 
+    def _single_payload(
+        self, text: str, resolved_source: str, resolved_target: str
+    ) -> dict[str, Any]:
         return {
             "text": text,
-            "from": source_code,
-            "to": self._language_code(target),
+            "from": resolved_source,
+            "to": resolved_target,
         }
+
+    def _batch_payload(self, texts: list[str], source: str, target: str) -> dict[str, Any]:
+        source_code = self._language_code(source)
+        if source_code == "auto":
+            for text in texts:
+                if text.strip():
+                    source_code = self._detect_client_side(text)
+                    break
+
+        return self._batch_payload_with_codes(
+            texts,
+            source_code,
+            self._language_code(target),
+        )
+
+    def _batch_payload_with_codes(
+        self, texts: list[str], resolved_source: str, resolved_target: str
+    ) -> dict[str, Any]:
+        return {
+            "texts": texts,
+            "from": resolved_source,
+            "to": resolved_target,
+        }
+
+    def _payload_fits(self, payload: dict[str, Any]) -> bool:
+        return len(_encode_mtran_payload(payload)) <= MTRAN_MAX_PAYLOAD_SIZE
+
+    def _post_payload(
+        self, client: httpx.Client, path: str, payload: dict[str, Any]
+    ) -> httpx.Response:
+        encoded = _encode_mtran_payload(payload)
+        if len(encoded) > MTRAN_MAX_PAYLOAD_SIZE:
+            raise ValueError(
+                f"MTranServer request body exceeds {MTRAN_MAX_PAYLOAD_SIZE}-byte payload limit"
+            )
+        return client.post(
+            f"{self.base_url}{path}",
+            content=encoded,
+            headers=self._headers(),
+        )
+
+    def _translate_single_request(
+        self,
+        client: httpx.Client,
+        text: str,
+        resolved_source: str,
+        resolved_target: str,
+    ) -> str:
+        response = self._post_payload(
+            client,
+            "/translate",
+            self._single_payload(text, resolved_source, resolved_target),
+        )
+        response.raise_for_status()
+        translated = self._extract_single(response.json())
+        if translated is None:
+            raise ValueError("MTranServer response does not contain translated text")
+        return translated
+
+    def _split_oversized_text(
+        self, text: str, resolved_source: str, resolved_target: str
+    ) -> list[str]:
+        pieces: list[str] = []
+        start = 0
+        preferred_boundaries = frozenset("\n.!?。！？;；")
+
+        while start < len(text):
+            remaining = text[start:]
+            low = 1
+            high = len(remaining)
+            largest_fitting = 0
+
+            while low <= high:
+                midpoint = (low + high) // 2
+                payload = self._single_payload(
+                    remaining[:midpoint],
+                    resolved_source,
+                    resolved_target,
+                )
+                if self._payload_fits(payload):
+                    largest_fitting = midpoint
+                    low = midpoint + 1
+                else:
+                    high = midpoint - 1
+
+            if largest_fitting == 0:
+                raise ValueError(
+                    "MTranServer payload limit cannot fit one source character "
+                    "with the JSON request envelope"
+                )
+
+            cut = largest_fitting
+            if largest_fitting < len(remaining):
+                lower_bound = largest_fitting // 2
+                for index in range(largest_fitting - 1, lower_bound - 1, -1):
+                    char = remaining[index]
+                    if char in preferred_boundaries or char.isspace():
+                        cut = index + 1
+                        break
+
+            pieces.append(remaining[:cut])
+            start += cut
+
+        return pieces
 
     def _extract_single(self, data: Any) -> str | None:
         if isinstance(data, str):
@@ -468,85 +588,93 @@ class MTranProvider(TranslationProvider):
             return None
         return parsed
 
+    def _translate_resolved(self, text: str, resolved_source: str, resolved_target: str) -> str:
+        if not text or not text.strip():
+            return text
+
+        payload = self._single_payload(text, resolved_source, resolved_target)
+        pieces = (
+            [text]
+            if self._payload_fits(payload)
+            else self._split_oversized_text(text, resolved_source, resolved_target)
+        )
+
+        with httpx.Client(timeout=self.timeout) as client:
+            translated_pieces = [
+                self._translate_single_request(
+                    client,
+                    piece,
+                    resolved_source,
+                    resolved_target,
+                )
+                for piece in pieces
+            ]
+        return "".join(translated_pieces)
+
     def translate(self, text: str, source: str, target: str) -> str:
         if not text or not text.strip():
             return text
 
-        payload = self._payload(text, source, target)
-        with httpx.Client(timeout=self.timeout) as client:
-            response = client.post(
-                f"{self.base_url}/translate",
-                json=payload,
-                headers=self._headers(),
-            )
-            response.raise_for_status()
-            translated = self._extract_single(response.json())
-            if translated is None:
-                raise ValueError("MTranServer response does not contain translated text")
-            return translated
+        resolved_source = self._resolved_source_code(text, source)
+        resolved_target = self._language_code(target)
+        return self._translate_resolved(text, resolved_source, resolved_target)
 
     def translate_batch(self, texts: list[str], source: str, target: str) -> list[str]:
         if not texts:
             return []
 
         results: list[str] = []
-        batch_start = 0
-        while batch_start < len(texts):
-            current_batch: list[str] = []
-            current_size = 0
+        pending: list[str] = []
 
-            # Approximate JSON overhead: {"texts": [...], "from": "...", "to": "..."}
-            base_overhead = 100
+        for text in texts:
+            candidate = [*pending, text]
+            candidate_payload: dict[str, Any] | None = None
+            candidate_fits = False
+            if len(candidate) <= MTRAN_BATCH_SIZE:
+                candidate_payload = self._batch_payload(candidate, source, target)
+                candidate_fits = self._payload_fits(candidate_payload)
+                if candidate_fits:
+                    pending = candidate
+                    continue
 
-            for i in range(batch_start, len(texts)):
-                text = texts[i]
-                # Each string in JSON is escaped and quoted.
-                # We use a safe estimate: len(text) * 1.1 + 10
-                estimated_item_size = int(len(text) * 1.1) + 10
+            if pending:
+                pending_has_nonempty_text = any(pending_text.strip() for pending_text in pending)
+                results.extend(self._translate_batch_chunk(pending, source, target))
+                pending = []
+                if candidate_payload is not None and not pending_has_nonempty_text:
+                    one_item_payload = self._batch_payload_with_codes(
+                        [text],
+                        candidate_payload["from"],
+                        candidate_payload["to"],
+                    )
+                else:
+                    one_item_payload = self._batch_payload([text], source, target)
+                one_item_fits = self._payload_fits(one_item_payload)
+            else:
+                # With no pending items, candidate is this exact one-item batch.
+                assert candidate_payload is not None
+                one_item_payload = candidate_payload
+                one_item_fits = candidate_fits
 
-                if len(current_batch) >= MTRAN_BATCH_SIZE:
-                    break
-                if current_batch and (
-                    base_overhead + current_size + estimated_item_size > MTRAN_MAX_PAYLOAD_SIZE
-                ):
-                    break
+            if one_item_fits:
+                pending = [text]
+            else:
+                resolved_source = one_item_payload["from"]
+                resolved_target = one_item_payload["to"]
+                results.append(self._translate_resolved(text, resolved_source, resolved_target))
 
-                current_batch.append(text)
-                current_size += estimated_item_size
-
-            if not current_batch:
-                # Should not happen unless a single text is huge,
-                # but let's handle it by taking at least one item
-                current_batch = [texts[batch_start]]
-
-            results.extend(self._translate_batch_chunk(current_batch, source, target))
-            batch_start += len(current_batch)
+        if pending:
+            results.extend(self._translate_batch_chunk(pending, source, target))
 
         return results
 
     def _translate_batch_chunk(self, texts: list[str], source: str, target: str) -> list[str]:
-        source_code = self._language_code(source)
-        if source_code == "auto" and texts:
-            # Detect based on the first non-empty text in the batch
-            for text in texts:
-                if text.strip():
-                    source_code = self._detect_client_side(text)
-                    break
-
-        payload: dict[str, Any] = {
-            "texts": texts,
-            "from": source_code,
-            "to": self._language_code(target),
-        }
+        payload = self._batch_payload(texts, source, target)
 
         response: httpx.Response | None = None
         try:
             with httpx.Client(timeout=self.timeout) as client:
-                response = client.post(
-                    f"{self.base_url}/translate/batch",
-                    json=payload,
-                    headers=self._headers(),
-                )
+                response = self._post_payload(client, "/translate/batch", payload)
 
                 # Check for Payload Too Large specifically
                 if response.status_code == 413:

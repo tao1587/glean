@@ -2,11 +2,6 @@
 Pydantic schemas for API requests and responses.
 """
 
-from .ai import (
-    SynthesisHighlight,
-    SynthesisPayload,
-    SynthesisTopic,
-)
 from .api_token import (
     APITokenCreate,
     APITokenCreateResponse,
@@ -22,10 +17,6 @@ from .bookmark import (
     BookmarkUpdate,
 )
 from .config import (
-    AIIntegrationConfig,
-    AIIntegrationConfigResponse,
-    AIIntegrationConfigUpdateRequest,
-    AIIntegrationStatusResponse,
     EmbeddingConfig,
     EmbeddingConfigResponse,
     EmbeddingConfigUpdateRequest,
@@ -82,10 +73,6 @@ __all__ = [
     "RefreshTokenRequest",
     "RegisterRequest",
     "TokenResponse",
-    # AI
-    "SynthesisPayload",
-    "SynthesisTopic",
-    "SynthesisHighlight",
     # User
     "UserResponse",
     "UserSettings",
@@ -125,10 +112,6 @@ __all__ = [
     "FolderTreeNode",
     "FolderTreeResponse",
     # Config
-    "AIIntegrationConfig",
-    "AIIntegrationConfigResponse",
-    "AIIntegrationConfigUpdateRequest",
-    "AIIntegrationStatusResponse",
     "EmbeddingConfig",
     "EmbeddingConfigResponse",
     "EmbeddingConfigUpdateRequest",

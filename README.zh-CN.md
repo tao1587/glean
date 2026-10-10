@@ -64,10 +64,10 @@ Reader 是一个面向高密度阅读场景的自托管 RSS 阅读器与个人�
 
 ```bash
 # 从当前分支下载 compose 文件
-curl -fsSL https://raw.githubusercontent.com/GoToBoy/glean/personal-main/docker-compose.yml -o docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/tao1587/glean/personal-main/docker-compose.yml -o docker-compose.yml
 
 # 可选：下载当前分支的示例环境变量文件
-curl -fsSL https://raw.githubusercontent.com/GoToBoy/glean/personal-main/.env.example -o .env
+curl -fsSL https://raw.githubusercontent.com/tao1587/glean/personal-main/.env.example -o .env
 
 # 可选：把 Docker 中的 backend/worker 指向外部 MTranServer
 # 例如：MTRAN_SERVER_URL=http://192.168.31.19:8989
@@ -193,7 +193,7 @@ Docker 部署性能说明：
 快速开始：
 
 ```bash
-git clone https://github.com/GoToBoy/glean.git
+git clone https://github.com/tao1587/glean.git
 cd glean
 npm install
 
@@ -223,7 +223,10 @@ docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --buil
 
 - Web：`http://localhost:3000`
 - Admin：`http://localhost:3001`
-- API 文档：`http://localhost:8000/api/docs`
+- API 文档（`DEBUG=true`）：`http://localhost:8000/api/docs`
+
+接口路径、鉴权和文档开放条件见 [REST API 与 MCP 说明](./docs/references/api-surface.md)。
+REST 业务接口使用用户登录 JWT；MCP 使用 Glean API Token，客户端地址为 `/mcp/mcp`。
 
 ## 分支相关文档
 

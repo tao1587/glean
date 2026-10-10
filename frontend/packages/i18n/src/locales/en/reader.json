@@ -59,19 +59,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "readComplete": "Read",
-    "unknownFeed": "Unknown feed",
-    "ai": {
-      "title": "AI Summary",
-      "showSummary": "Show AI summary",
-      "showList": "Show intake list",
-      "fallbackTitle": "Today's Brief",
-      "emptyTitle": "No AI summary yet",
-      "emptyDescription": "Run your local AI client against today's intake API, then write the summary back here.",
-      "highlights": "Highlights",
-      "highlightFallback": "Highlight",
-      "topics": "Topics",
-      "recommended": "Recommended reading"
-    }
+    "unknownFeed": "Unknown feed"
   },
   "empty": {
     "selectArticle": "Select an article",

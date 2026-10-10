@@ -1,6 +1,6 @@
 import { Switch } from '@glean/ui'
 import { useNavigate } from 'react-router-dom'
-import { ListChecks, Languages, Sparkles, Key, type LucideIcon } from 'lucide-react'
+import { ListChecks, Languages, Key, type LucideIcon } from 'lucide-react'
 import { useTranslation, type Locale } from '@glean/i18n'
 import { useAuthStore } from '../../../../../stores/authStore'
 import { useThemeStore } from '../../../../../stores/themeStore'
@@ -288,12 +288,6 @@ export function SettingsPanel() {
             label={t('settings.links.translation')}
             subLabel={t('settings.links.translationSub')}
             onClick={() => navigate('/settings?tab=translation')}
-          />
-          <SettingsLinkCard
-            icon={Sparkles}
-            label={t('settings.links.ai')}
-            subLabel={t('settings.links.aiSub')}
-            onClick={() => navigate('/settings?tab=ai-integration')}
           />
           <SettingsLinkCard
             icon={Key}

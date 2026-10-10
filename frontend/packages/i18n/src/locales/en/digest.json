@@ -86,8 +86,6 @@
       "manageFeedsSub": "feed CRUD",
       "translation": "Translation",
       "translationSub": "Target language / service",
-      "ai": "AI Integration",
-      "aiSub": "Model config",
       "apiTokens": "API Tokens",
       "apiTokensSub": "Access token management"
     }

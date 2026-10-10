@@ -73,20 +73,6 @@ services:
       LOG_RETENTION: ${LOG_RETENTION:-30 days}
       LOG_COMPRESSION: ${LOG_COMPRESSION:-gz}
       LOG_SERIALIZE: ${LOG_SERIALIZE:-false}
-      # AI summarization (DeepSeek v4 by default; OpenAI-compatible).
-      # Empty LLM_API_KEY auto-disables AI integration; the rest fall back to safe defaults.
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
-      LLM_MODEL: ${LLM_MODEL:-deepseek-v4-flash}
-      LLM_PROMPT_VERSION: ${LLM_PROMPT_VERSION:-v1}
-      LLM_TARGET_LANGUAGE: ${LLM_TARGET_LANGUAGE:-}
-      LLM_EXTRA_PARAMS: ${LLM_EXTRA_PARAMS:-{}}
-      LLM_MAX_INPUT_CHARS: ${LLM_MAX_INPUT_CHARS:-6000}
-      LLM_MAX_OUTPUT_TOKENS_SUMMARIZE: ${LLM_MAX_OUTPUT_TOKENS_SUMMARIZE:-500}
-      LLM_MAX_OUTPUT_TOKENS_SYNTHESIZE: ${LLM_MAX_OUTPUT_TOKENS_SYNTHESIZE:-1500}
-      LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-60}
-      LLM_SMOKE_CHECK_ENABLED: ${LLM_SMOKE_CHECK_ENABLED:-true}
-      LLM_SYNTHESIS_ENABLED: ${LLM_SYNTHESIS_ENABLED:-true}
     volumes:
       - ${LOGS_DIR:-./logs}:/app/logs
     depends_on:
@@ -127,19 +113,6 @@ services:
       LOG_RETENTION: ${LOG_RETENTION:-30 days}
       LOG_COMPRESSION: ${LOG_COMPRESSION:-gz}
       LOG_SERIALIZE: ${LOG_SERIALIZE:-false}
-      # AI summarization — must mirror the backend so the worker can run the LLM jobs.
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
-      LLM_MODEL: ${LLM_MODEL:-deepseek-v4-flash}
-      LLM_PROMPT_VERSION: ${LLM_PROMPT_VERSION:-v1}
-      LLM_TARGET_LANGUAGE: ${LLM_TARGET_LANGUAGE:-}
-      LLM_EXTRA_PARAMS: ${LLM_EXTRA_PARAMS:-{}}
-      LLM_MAX_INPUT_CHARS: ${LLM_MAX_INPUT_CHARS:-6000}
-      LLM_MAX_OUTPUT_TOKENS_SUMMARIZE: ${LLM_MAX_OUTPUT_TOKENS_SUMMARIZE:-500}
-      LLM_MAX_OUTPUT_TOKENS_SYNTHESIZE: ${LLM_MAX_OUTPUT_TOKENS_SYNTHESIZE:-1500}
-      LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-60}
-      LLM_SMOKE_CHECK_ENABLED: ${LLM_SMOKE_CHECK_ENABLED:-true}
-      LLM_SYNTHESIS_ENABLED: ${LLM_SYNTHESIS_ENABLED:-true}
     volumes:
       - ${LOGS_DIR:-./logs}:/app/logs
     mem_limit: ${WORKER_MEMORY_LIMIT:-2g}

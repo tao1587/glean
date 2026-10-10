@@ -55,10 +55,10 @@ To fix this, I changed the project to a "Reader" mode. In this new version:
 
 ```bash
 # Download the compose file from this branch
-curl -fsSL https://raw.githubusercontent.com/GoToBoy/glean/personal-main/docker-compose.yml -o docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/tao1587/glean/personal-main/docker-compose.yml -o docker-compose.yml
 
 # Optional: download the example env file from this branch
-curl -fsSL https://raw.githubusercontent.com/GoToBoy/glean/personal-main/.env.example -o .env
+curl -fsSL https://raw.githubusercontent.com/tao1587/glean/personal-main/.env.example -o .env
 
 # Optional: point Dockerized backend/worker at an external MTranServer
 # Example: MTRAN_SERVER_URL=http://192.168.31.19:8989
@@ -185,7 +185,7 @@ Recommended local modes:
 Quick start:
 
 ```bash
-git clone https://github.com/GoToBoy/glean.git
+git clone https://github.com/tao1587/glean.git
 cd glean
 npm install
 
@@ -228,7 +228,11 @@ Development endpoints:
 
 - Web: `http://localhost:3000`
 - Admin: `http://localhost:3001`
-- API docs: `http://localhost:8000/api/docs`
+- API docs (`DEBUG=true`): `http://localhost:8000/api/docs`
+
+See the [REST API and MCP reference](./docs/references/api-surface.md) for routes,
+authentication, and documentation availability. REST business routes use a user
+access JWT; MCP clients use a Glean API Token at `/mcp/mcp`.
 
 ## Branch-Specific Docs
 

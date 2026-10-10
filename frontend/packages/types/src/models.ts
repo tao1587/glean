@@ -14,8 +14,6 @@ export interface UserSettings {
   translation_target_language?: TranslationTargetLanguage
   list_translation_auto_enabled?: boolean // Auto-enable list viewport translation
   list_translation_english_only?: boolean // Translate only English content in list
-  ai_integration_enabled?: boolean // Enable local AI features for this user
-  today_board_default_view?: 'list' | 'ai_summary' // Default Today Board view for this user
   translation_api_key?: string
   translation_model?: string
   translation_base_url?: string

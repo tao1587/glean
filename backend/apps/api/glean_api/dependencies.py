@@ -16,7 +16,6 @@ from glean_core.schemas import UserResponse
 from glean_core.schemas.admin import AdminUserResponse
 from glean_core.services import (
     AdminService,
-    AIIntegrationService,
     APITokenService,
     AuthService,
     BookmarkService,
@@ -145,38 +144,6 @@ async def get_current_api_token_user(
         ) from None
 
 
-async def get_current_user_or_api_token_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    session: Annotated[AsyncSession, Depends(get_session)],
-    jwt_config: Annotated[JWTConfig, Depends(get_jwt_config)],
-) -> UserResponse:
-    """Get current user from either a browser JWT or a Glean API token."""
-    token = credentials.credentials
-    token_data = verify_token(token, jwt_config)
-    if token_data and token_data.type == "access":
-        auth_service = AuthService(session, jwt_config)
-        try:
-            return await auth_service.get_current_user(token)
-        except ValueError:
-            pass
-
-    token_service = APITokenService(session)
-    api_token = await token_service.verify_token(token)
-    if api_token:
-        await token_service.update_last_used(api_token.id)
-        user_service = UserService(session)
-        try:
-            return await user_service.get_user(api_token.user_id)
-        except ValueError:
-            pass
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid authentication credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-
 # Service dependencies
 def get_auth_service(
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -269,13 +236,6 @@ def get_typed_config_service(
 ) -> TypedConfigService:
     """Get typed config service instance."""
     return TypedConfigService(session)
-
-
-def get_ai_integration_service(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> AIIntegrationService:
-    """Get AI integration service instance."""
-    return AIIntegrationService(session)
 
 
 # MCP service dependencies

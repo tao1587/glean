@@ -7,7 +7,6 @@
     "appearance": "Appearance",
     "manageFeeds": "Manage Feeds",
     "apiTokens": "API Tokens",
-    "aiIntegration": "AI",
     "translation": "Translation"
   },
   "profile": {
@@ -307,22 +306,6 @@
       "toolList": "List articles by date range",
       "toolSubs": "List your subscriptions"
     }
-  },
-  "aiIntegration": {
-    "title": "AI",
-    "desc": "Configure your local AI experience",
-    "systemDisabled": "Local AI is disabled by the administrator. Your personal settings will apply after it is enabled.",
-    "enableLabel": "Enable local AI for my account",
-    "enableDesc": "Show AI summary controls in Today's Intake and allow your API tokens to use local AI endpoints.",
-    "defaultView": "Default Today's Intake view",
-    "defaultViewDesc": "Choose what opens first when you enter Today's Intake.",
-    "defaultViewOptions": {
-      "list": "Original list and article detail",
-      "ai_summary": "AI summary"
-    },
-    "tokenGuideTitle": "Local AI request token",
-    "tokenGuideDesc": "Create a normal API token on the API Tokens tab, then send it as a Bearer token from your local AI client.",
-    "settingsSaved": "AI settings saved"
   },
   "version": "Glean v{{version}}"
 }

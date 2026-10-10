@@ -22,7 +22,6 @@ import {
   type ReactNode,
 } from 'react'
 import { stripHtmlTags } from '../../../../lib/html'
-import { TodayBoardSummary } from './TodayBoardSummary'
 import {
   buildTodayBoardGroups,
   truncateTodayBoardSummary,
@@ -50,7 +49,6 @@ interface TodayBoardProps {
   translatedTexts?: Record<string, { title?: string; summary?: string }>
   onToggleTranslation?: () => void
   renderDetail?: (entry: TodayBoardEntry) => ReactNode
-  aiEnabled?: boolean
 }
 
 export function TodayBoard({
@@ -72,7 +70,6 @@ export function TodayBoard({
   translatedTexts = {},
   onToggleTranslation,
   renderDetail,
-  aiEnabled = false,
 }: TodayBoardProps) {
   const { t } = useTranslation('reader')
   const [markingFeedId, setMarkingFeedId] = useState<string | null>(null)
@@ -276,15 +273,6 @@ export function TodayBoard({
             ) : null}
           </div>
         </div>
-
-        {aiEnabled && selectedDateKey ? (
-          <TodayBoardSummary
-            date={selectedDateKey}
-            entries={entries}
-            enabled={aiEnabled}
-            onSelectEntry={handleSelectEntry}
-          />
-        ) : null}
 
         {isLoading ? (
           <TodayBoardLoadingState />

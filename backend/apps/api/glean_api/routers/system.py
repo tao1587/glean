@@ -11,8 +11,6 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from glean_core.schemas.config import (
-    AIIntegrationConfig,
-    AIIntegrationStatusResponse,
     EmbeddingConfig,
     EmbeddingRebuildProgress,
     SystemTimeResponse,
@@ -101,40 +99,6 @@ async def get_vectorization_status(
         has_error=current_status == VectorizationStatus.ERROR,
         error_message=config.last_error if current_status == VectorizationStatus.ERROR else None,
         rebuild_progress=progress,
-    )
-
-
-@router.get("/ai-integration", response_model=AIIntegrationStatusResponse)
-async def get_ai_integration_status(
-    config_service: Annotated[TypedConfigService, Depends(get_config_service)],
-) -> AIIntegrationStatusResponse:
-    """Get non-sensitive local AI integration status for the web UI.
-
-    Exposes enough metadata for the frontend to:
-    - skip rendering AI views entirely (`enabled=False`)
-    - build correct TanStack Query cache keys (`model`, `prompt_version`,
-      `target_language`)
-    - decide whether to render the daily synthesis panel (`synthesis_enabled`).
-
-    The model / prompt / language tuple comes from the running settings, not
-    from the database — changing env vars requires a service restart.
-    """
-    from glean_api.config import settings as api_settings
-    from glean_core.services.llm.prompts import DAILY_SUMMARY_PROMPT_VERSION
-
-    config = await config_service.get(AIIntegrationConfig)
-    has_key = bool(api_settings.llm_api_key)
-    enabled = config.enabled and has_key
-    return AIIntegrationStatusResponse(
-        enabled=enabled,
-        model=api_settings.llm_model if enabled else None,
-        prompt_version=DAILY_SUMMARY_PROMPT_VERSION if enabled else None,
-        target_language=(api_settings.llm_target_language or "en") if enabled else None,
-        synthesis_enabled=(
-            enabled
-            and config.allow_today_synthesis
-            and api_settings.llm_synthesis_enabled
-        ),
     )
 
 

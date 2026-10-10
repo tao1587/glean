@@ -3,9 +3,13 @@
 import json
 from typing import Any
 
+import httpx
+import pytest
+
 from glean_core.schemas.user import UserSettings
 from glean_core.services.translation_providers import (
     DEFAULT_MTRAN_SERVER_URL,
+    MTRAN_MAX_PAYLOAD_SIZE,
     FallbackProvider,
     GoogleFreeProvider,
     MTranProvider,
@@ -45,12 +49,13 @@ class _FakeClient:
 
     def post(self, url: str, **kwargs: Any) -> _FakeResponse:
         self.calls.append((url, kwargs))
-        if "texts" not in kwargs.get("json", {}) and "text" not in kwargs.get("json", {}):
+        json_data = _request_json(kwargs)
+        if "texts" not in json_data and "text" not in json_data:
             return _FakeResponse(self.payload)
 
         # For single translate fallback, _FakeClient usually expects result/translation key
-        if "text" in kwargs.get("json", {}):
-            text = kwargs["json"]["text"]
+        if "text" in json_data:
+            text = json_data["text"]
             # If payload is a list (from batch expectation), this might fail.
             # But _FakeClient is used with specific payload in tests.
             if isinstance(self.payload, dict) and "results" in self.payload:
@@ -71,14 +76,38 @@ class _EchoBatchClient:
 
     def post(self, url: str, **kwargs: Any) -> _FakeResponse:
         self.calls.append((url, kwargs))
-        json_data = kwargs.get("json", {})
+        json_data = _request_json(kwargs)
         if "texts" in json_data:
             texts = json_data["texts"]
-            return _FakeResponse({"translations": [f"translated {text}" for text in texts]})
-        elif "text" in json_data:
+            return _FakeResponse({"translations": texts})
+        if "text" in json_data:
             text = json_data["text"]
-            return _FakeResponse({"translation": f"translated {text}"})
+            return _FakeResponse({"translation": text})
         return _FakeResponse({})
+
+
+def _request_body(kwargs: dict[str, Any]) -> bytes:
+    content = kwargs.get("content")
+    if isinstance(content, bytes):
+        return content
+    return httpx.Request("POST", "http://mtran.local", json=kwargs["json"]).content
+
+
+def _request_json(kwargs: dict[str, Any]) -> dict[str, Any]:
+    parsed = json.loads(_request_body(kwargs).decode("utf-8"))
+    assert isinstance(parsed, dict)
+    return parsed
+
+
+def _call_json(call: tuple[str, dict[str, Any]]) -> dict[str, Any]:
+    return _request_json(call[1])
+
+
+def _assert_safe_request_bodies(calls: list[tuple[str, dict[str, Any]]]) -> None:
+    assert calls
+    for _, kwargs in calls:
+        content = _request_body(kwargs)
+        assert len(content) <= MTRAN_MAX_PAYLOAD_SIZE
 
 
 def test_create_provider_returns_mtran() -> None:
@@ -164,7 +193,7 @@ def test_mtran_translate_parses_standard_payload(monkeypatch) -> None:  # type: 
 
     assert result == "你好世界"
     assert fake_client.calls[0][0] == "http://mtran.local/translate"
-    assert fake_client.calls[0][1]["json"] == {
+    assert _call_json(fake_client.calls[0]) == {
         "from": "en",
         "to": "zh-Hans",
         "text": "Hello world",
@@ -190,8 +219,8 @@ def test_mtran_translate_detects_english_with_article_punctuation(monkeypatch) -
     )
 
     assert result == "任天堂的秘密帝国"
-    assert fake_client.calls[0][1]["json"]["from"] == "en"
-    assert fake_client.calls[0][1]["json"]["to"] == "zh-Hans"
+    assert _call_json(fake_client.calls[0])["from"] == "en"
+    assert _call_json(fake_client.calls[0])["to"] == "zh-Hans"
 
 
 def test_mtran_translate_detects_mostly_english_mixed_title(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -213,8 +242,8 @@ def test_mtran_translate_detects_mostly_english_mixed_title(monkeypatch) -> None
     )
 
     assert result == "中文读写速通 II：字符回旋加速器"
-    assert fake_client.calls[0][1]["json"]["from"] == "en"
-    assert fake_client.calls[0][1]["json"]["to"] == "zh-Hans"
+    assert _call_json(fake_client.calls[0])["from"] == "en"
+    assert _call_json(fake_client.calls[0])["to"] == "zh-Hans"
 
 
 def test_mtran_batch_parses_payload(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -234,7 +263,7 @@ def test_mtran_batch_parses_payload(monkeypatch) -> None:  # type: ignore[no-unt
 
     assert result == ["你好", "世界"]
     assert fake_client.calls[0][0] == "http://mtran.local/translate/batch"
-    assert fake_client.calls[0][1]["json"] == {
+    assert _call_json(fake_client.calls[0]) == {
         "from": "en",
         "to": "zh-Hans",
         "texts": ["hello", "world"],
@@ -257,7 +286,7 @@ def test_mtran_batch_stays_auto_for_cjk(monkeypatch) -> None:  # type: ignore[no
     result = provider.translate_batch(["你好", "world"], "auto", "en")
 
     assert result == ["translated", "translated"]
-    assert fake_client.calls[0][1]["json"]["from"] == "auto"
+    assert _call_json(fake_client.calls[0])["from"] == "auto"
 
 
 def test_mtran_batch_chunks_large_payloads(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -275,8 +304,213 @@ def test_mtran_batch_chunks_large_payloads(monkeypatch) -> None:  # type: ignore
     texts = [f"text {index}" for index in range(30)]
     result = provider.translate_batch(texts, "auto", "zh-CN")
 
-    assert result == [f"translated {text}" for text in texts]
-    assert [len(call[1]["json"]["texts"]) for call in fake_client.calls] == [24, 6]
+    assert result == texts
+    assert [len(_call_json(call)["texts"]) for call in fake_client.calls] == [24, 6]
+
+
+def test_mtran_batch_empty_returns_empty_without_request(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+
+    assert provider.translate_batch([], "auto", "zh-CN") == []
+    assert fake_client.calls == []
+
+
+def test_mtran_batch_limits_exact_utf8_json_bytes(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    texts = [("汉字🙂" * 8_000) + str(index) for index in range(4)]
+    result = provider.translate_batch(texts, "auto", "en")
+
+    assert result == texts
+    _assert_safe_request_bodies(fake_client.calls)
+    assert all(url.endswith("/translate/batch") for url, _ in fake_client.calls)
+    received = [text for call in fake_client.calls for text in _call_json(call)["texts"]]
+    assert received == texts
+
+
+def test_mtran_batch_counts_json_escaping_bytes(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    escaped = '"\\\n\t\r' * 8_000
+    texts = [f"{index}:{escaped}" for index in range(3)]
+    result = provider.translate_batch(texts, "en", "zh-CN")
+
+    assert result == texts
+    _assert_safe_request_bodies(fake_client.calls)
+    received = [text for call in fake_client.calls for text in _call_json(call)["texts"]]
+    assert received == texts
+
+
+def test_mtran_translate_splits_oversized_single_text(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    text = ("你" * 20_000) + (" word" * 25_000)
+    result = provider.translate(text, "auto", "zh-CN")
+
+    assert result == text
+    assert len(fake_client.calls) > 1
+    assert all(url.endswith("/translate") for url, _ in fake_client.calls)
+    _assert_safe_request_bodies(fake_client.calls)
+    payloads = [_call_json(call) for call in fake_client.calls]
+    assert "".join(payload["text"] for payload in payloads) == text
+    assert {payload["from"] for payload in payloads} == {"en"}
+
+
+def test_mtran_translate_rejects_impossible_single_character_payload(
+    monkeypatch,
+) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.MTRAN_MAX_PAYLOAD_SIZE",
+        1,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    with pytest.raises(ValueError, match="cannot fit one source character"):
+        provider.translate("🙂", "auto", "zh-CN")
+
+    assert fake_client.calls == []
+
+
+def test_mtran_batch_splits_oversized_single_item(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    text = "翻译🙂" * 12_000
+    detected_texts: list[str] = []
+
+    def _detect_client_side(detected_text: str) -> str:
+        detected_texts.append(detected_text)
+        return "en"
+
+    monkeypatch.setattr(provider, "_detect_client_side", _detect_client_side)
+    result = provider.translate_batch([text], "auto", "en")
+
+    assert result == [text]
+    assert detected_texts == [text]
+    assert len(fake_client.calls) > 1
+    assert all(url.endswith("/translate") for url, _ in fake_client.calls)
+    _assert_safe_request_bodies(fake_client.calls)
+    payloads = [_call_json(call) for call in fake_client.calls]
+    assert "".join(payload["text"] for payload in payloads) == text
+    assert {payload["from"] for payload in payloads} == {"en"}
+
+
+@pytest.mark.parametrize("empty_prefix", ["", " \t\n"])
+def test_mtran_batch_reuses_detection_after_empty_prefix(
+    monkeypatch,
+    empty_prefix: str,
+) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    text = "翻译🙂" * 12_000
+    detected_texts: list[str] = []
+
+    def _detect_client_side(detected_text: str) -> str:
+        detected_texts.append(detected_text)
+        return "en"
+
+    monkeypatch.setattr(provider, "_detect_client_side", _detect_client_side)
+    result = provider.translate_batch([empty_prefix, text], "auto", "en")
+
+    assert result == [empty_prefix, text]
+    assert detected_texts == [text]
+    _assert_safe_request_bodies(fake_client.calls)
+    single_payloads = [
+        _call_json(call) for call in fake_client.calls if call[0].endswith("/translate")
+    ]
+    assert len(single_payloads) > 1
+    assert "".join(payload["text"] for payload in single_payloads) == text
+    assert {payload["from"] for payload in single_payloads} == {"en"}
+
+
+def test_mtran_batch_preserves_order_around_oversized_item(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    fake_client = _EchoBatchClient()
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _EchoBatchClient:
+        return fake_client
+
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        _client_factory,
+    )
+
+    provider = MTranProvider(base_url="http://mtran.local")
+    huge = ('段落🙂\\"\n' * 15_000) + "tail"
+    texts = ["small before", huge, "small after"]
+    result = provider.translate_batch(texts, "auto", "zh-CN")
+
+    assert result == texts
+    _assert_safe_request_bodies(fake_client.calls)
+    routes = [url.removeprefix("http://mtran.local") for url, _ in fake_client.calls]
+    assert routes[0] == "/translate/batch"
+    assert routes[-1] == "/translate/batch"
+    assert all(route == "/translate" for route in routes[1:-1])
+    assert _call_json(fake_client.calls[0])["texts"] == ["small before"]
+    assert _call_json(fake_client.calls[-1])["texts"] == ["small after"]
+    assert "".join(_call_json(call)["text"] for call in fake_client.calls[1:-1]) == huge
 
 
 def test_mtran_default_url_uses_localhost_fallback() -> None:

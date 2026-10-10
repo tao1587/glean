@@ -59,19 +59,7 @@
     "expand": "展开",
     "collapse": "收起",
     "readComplete": "已阅",
-    "unknownFeed": "未知订阅",
-    "ai": {
-      "title": "AI 总结",
-      "showSummary": "查看 AI 总结",
-      "showList": "查看收录列表",
-      "fallbackTitle": "今日简报",
-      "emptyTitle": "暂无 AI 总结",
-      "emptyDescription": "让本地 AI 客户端读取今日收录接口后，把总结写回这里。",
-      "highlights": "重点",
-      "highlightFallback": "重点内容",
-      "topics": "主题",
-      "recommended": "推荐阅读"
-    }
+    "unknownFeed": "未知订阅"
   },
   "empty": {
     "selectArticle": "选择文章",

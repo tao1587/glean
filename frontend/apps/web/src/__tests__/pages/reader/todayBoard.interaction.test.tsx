@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { apiClient } from '@glean/api-client'
 import type { EntryWithState } from '@glean/types'
 import { TodayBoard } from '@/pages/reader/shared/components/TodayBoard'
 import { buildTodayBoardEntries } from '@/pages/reader/shared/todayBoard'
@@ -62,6 +63,38 @@ function TodayBoardHarness({ entries }: { entries: EntryWithState[] }) {
 describe('TodayBoard interaction', () => {
   afterEach(() => {
     cleanup()
+    vi.restoreAllMocks()
+  })
+
+  it('renders the article list without a summary panel even when legacy AI props are supplied', () => {
+    vi.spyOn(apiClient, 'post').mockResolvedValue({
+      summary: null,
+      current_set_hash: null,
+      current_count: 0,
+      is_stale: false,
+    })
+    const legacyProps = { aiEnabled: true }
+    const entries = buildTodayBoardEntries(
+      [makeEntry({ title: 'Keep reading this article', ingested_at: '2026-04-10T01:00:00Z' })],
+      {
+        now: new Date('2026-04-10T12:00:00+08:00'),
+        getFeedDescription: () => 'Feed summary',
+      }
+    )
+
+    render(
+      <TodayBoard
+        {...legacyProps}
+        entries={entries}
+        selectedEntryId={null}
+        selectedDateKey="2026-04-10"
+        onSelectEntry={() => undefined}
+        onCloseDetail={() => undefined}
+      />
+    )
+
+    expect(screen.getByRole('button', { name: /Keep reading this article/i })).toBeInTheDocument()
+    expect(screen.queryByTestId('summary-card')).not.toBeInTheDocument()
   })
 
   it('opens a calendar popover and emits selected date changes', () => {

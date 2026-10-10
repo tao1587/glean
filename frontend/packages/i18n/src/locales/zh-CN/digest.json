@@ -86,8 +86,6 @@
       "manageFeedsSub": "feed CRUD",
       "translation": "翻译设置",
       "translationSub": "目标语言/服务",
-      "ai": "AI 集成",
-      "aiSub": "模型配置",
       "apiTokens": "API 令牌",
       "apiTokensSub": "访问令牌管理"
     }

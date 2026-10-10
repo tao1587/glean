@@ -2,6 +2,15 @@
 
 This document tracks feature-level additions and optimizations over time.
 
+## 2026-10-10 Reader cleanup
+
+- Follow-up: removed the retained summary ORM and its package exports, plus the obsolete summary/supplement design and implementation documents. No functional summary code remains in application source.
+
+- Updated English and Chinese README clone/download links to `tao1587/glean`, the current destination of the former `GoToBoy/glean` repository.
+- Removed the daily/weekly AI summary workflow: reader/settings/admin controls, REST interfaces, worker jobs/cron, dedicated services and LLM configuration. Historical migrations and stored summary data remain unchanged; translation and source discovery remain available.
+- Integrated the GitHub MTran request-limit fix from `personal-main` commit `8a54c34a333d74db6f1f7be092674edf5081632d`: size and transmit the same UTF-8 JSON bytes, split oversized single inputs, and preserve input ordering and resolved source language.
+- Added the [REST API and MCP reference](../references/api-surface.md), including JWT/API Token boundaries, public routes, the effective `/mcp/mcp` endpoint, and the OpenAPI/Swagger visibility conditions. Removed the obsolete local AI API instructions.
+
 ## 2026-02-20 Baseline (compare `origin/main...HEAD`)
 
 ### Scope

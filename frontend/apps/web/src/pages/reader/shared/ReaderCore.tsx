@@ -11,7 +11,6 @@ import {
 } from '../../../hooks/useEntries'
 import { useAllSubscriptions } from '../../../hooks/useSubscriptions'
 import { entryService } from '@glean/api-client'
-import { useAIIntegrationStatus } from '../../../hooks/useAIIntegration'
 import { ArticleReader, ArticleReaderSkeleton } from '../../../components/ArticleReader'
 import { useAuthStore } from '../../../stores/authStore'
 import { useTranslation } from '@glean/i18n'
@@ -96,9 +95,6 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
   } = useReaderController()
   const { user } = useAuthStore()
   const { data: subscriptions = [] } = useAllSubscriptions()
-  const { data: aiIntegrationStatus } = useAIIntegrationStatus()
-  const userAIIntegrationEnabled = user?.settings?.ai_integration_enabled ?? false
-  const aiIntegrationEnabled = (aiIntegrationStatus?.enabled ?? false) && userAIIntegrationEnabled
 
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
 
@@ -243,7 +239,6 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
     () => todayBoardEntries.map((entry) => entry.id),
     [todayBoardEntries]
   )
-  // The daily summary card manages its own data; nothing fetched here.
 
   // Fetch selected entry separately to keep it visible even when filtered out of list
   const { data: selectedEntry, isLoading: isLoadingEntry } = useEntry(selectedEntryId || '')
@@ -932,7 +927,6 @@ export function ReaderCore({ isMobile }: { isMobile: boolean }) {
                 translationLoadingPhase={listTranslationLoadingPhase}
                 translatedTexts={translatedEntryTexts}
                 onToggleTranslation={() => setIsListTranslationActive((value) => !value)}
-                aiEnabled={aiIntegrationEnabled}
                 renderDetail={
                   isMobile
                     ? undefined

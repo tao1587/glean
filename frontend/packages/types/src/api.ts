@@ -87,73 +87,11 @@ export interface UpdateEntryStateRequest {
   content_temporality?: 'timely' | 'evergreen' | 'mixed'
 }
 
-export interface AIIntegrationStatusResponse {
-  enabled: boolean
-  // Exposed when enabled is true; FE uses these to build TanStack Query cache keys
-  // and decide whether to render the synthesis panel.
-  model?: string | null
-  prompt_version?: string | null
-  target_language?: string | null
-  synthesis_enabled?: boolean
-}
-
 export interface SystemTimeResponse {
   timezone: string
   current_time: string
   current_date: string
 }
-
-export interface AIIntegrationConfigResponse {
-  enabled: boolean
-  allow_today_synthesis: boolean
-}
-
-export type SummaryPeriod = 'day' | 'week'
-export type SummaryStatus = 'pending' | 'processing' | 'done' | 'failed'
-
-export interface SummaryTopic {
-  name: string
-  entry_ids: string[]
-}
-
-export interface SummaryHighlight {
-  entry_id: string
-  reason: string
-}
-
-export interface SummaryView {
-  period: SummaryPeriod
-  period_start: string | null
-  period_end: string | null
-  status: SummaryStatus
-  title: string | null
-  summary: string | null
-  topics: SummaryTopic[]
-  highlights: SummaryHighlight[]
-  recommended_entry_ids: string[]
-  model: string | null
-  generated_at: string | null
-  source_set_hash: string | null
-  source_count: number | null
-  error_code: string | null
-  error_message: string | null
-}
-
-export interface SummaryLookupResponse {
-  summary: SummaryView | null
-  current_set_hash: string | null
-  current_count: number
-  is_stale: boolean
-}
-
-export interface SummaryGenerateResponse {
-  status: 'queued' | 'in_flight' | 'already_done' | 'no_entries'
-  summary_id: string
-  source_set_hash: string
-  source_count: number
-}
-
-export type AIIntegrationConfigUpdateRequest = Partial<AIIntegrationConfigResponse>
 
 /** Entry list response */
 export type EntryListResponse = PaginatedResponse<EntryWithState>

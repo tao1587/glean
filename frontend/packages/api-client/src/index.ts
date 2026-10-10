@@ -38,7 +38,6 @@ export {
 export { FolderService } from './services/folders'
 export { BookmarkService, type BookmarkListParams } from './services/bookmarks'
 export { SystemService, type VectorizationStatus } from './services/system'
-export { TodayAIService } from './services/todayAi'
 // MCP services
 export { APITokenService } from './services/apiTokens'
 export { tokenStorage } from './tokenStorage'
@@ -51,7 +50,6 @@ import { EntryService } from './services/entries'
 import { FolderService } from './services/folders'
 import { BookmarkService } from './services/bookmarks'
 import { SystemService } from './services/system'
-import { TodayAIService } from './services/todayAi'
 import { APITokenService } from './services/apiTokens'
 
 export const authService = new AuthService(apiClient)
@@ -61,6 +59,5 @@ export const entryService = new EntryService(apiClient)
 export const folderService = new FolderService(apiClient)
 export const bookmarkService = new BookmarkService(apiClient)
 export const systemService = new SystemService(apiClient)
-export const todayAIService = new TodayAIService(apiClient)
 // MCP service instances
 export const apiTokenService = new APITokenService(apiClient)

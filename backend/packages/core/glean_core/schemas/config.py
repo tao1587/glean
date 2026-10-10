@@ -99,54 +99,6 @@ class RSSHubConfigUpdateRequest(BaseModel):
     custom_rules: list[dict[str, str | bool]] | None = None
 
 
-class AIIntegrationConfig(BaseModel):
-    """Local AI integration configuration.
-
-    Gates the two internal AI flows mounted at /api/today/ai/*. The legacy
-    external-writeback flags (allow_today_entries_api / allow_entry_detail_api
-    / allow_ai_writeback) were removed when those endpoints were retired.
-    """
-
-    NAMESPACE: ClassVar[str] = "ai_integration"
-
-    enabled: bool = False
-    allow_today_synthesis: bool = True
-
-
-class AIIntegrationConfigUpdateRequest(BaseModel):
-    """Partial update request for local AI integration configuration."""
-
-    enabled: bool | None = None
-    allow_today_synthesis: bool | None = None
-
-
-class AIIntegrationConfigResponse(BaseModel):
-    """Admin response for local AI integration configuration."""
-
-    enabled: bool
-    allow_today_synthesis: bool
-
-    @classmethod
-    def from_config(cls, config: AIIntegrationConfig) -> "AIIntegrationConfigResponse":
-        """Create response from stored config."""
-        return cls(
-            enabled=config.enabled,
-            allow_today_synthesis=config.allow_today_synthesis,
-        )
-
-
-class AIIntegrationStatusResponse(BaseModel):
-    """Non-sensitive web response for local AI integration status."""
-
-    enabled: bool
-    # Exposed when enabled is True so the frontend can build correct cache keys
-    # and decide whether to render the synthesis panel.
-    model: str | None = None
-    prompt_version: str | None = None
-    target_language: str | None = None
-    synthesis_enabled: bool = False
-
-
 class SystemTimeResponse(BaseModel):
     """Server time response."""
 

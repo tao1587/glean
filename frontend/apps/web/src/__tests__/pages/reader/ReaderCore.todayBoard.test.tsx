@@ -56,7 +56,6 @@ const {
     entries: null as EntryWithState[] | null,
   },
   aiIntegrationState: {
-    enabled: false,
     userEnabled: false,
     defaultView: 'list' as 'list' | 'ai_summary',
   },
@@ -171,11 +170,6 @@ vi.mock('@/hooks/useVectorizationStatus', () => ({
   useVectorizationStatus: () => ({ data: { enabled: false, status: 'idle' } }),
 }))
 
-vi.mock('@/hooks/useAIIntegration', () => ({
-  useAIIntegrationStatus: () => ({ data: { enabled: aiIntegrationState.enabled } }),
-  useAITodaySummary: () => ({ data: null, isLoading: false, error: null }),
-}))
-
 vi.mock('@/components/ArticleReader', () => ({
   ArticleReader: articleReaderSpy,
   ArticleReaderSkeleton: () => <div>loading</div>,
@@ -274,7 +268,6 @@ describe('ReaderCore today-board route', () => {
     readerControllerState.isLoading = false
     readerControllerState.listTranslationAutoEnabled = false
     readerControllerState.entries = null
-    aiIntegrationState.enabled = false
     aiIntegrationState.userEnabled = false
     aiIntegrationState.defaultView = 'list'
   })
@@ -488,11 +481,11 @@ describe('ReaderCore today-board route', () => {
     expect(navigateSpy).toHaveBeenCalledWith('/reader?feed=feed-target')
   })
 
-  it('enables the today-board summary card when system + user AI integration are on', () => {
+  it('ignores stored summary preferences while continuing to render the today-board', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-04-10T12:00:00+08:00'))
-    aiIntegrationState.enabled = true
     aiIntegrationState.userEnabled = true
+    aiIntegrationState.defaultView = 'ai_summary'
 
     Object.defineProperty(window, 'ResizeObserver', {
       writable: true,
@@ -504,36 +497,9 @@ describe('ReaderCore today-board route', () => {
 
     render(<ReaderCore isMobile={false} />)
 
-    expect(todayBoardSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aiEnabled: true,
-      }),
-      expect.anything()
-    )
-  })
-
-  it('keeps the today-board summary card disabled when only the system gate is enabled', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-04-10T12:00:00+08:00'))
-    aiIntegrationState.enabled = true
-    aiIntegrationState.userEnabled = false
-
-    Object.defineProperty(window, 'ResizeObserver', {
-      writable: true,
-      value: class {
-        observe() {}
-        disconnect() {}
-      },
-    })
-
-    render(<ReaderCore isMobile={false} />)
-
-    expect(todayBoardSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aiEnabled: false,
-      }),
-      expect.anything()
-    )
+    expect(screen.getByTestId('today-board-probe')).toBeInTheDocument()
+    const lastCall = todayBoardSpy.mock.calls[todayBoardSpy.mock.calls.length - 1]
+    expect(lastCall?.[0]).not.toHaveProperty('aiEnabled')
   })
 
   it('chunks today-board list translation requests so large boards do not hit the provider at once', async () => {

@@ -16,7 +16,6 @@ import {
   Moon,
   Monitor,
   ListChecks,
-  Sparkles,
   Languages,
   Key,
 } from 'lucide-react'
@@ -37,7 +36,6 @@ import {
 import { SubscriptionsTab } from '../components/tabs/SubscriptionsTab'
 import { APITokensTab } from '../components/tabs/APITokensTab'
 import { TranslationTab } from '../components/tabs/TranslationTab'
-import { AIIntegrationTab } from '../components/tabs/AIIntegrationTab'
 import { useTranslation } from '@glean/i18n'
 
 /**
@@ -60,7 +58,6 @@ export default function SettingsPage() {
     'translation',
     'manage-feeds',
     'api-tokens',
-    'ai-integration',
   ] as const
   const tabParam = searchParams.get('tab')
   const activeTab = VALID_TABS.includes(tabParam as (typeof VALID_TABS)[number])
@@ -237,9 +234,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Show remaining time toggle */}
-      <div
-        className="border-border/50 from-muted/30 to-muted/10 ring-border/20 rounded-xl border bg-gradient-to-br p-5 ring-1"
-      >
+      <div className="border-border/50 from-muted/30 to-muted/10 ring-border/20 rounded-xl border bg-gradient-to-br p-5 ring-1">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-1 items-center gap-3">
             <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -263,7 +258,7 @@ export default function SettingsPage() {
       </div>
 
       {saveSuccess && (
-        <div className="flex items-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-sm text-success ring-1 ring-success/20">
+        <div className="bg-success/10 text-success ring-success/20 flex items-center gap-2 rounded-lg px-4 py-3 text-sm ring-1">
           <CheckCircle className="h-4 w-4" />
           {t('readLater.settingsSaved')}
         </div>
@@ -444,14 +439,10 @@ export default function SettingsPage() {
                     <Key className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
                     <span className="text-[10px] md:text-sm">{t('tabs.apiTokens')}</span>
                   </TabsTab>
-                  <TabsTab value="ai-integration" className={tabsTabClass}>
-                    <Sparkles className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
-                    <span className="text-[10px] md:text-sm">{t('tabs.aiIntegration')}</span>
-                  </TabsTab>
                 </TabsList>
               </div>
 
-              <div className="w-full min-h-0 min-w-0 flex-1 overflow-y-auto">
+              <div className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto">
                 <TabsPanel value="profile" className={panelClass}>
                   <div className={panelHeaderClass}>
                     <div className="mb-2 flex items-center gap-3">
@@ -546,25 +537,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <APITokensTab />
-                </TabsPanel>
-
-                <TabsPanel value="ai-integration" className={panelClass}>
-                  <div className={panelHeaderClass}>
-                    <div className="mb-2 flex items-center gap-3">
-                      <div className="bg-primary/10 ring-primary/20 flex h-10 w-10 items-center justify-center rounded-xl ring-1">
-                        <Sparkles className="text-primary h-5 w-5" />
-                      </div>
-                      <div>
-                        <h2 className="font-display text-foreground text-2xl font-semibold">
-                          {t('aiIntegration.title')}
-                        </h2>
-                        <p className="text-muted-foreground text-sm">
-                          {t('aiIntegration.desc')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <AIIntegrationTab />
                 </TabsPanel>
               </div>
             </div>

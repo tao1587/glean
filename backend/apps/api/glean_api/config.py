@@ -63,23 +63,6 @@ class Settings(BaseSettings):
     mcp_issuer_url: str = "http://localhost:8000"
     mcp_resource_server_url: str = "http://localhost:8000/mcp"
 
-    # LLM / AI summarization (DeepSeek v4 by default; OpenAI-compatible)
-    llm_api_key: str | None = None
-    llm_base_url: str = "https://api.deepseek.com"
-    llm_model: str = "deepseek-v4-flash"
-    llm_prompt_version: str = "v1"
-    llm_target_language: str | None = None
-    llm_extra_params: str = "{}"
-    llm_max_input_chars: int = 6000
-    llm_max_input_chars_daily: int = 1500
-    llm_max_output_tokens_summarize: int = 500
-    llm_max_output_tokens_synthesize: int = 1500
-    llm_request_timeout_seconds: int = 60
-    llm_smoke_check_enabled: bool = True
-    llm_synthesis_enabled: bool = True
-    summary_cron_hours: str = "6,12,18,22"
-
-
 @lru_cache
 def get_settings() -> Settings:
     """

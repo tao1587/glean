@@ -24,9 +24,6 @@ from .tasks import (
     embedding_worker,
     feed_fetcher,
     subscription_cleanup,
-    summarize_day,
-    summarize_week,
-    summary_scheduler,
     translation,
 )
 from .timezone import resolve_worker_timezone
@@ -130,10 +127,6 @@ def get_oss_functions() -> list[TaskFunction]:
         subscription_cleanup.cleanup_orphan_embeddings,
         # Translation
         translation.translate_entry_task,
-        # AI daily/weekly summaries
-        summarize_day.summarize_day_task,
-        summarize_week.summarize_week_task,
-        summary_scheduler.scheduled_daily_summaries,
     ]
 
 
@@ -154,8 +147,6 @@ def get_oss_cron_jobs() -> list[CronJob]:
         cron(cleanup.scheduled_cleanup, minute=0)
     )
 
-    for hour in sorted(summary_scheduler.parse_cron_hours(settings.summary_cron_hours)):
-        cron_jobs.append(cron(summary_scheduler.scheduled_daily_summaries, hour=hour, minute=15))
     return cron_jobs
 
 

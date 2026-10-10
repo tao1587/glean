@@ -21,8 +21,6 @@ class UserSettings(BaseModel):
     translation_target_language: Literal["zh-CN", "en"] | None = None
     list_translation_auto_enabled: bool | None = None
     list_translation_english_only: bool | None = None
-    ai_integration_enabled: bool | None = None
-    today_board_default_view: Literal["list", "ai_summary"] | None = None
     translation_api_key: str | None = None
     translation_model: str | None = None
     translation_base_url: str | None = None

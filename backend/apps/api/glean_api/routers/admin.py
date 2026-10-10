@@ -17,8 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from glean_core.schemas import (
-    AIIntegrationConfigResponse,
-    AIIntegrationConfigUpdateRequest,
     EmbeddingConfigUpdateRequest,
     RSSHubConfigUpdateRequest,
 )
@@ -1593,29 +1591,3 @@ async def update_rsshub_settings(
     updates = request.model_dump(exclude_unset=True)
     updated = await config_service.update(RSSHubConfig, **updates)
     return updated.model_dump(exclude={"NAMESPACE"})
-
-
-@router.get("/settings/ai-integration", response_model=AIIntegrationConfigResponse)
-async def get_ai_integration_settings(
-    current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
-    config_service: Annotated[TypedConfigService, Depends(get_typed_config_service)],
-) -> AIIntegrationConfigResponse:
-    """Get local AI integration configuration."""
-    from glean_core.schemas.config import AIIntegrationConfig
-
-    config = await config_service.get(AIIntegrationConfig)
-    return AIIntegrationConfigResponse.from_config(config)
-
-
-@router.post("/settings/ai-integration", response_model=AIIntegrationConfigResponse)
-async def update_ai_integration_settings(
-    request: AIIntegrationConfigUpdateRequest,
-    current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
-    config_service: Annotated[TypedConfigService, Depends(get_typed_config_service)],
-) -> AIIntegrationConfigResponse:
-    """Update local AI integration configuration."""
-    from glean_core.schemas.config import AIIntegrationConfig
-
-    updates = request.model_dump(exclude_unset=True)
-    updated = await config_service.update(AIIntegrationConfig, **updates)
-    return AIIntegrationConfigResponse.from_config(updated)
