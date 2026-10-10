@@ -9,5 +9,6 @@ Use this section for deployment, runtime operations, local development workflows
 - [admin-setup.md](./admin-setup.md)
 - [feed-fetch-guardrails.md](./feed-fetch-guardrails.md)
 - [rsshub-route-repairs.md](./rsshub-route-repairs.md)
+- [source-failure-triage.md](./source-failure-triage.md)
 - [backend-logging-baseline.md](./backend-logging-baseline.md)
 - [cloudflare-tunnel-optimization.md](./cloudflare-tunnel-optimization.md)

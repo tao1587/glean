@@ -136,6 +136,7 @@ flowchart TD
 
 - XML is parsed with `feedparser`.
 - A malformed feed only hard-fails when parsing errors occur and there are no entries.
+- HTML documents with no salvageable entries are rejected even when `feedparser` reports no XML error. Legitimate empty RSS/Atom feeds remain valid, and partial feeds with parsed entries remain salvageable.
 - On success, the worker updates feed metadata such as title, description, language, site URL, and icon URL.
 - Cache headers are only saved when the primary URL succeeded.
 

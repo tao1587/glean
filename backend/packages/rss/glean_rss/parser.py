@@ -5,12 +5,13 @@ Parses RSS and Atom feeds using feedparser.
 """
 
 import html
+import re
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import feedparser
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, UnicodeDammit
 from feedparser import FeedParserDict
 
 MIN_FULL_CONTENT_TEXT_LENGTH = 200
@@ -149,7 +150,7 @@ class ParsedEntry:
             self.published_at = None
 
 
-async def parse_feed(content: str, url: str) -> ParsedFeed:
+async def parse_feed(content: str | bytes, url: str) -> ParsedFeed:
     """
     Parse RSS/Atom feed from content.
 
@@ -167,34 +168,40 @@ async def parse_feed(content: str, url: str) -> ParsedFeed:
 
     bozo: bool = bool(data.get("bozo", False))  # type: ignore[reportUnknownMemberType]
     entries: Any = data.get("entries")  # type: ignore[reportUnknownMemberType]
+    # Well-formed HTML can have no entries and no feedparser XML error.
+    if not entries and _looks_like_html_document(content):
+        raise ValueError(
+            "Failed to parse feed: response body is an HTML document, not a feed "
+            "(endpoint likely no longer serves RSS/Atom)"
+        )
     if bozo and not entries:
         # feedparser already keeps partial results when *some* entries parse, so
-        # reaching here means nothing was salvageable. A common real-world cause
-        # is an endpoint that has quietly turned into an HTML page (SPA shell or
-        # error page) while still advertising an RSS content-type. Surface that
-        # distinctly so it gets triaged as a dead feed rather than transient noise.
-        if _looks_like_html_document(content):
-            raise ValueError(
-                "Failed to parse feed: response body is an HTML document, not a feed "
-                "(endpoint likely no longer serves RSS/Atom)"
-            )
+        # reaching here means nothing was salvageable.
         raise ValueError(f"Failed to parse feed: {data.get('bozo_exception', 'Unknown error')}")
 
     return ParsedFeed(data, feed_url=url)
 
 
-def _looks_like_html_document(content: str) -> bool:
+def _looks_like_html_document(content: str | bytes) -> bool:
     """Heuristically detect an HTML page being served in place of a feed.
 
     Some sources return their SPA shell or an error page (with an HTML doctype
     or <html> root) while keeping an RSS/Atom content-type, which feedparser
     cannot turn into entries.
     """
-    # Skip a leading XML prolog / BOM / whitespace before sniffing the root element.
-    head = content.lstrip("﻿ \t\r\n").lower()
-    if head.startswith("<?xml"):
-        head = head[head.find("?>") + 2 :].lstrip() if "?>" in head else head
-    return head.startswith("<!doctype html") or head.startswith("<html")
+    text = UnicodeDammit(content).unicode_markup if isinstance(content, bytes) else content
+    if text is None:
+        return False
+    # Comments and XML declarations may precede the actual root element.
+    head = text.lstrip("\ufeff \t\r\n").lower()
+    while head.startswith(("<?xml", "<!--")):
+        end = "?>" if head.startswith("<?xml") else "-->"
+        _, separator, remainder = head.partition(end)
+        if not separator:
+            return False
+        head = remainder.lstrip()
+    # Match the complete tag name; html:feed is a legitimate Atom namespace prefix.
+    return bool(re.match(r"(?:<!doctype\s+html(?:\s|>)|<html(?:\s|/?>))", head))
 
 
 def _resolve_entry_url(value: str, base_url: str | None) -> str:

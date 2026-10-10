@@ -1,5 +1,6 @@
 """Tests for RSS parser."""
 
+import feedparser
 import pytest
 
 from glean_rss.parser import (
@@ -154,6 +155,71 @@ class TestParseFeed:
 
         with pytest.raises(ValueError, match="HTML document, not a feed"):
             await parse_feed(body, "https://example.com/feed.rss")
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "body",
+        [
+            "<html><head><title>Unavailable</title></head>"
+            "<body><p>This endpoint no longer serves a feed.</p></body></html>",
+            "<!-- harmless comment --><html><body>No feed</body></html>",
+            b"<html><body>No feed</body></html>",
+        ],
+        ids=["html", "comment-prefix", "utf8-bytes"],
+    )
+    async def test_well_formed_html_without_parser_error_is_not_an_empty_feed(
+        self, body: str | bytes
+    ) -> None:
+        # A well-formed HTML shell produces no XML error; bozo alone cannot detect it.
+        result = feedparser.parse(body)
+        assert not result.bozo
+        assert result.entries == []
+        with pytest.raises(ValueError, match="HTML document, not a feed"):
+            await parse_feed(body, "https://example.com/feed.xml")
+
+    @pytest.mark.asyncio
+    async def test_utf16_html_bytes_are_rejected_as_html(self) -> None:
+        body = "<html><body>No feed</body></html>".encode("utf-16")
+        with pytest.raises(ValueError, match="HTML document, not a feed"):
+            await parse_feed(body, "https://example.com/feed.xml")
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "body",
+        [
+            '<rss version="2.0"><channel><title>Empty feed</title>'
+            "<link>https://example.com</link><description>Empty</description></channel></rss>",
+            '<feed xmlns="http://www.w3.org/2005/Atom"><title>Empty feed</title>'
+            "<id>https://example.com/feed</id><updated>2026-10-10T00:00:00Z</updated></feed>",
+            b'<rss version="2.0"><channel><title>Empty feed</title>'
+            b"<link>https://example.com</link><description>Empty</description></channel></rss>",
+            '<html:feed xmlns:html="http://www.w3.org/2005/Atom"><html:title>Empty feed</html:title>'
+            "<html:id>urn:test</html:id></html:feed>",
+        ],
+        ids=["rss", "atom", "rss-bytes", "atom-html-namespace"],
+    )
+    async def test_legitimate_empty_feed_remains_valid(self, body: str | bytes) -> None:
+        parsed = await parse_feed(body, "https://example.com/feed.xml")
+        assert parsed.title == "Empty feed"
+        assert parsed.entries == []
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "body",
+        [
+            '<rss version="2.0"><channel><title>Partial feed</title><item>'
+            "<title>Salvaged</title><link>https://example.com/post</link></item>",
+            '<html><rss version="2.0"><channel><title>Partial feed</title><item>'
+            "<title>Salvaged</title><link>https://example.com/post</link></item>"
+            "</channel></rss></html>",
+        ],
+        ids=["malformed-rss", "html-wrapped-rss"],
+    )
+    async def test_salvageable_entries_are_preserved(self, body: str) -> None:
+        parsed = await parse_feed(body, "https://example.com/feed.xml")
+        assert len(parsed.entries) == 1
+        assert parsed.entries[0].title == "Salvaged"
+        assert parsed.entries[0].url == "https://example.com/post"
 
 
 class TestLooksLikeHtmlDocument:
