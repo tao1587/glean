@@ -11,3 +11,4 @@ RUN node /opt/glean-rsshub/public-ca-chain.mjs /opt/glean-rsshub/certs/root-yr-b
     && chmod 755 /opt/glean-rsshub/with-ca-chain.sh
 
 ENTRYPOINT ["dumb-init", "--", "/opt/glean-rsshub/with-ca-chain.sh"]
+CMD ["npm", "run", "start"]

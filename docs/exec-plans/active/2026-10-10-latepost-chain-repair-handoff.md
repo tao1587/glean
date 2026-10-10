@@ -30,6 +30,7 @@ The official bridge's cryptographic signature verified against the existing trus
 - Six final CA tests pass: correct bridge/issuer signature, corrupt and wrong self-signed certificate rejection, missing issuer/expiry rejection, preservation of every prior default CA and extra-CA setting, no mutation after failed validation, and optional runtime continuity.
 - Original complete compiled publisher handler ran in an isolated Node process with the verified bridge and installed production proxy/header/cache context: one requested item, one valid date and one nonempty article body. No active numeric-length or null-body failure occurred; no publisher parser patch was added.
 - Final combined local RSSHub patch/certificate suite: 16 tests passed. Node preload syntax, shell syntax, build-time certificate verifier, repository docs validation and `git diff --check` passed.
+- A derived image inspection caught a startup regression before deployment: adding the wrapper ENTRYPOINT cleared the base image's inherited CMD, leaving `Config.Cmd=null`. The actual-image command-preservation check failed (RED); the candidate was never deployed. The Dockerfile now explicitly sets the verified pinned-base command `CMD ["npm", "run", "start"]`. Root must rebuild and confirm both image configuration and default startup without a command override before acceptance.
 
 ## Remaining gates
 
