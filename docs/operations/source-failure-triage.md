@@ -8,7 +8,7 @@ Probe suspected failures serially with bounded timeouts and pacing. Compare the 
 
 ## Controlled repairs
 
-- If an individual publisher works directly but fails through the proxy, add only that proven host to the backend/worker `NO_PROXY` exclusions. Preserve every existing exclusion and account for lowercase `no_proxy` precedence. Back up the private Compose configuration, validate the candidate, and recreate only affected application services.
+- If an individual publisher works directly but fails through the proxy, add only that proven host to the backend/worker `NO_PROXY` exclusions. Preserve every existing exclusion and account for lowercase `no_proxy` precedence. Check positively verified publisher redirect destinations too: excluding only the initial host does not exclude a different redirect host. Keep normal TLS verification. Back up the private Compose configuration, validate the candidate, and recreate only affected application services.
 - If a publisher's legacy URL no longer serves RSS and a verified equivalent route works, check target URL uniqueness, retain the original Feed ID/subscriptions/entry history, replace only the source URL/type, and clear validators belonging to the old endpoint.
 - If a disabled source now produces a valid feed, use a targeted authenticated refresh and require a terminal successful run before calling it restored. Do not reset every error counter or mass-enable historical failures.
 - Imported RSSHub URLs should have the RSSHub source type so transient route failures use the existing retry policy. Changing an affected row's type is separate from proving that its route works.
@@ -17,7 +17,7 @@ After configuration/source repair, verify the deployed worker's actual fetch pat
 
 ## RSSHub immediate retries
 
-The inspected RSSHub runtime used `REQUEST_RETRY=2`, a one-second retry delay and `PROXY_STRATEGY=all`. A loopback upstream returning 429 received three requests for one logical fetch. With a process-local `REQUEST_RETRY=0` canary it received one. The production repair disables RSSHub's immediate retries while retaining proxy configuration and Glean's existing scheduled route backoff; this reduces amplification without claiming that provider limits disappear.
+The inspected RSSHub runtime used `REQUEST_RETRY=2`, a one-second retry delay and `PROXY_STRATEGY=all`. A loopback upstream returning 429 received three requests for one logical fetch. With a process-local `REQUEST_RETRY=0` canary it received one. That initial mitigation also removed retries needed for transient resets. The final dependency patch removes only 429 from the immediate retry status list and restores `REQUEST_RETRY=2`, retaining bounded network/server retries, proxy configuration and Glean's scheduled route backoff. Podcast episode detail enrichment has concurrency two and uses sufficient overview descriptions after a detail limit without replacing full caches. These changes reduce amplification without claiming that provider limits disappear.
 
 Check the exact deployed upstream version: the installed build has no host-rate-limits configuration support, so setting a newer `REQUEST_RATE_LIMITS` variable would not prove throttling is active. Current upstream retry configuration is described in [RSSHub config](https://github.com/DIYgod/RSSHub/blob/master/lib/config.ts) and [ofetch setup](https://github.com/DIYgod/RSSHub/blob/master/lib/utils/ofetch.ts). Reverify transport and working routes after any dependency change.
 

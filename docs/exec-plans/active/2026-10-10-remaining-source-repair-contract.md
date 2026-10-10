@@ -18,3 +18,14 @@ Investigate the NAS's remaining RSSHub rate limits and subscribed-source fetch f
 - Every feasible controlled repair is verified via actual RSS/XML or relevant queue completion; remaining external/account/provider failures are stated without claiming universal availability.
 - Relevant tests and independent contract evaluation pass; production version/image identities and stateful service identities are recorded after any rollout.
 - A private user-facing source report lists unresolved failures and reasons without credentials. Repo-local handoff/evaluation records contain sanitized aggregate evidence and reproducible repair instructions.
+
+## Confirmed RSSHub follow-up scope
+
+Serial probes and directly associated on-NAS error classifications identified intermittent episode-detail HTTP 429 failures in the podcast provider and a transport reset in another provider. Representative overview pages remained healthy both directly and through the configured proxy; sufficient overview descriptions and audio metadata were available. This evidence authorizes only the following dependency repairs:
+
+- Remove HTTP 429 from RSSHub's immediate retry status list while preserving bounded transport/5xx retries. Restore the runtime retry count to two only with the validated patched image.
+- Bound podcast detail concurrency to two. On the first 429, stop further detail cache misses for that invocation while allowing existing full-detail cache entries and at most two in-flight requests to finish. Use available overview descriptions only for limited details; missing descriptions and other errors remain explicit failures.
+- Preserve original feed metadata, item order, links/dates/audio fields and successful detail caching. Do not cache overview fallbacks as full details.
+- Reject unfamiliar compiled module layouts before changing files. Require real dependency loopback tests, executable patcher tests and derived-image/live canaries before rollout.
+
+Worker retries, source policy and user settings remain outside this focused patch. Private source names, identifiers and inventories must stay outside public repository artifacts.
