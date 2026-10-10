@@ -152,6 +152,7 @@ The inspected Anthropic route repair and build instructions are recorded in [rss
 5. Midnight supplementation must use the same explicit timezone as the worker cron.
 6. Named timezones require timezone data; worker startup must still succeed if that data is missing.
 7. Feed-source failures such as RSSHub or direct-feed timeouts must not strand runs in active states.
+8. Regular and midnight automatic selection must require an existing subscription, including inactive-account ownership. Historical orphan feeds and their articles stay intact; explicit manual/admin refresh and resubscription remain available. Do not use a user-activation filter, duplicate feeds through subscription joins or cancel already queued jobs to enforce this rule.
 
 ## 3. Required Checks Before Changing Feed Fetch Code
 
@@ -170,7 +171,10 @@ Recommended test targets:
 cd backend
 uv run pytest apps/api/tests/test_feed_fetch_progress.py apps/api/tests/test_feeds_router_active_runs.py apps/worker/tests/test_feed_refresh_scheduler.py
 uv run pytest apps/worker/tests/test_rsshub_reliability.py packages/rss/tests/test_fetch_retry_policy.py
+uv run pytest apps/worker/tests/test_scheduled_source_eligibility.py
 ```
+
+The eligibility tests execute real SQL against the isolated `glean_test` PostgreSQL instance from `docker-compose.test.yml`. Never point their schema-reset fixtures at the NAS or another production database.
 
 ## 4. Fast Debugging Checklist
 

@@ -29,7 +29,7 @@ from glean_api.feed_fetch_progress import (
 from glean_core import get_logger
 from glean_core.schemas.config import EmbeddingConfig, VectorizationStatus
 from glean_core.services import RSSHubService, TypedConfigService
-from glean_database.models import Entry, Feed, FeedFetchRun, FeedStatus
+from glean_database.models import Entry, Feed, FeedFetchRun, FeedStatus, Subscription
 from glean_database.session import get_session_context
 from glean_rss import fetch_feed, fetch_or_synthesize_feed, parse_feed, postprocess_html
 
@@ -111,16 +111,19 @@ async def _load_scheduled_feeds(
     include_midnight_supplement: bool,
 ) -> list[Feed]:
     """Load the feeds eligible for the current scheduled batch."""
+    subscribed_active_feeds = select(Feed).where(
+        Feed.status == FeedStatus.ACTIVE,
+        select(Subscription.id).where(Subscription.feed_id == Feed.id).exists(),
+    )
     if not include_midnight_supplement:
         result = await session.execute(
-            select(Feed).where(
-                Feed.status == FeedStatus.ACTIVE,
+            subscribed_active_feeds.where(
                 (Feed.next_fetch_at.is_(None)) | (Feed.next_fetch_at <= now_utc),
             )
         )
         return list(result.scalars().all())
 
-    result = await session.execute(select(Feed).where(Feed.status == FeedStatus.ACTIVE))
+    result = await session.execute(subscribed_active_feeds)
     active_feeds = result.scalars().all()
     day_start_utc = _local_day_start_utc(now_utc)
     guard_minutes = _midnight_guard_minutes(settings.feed_refresh_interval_minutes)

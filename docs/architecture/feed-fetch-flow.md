@@ -27,7 +27,7 @@ There are three ways a feed fetch starts:
 2. Manual refresh enqueue:
    `POST /api/feeds/{subscription_id}/refresh` and `POST /api/feeds/refresh-all` enqueue `fetch_feed_task` with `backfill_existing_entries=true`.
 3. Scheduled refresh enqueue:
-   the worker cron runs according to `FEED_REFRESH_INTERVAL_MINUTES`, finds active feeds whose `next_fetch_at` is due, and enqueues `fetch_feed_task`.
+   the worker cron runs according to `FEED_REFRESH_INTERVAL_MINUTES`, finds active feeds with at least one subscription whose `next_fetch_at` is due, and enqueues `fetch_feed_task`.
 
 ## 3. Flow Diagram
 
@@ -38,7 +38,7 @@ flowchart TD
     T3["Manual refresh /api/feeds/{subscription_id}/refresh<br/>backfill_existing_entries=true"] --> T2
     T4["Manual refresh all /api/feeds/refresh-all<br/>backfill_existing_entries=true"] --> T2
     T5["Worker cron based on FEED_REFRESH_INTERVAL_MINUTES"] --> T6["scheduled_fetch -> fetch_all_feeds"]
-    T6 --> T7["Select ACTIVE feeds with due next_fetch_at"]
+    T6 --> T7["Select subscribed ACTIVE feeds with due next_fetch_at"]
     T7 --> T2
   end
 
@@ -122,6 +122,7 @@ flowchart TD
 - The worker registers `fetch_feed_task` plus cron jobs derived from `FEED_REFRESH_INTERVAL_MINUTES`.
 - The interval must evenly divide 1440 minutes so one day can be represented as deterministic cron buckets.
 - Scheduled sync does not fetch feeds inline. It first selects due feeds, then enqueues one job per feed.
+- Both regular and midnight supplemental selection require at least one subscription, including subscriptions owned by inactive accounts. The scheduler leaves historical zero-subscriber catalog rows and their articles, bookmarks and reading state intact while skipping their automatic refresh. Explicit manual/admin refresh and resubscription remain available.
 - Manual refresh endpoints also enqueue jobs instead of performing feed fetch synchronously in the API process.
 - At local midnight, the worker can also run a supplemental scheduled batch for active feeds that still have not succeeded since the local day started.
 
