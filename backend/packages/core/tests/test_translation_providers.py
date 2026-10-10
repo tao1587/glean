@@ -152,6 +152,30 @@ def test_unset_provider_prefers_configured_mtran(monkeypatch: pytest.MonkeyPatch
     assert provider.base_url == "http://mtran.local"
 
 
+@pytest.mark.parametrize("include_null_preference", [False, True])
+def test_automatic_mtran_ignores_stale_user_provider_configuration(
+    monkeypatch: pytest.MonkeyPatch,
+    include_null_preference: bool,
+) -> None:
+    monkeypatch.setenv("MTRAN_SERVER_URL", "http://server-default-mtran.local")
+    settings: dict[str, Any] = {
+        "translation_base_url": "https://paid-provider.invalid/v1",
+        "translation_api_key": "stale-paid-provider-key",
+        "translation_model": "paid-provider-model",
+    }
+    if include_null_preference:
+        settings["translation_provider"] = None
+    original_settings = dict(settings)
+
+    provider = create_translation_provider(settings)
+
+    assert isinstance(provider, MTranProvider)
+    assert provider.base_url == "http://server-default-mtran.local"
+    assert provider.api_key == ""
+    assert provider.model == ""
+    assert settings == original_settings
+
+
 def test_explicit_google_is_preserved_with_mtran_configured(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

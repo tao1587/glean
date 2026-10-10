@@ -26,6 +26,12 @@ Translation regression coverage includes serial/concurrent Google cooldown, prov
 
 RSSHub coverage includes actual wrapped HTTP exception causes, healthy-root route errors, ten transient failures, permanent 403 behavior, per-origin scheduler isolation, cross-origin fallback attribution and retention of the circuit counter after unblock. HTTP 4xx no longer receive an immediate duplicate request. The Anthropic adapter extracts publication cards rather than obsolete Next.js sections, preserves the original parser fallback, limits concurrency to two and reuses the verified installed imports/cache/date helpers.
 
+### Final Automatic factory refinement
+
+Before final rollout, the root identified that an unset/null preference could still reuse a stale per-user URL/key/model and redirect the automatic MTran request. The evaluator independently reproduced both new regression failures against the prior factory. The final narrow change resolves the provider first, then ignores provider-specific user fields for an automatic selection without modifying the original settings object. Explicit MTran retains its URL/key/model.
+
+Independent provider/API/worker/service verification after this refinement: **74 passed**. Additional direct probes verify null, empty, whitespace and Pydantic automatic preferences use the server URL with empty key/model, preserve the original input, and retain all explicit MTran fields. The corrected source is accepted for rebuilding backend/worker candidates; this does not accept the previously built reliability images or complete the pending live gates.
+
 ## Independent NAS and candidate evidence
 
 The initial cleanup release `7c5a7e7` is online. Metadata-only inspection independently confirms running Glean image prefixes: backend `a39a69315f64`, worker `cb928c07baf6`, web `12a65fdeea74`, admin `d77b3f36b539`. The production RSSHub remains the original image `ce24662156d6` at this phase.

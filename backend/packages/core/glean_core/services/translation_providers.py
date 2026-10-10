@@ -1,10 +1,10 @@
 """
 Translation provider abstraction.
 
-Supports Google Translate (free), DeepL, and OpenAI as configurable
-translation backends. Users configure their preferred provider and
-API key via user settings. An unset preference uses configured local
-MTran, or Google when no local service is configured.
+Supports Google Translate (free), DeepL, OpenAI, and MTran as configurable
+translation backends. Explicit selections remain selected, and paid providers
+require an API key. An unset preference uses server-configured MTran, or
+Google when no local service is configured, without stale user overrides.
 """
 
 import json
@@ -762,6 +762,11 @@ def create_translation_provider(settings: Any | None) -> TranslationProvider:
     """
     normalized_settings = _normalize_translation_settings(settings)
     provider = resolve_translation_provider_name(normalized_settings)
+    configured_provider = normalized_settings.get("translation_provider")
+    if not isinstance(configured_provider, str) or not configured_provider.strip():
+        # Automatic means server defaults. Previous provider credentials/model
+        # settings must not redirect requests or be sent to the default service.
+        normalized_settings = {}
     api_key = normalized_settings.get("translation_api_key", "")
     raw_model = normalized_settings.get("translation_model")
     model = raw_model if isinstance(raw_model, str) else None
