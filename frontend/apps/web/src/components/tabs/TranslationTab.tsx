@@ -14,10 +14,15 @@ import { CheckCircle, Loader2, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { useTranslation } from '@glean/i18n'
 import type { TranslationTargetLanguage } from '@glean/types'
 
-type Provider = 'google' | 'deepl' | 'openai' | 'mtran'
+type Provider = 'automatic' | 'google' | 'deepl' | 'openai' | 'mtran'
 const DEFAULT_MTRAN_BASE_URL = ''
 
 const PROVIDERS: { value: Provider; nameKey: string; descKey: string }[] = [
+  {
+    value: 'automatic',
+    nameKey: 'translation.automatic.name',
+    descKey: 'translation.automatic.desc',
+  },
   { value: 'google', nameKey: 'translation.google.name', descKey: 'translation.google.desc' },
   { value: 'deepl', nameKey: 'translation.deepl.name', descKey: 'translation.deepl.desc' },
   { value: 'openai', nameKey: 'translation.openai.name', descKey: 'translation.openai.desc' },
@@ -44,11 +49,12 @@ export function TranslationTab() {
   const { t } = useTranslation('settings')
   const { user, updateSettings, isLoading } = useAuthStore()
 
-  const currentProvider = (user?.settings?.translation_provider ?? 'google') as Provider
+  const currentProvider = (user?.settings?.translation_provider ?? 'automatic') as Provider
   const currentTargetLanguage = (user?.settings?.translation_target_language ??
     'zh-CN') as TranslationTargetLanguage
   const currentApiKey = user?.settings?.translation_api_key ?? ''
-  const currentModel = user?.settings?.translation_model ?? 'gpt-4o-mini'
+  const currentModel =
+    user?.settings?.translation_model ?? (currentProvider === 'openai' ? 'gpt-4o-mini' : '')
   const savedBaseUrl = user?.settings?.translation_base_url
   const currentBaseUrl =
     typeof savedBaseUrl === 'string' && savedBaseUrl.trim()
@@ -57,9 +63,8 @@ export function TranslationTab() {
   const currentListTranslationAutoEnabled = user?.settings?.list_translation_auto_enabled ?? false
 
   const [provider, setProvider] = useState<Provider>(currentProvider)
-  const [targetLanguage, setTargetLanguage] = useState<TranslationTargetLanguage>(
-    currentTargetLanguage
-  )
+  const [targetLanguage, setTargetLanguage] =
+    useState<TranslationTargetLanguage>(currentTargetLanguage)
   const [apiKey, setApiKey] = useState(currentApiKey)
   const [model, setModel] = useState(currentModel)
   const [baseUrl, setBaseUrl] = useState(currentBaseUrl)
@@ -87,11 +92,11 @@ export function TranslationTab() {
     try {
       await updateSettings({
         ...user?.settings,
-        translation_provider: provider,
+        translation_provider: provider === 'automatic' ? null : provider,
         translation_target_language: targetLanguage,
-        translation_api_key: apiKey,
-        translation_model: model,
-        translation_base_url: baseUrl,
+        translation_api_key: provider === 'automatic' ? '' : apiKey,
+        translation_model: provider === 'openai' || provider === 'mtran' ? model : '',
+        translation_base_url: provider === 'mtran' ? baseUrl : '',
         list_translation_auto_enabled: listTranslationAutoEnabled,
       })
       setSaveSuccess(true)
@@ -115,7 +120,19 @@ export function TranslationTab() {
           {PROVIDERS.map(({ value, nameKey, descKey }) => (
             <button
               key={value}
-              onClick={() => setProvider(value)}
+              onClick={() => {
+                setProvider(value)
+                if (value !== provider) {
+                  setModel(
+                    value === currentProvider
+                      ? currentModel
+                      : value === 'openai'
+                        ? 'gpt-4o-mini'
+                        : ''
+                  )
+                }
+              }}
+              aria-pressed={provider === value}
               className={`group relative flex flex-col gap-2 rounded-xl border p-4 text-left ${
                 provider === value
                   ? 'border-primary/50 from-primary/10 to-primary/5 ring-primary/30 bg-gradient-to-br ring-2'
@@ -145,8 +162,13 @@ export function TranslationTab() {
         <Label className="text-muted-foreground mb-2 block text-sm font-medium">
           {t('translation.targetLanguage')}
         </Label>
-        <p className="text-muted-foreground/80 mb-4 text-sm">{t('translation.targetLanguageDesc')}</p>
-        <Select value={targetLanguage} onValueChange={(v) => v && setTargetLanguage(v as TranslationTargetLanguage)}>
+        <p className="text-muted-foreground/80 mb-4 text-sm">
+          {t('translation.targetLanguageDesc')}
+        </p>
+        <Select
+          value={targetLanguage}
+          onValueChange={(v) => v && setTargetLanguage(v as TranslationTargetLanguage)}
+        >
           <SelectTrigger className="w-full max-w-xs">
             <SelectValue>{t(`translation.targetLanguageOptions.${targetLanguage}`)}</SelectValue>
           </SelectTrigger>
@@ -177,9 +199,7 @@ export function TranslationTab() {
       )}
 
       {/* List translation default toggle */}
-      <div
-        className="border-border/50 from-muted/30 to-muted/10 ring-border/20 rounded-xl border bg-gradient-to-br p-5 ring-1"
-      >
+      <div className="border-border/50 from-muted/30 to-muted/10 ring-border/20 rounded-xl border bg-gradient-to-br p-5 ring-1">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <Label className="text-foreground block text-sm font-medium">
@@ -271,10 +291,7 @@ export function TranslationTab() {
 
       {/* Save button */}
       <div className="flex items-center gap-3">
-        <Button
-          onClick={handleSave}
-          disabled={isSaving || isLoading || !hasChanges}
-        >
+        <Button onClick={handleSave} disabled={isSaving || isLoading || !hasChanges}>
           {isSaving && <Loader2 className="mr-2 h-4 w-4" />}
           {t('common:actions.save')}
         </Button>

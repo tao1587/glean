@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from glean_core import get_logger
 from glean_core.schemas import (
@@ -28,7 +28,12 @@ from glean_core.schemas import (
 )
 from glean_core.server_time import get_server_date, get_server_day_range, get_server_period_range
 from glean_core.services import EntryService, TranslationService
-from glean_core.services.translation_providers import create_translation_provider
+from glean_core.services.translation_providers import (
+    TranslationConfigurationError,
+    TranslationRateLimitError,
+    create_translation_provider,
+    resolve_translation_provider_name,
+)
 
 from ..dependencies import (
     get_current_user,
@@ -118,7 +123,9 @@ async def list_today_entries(
             date_ or get_server_date()
         )
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)
+        ) from exc
 
     return await entry_service.get_entries(
         user_id=current_user.id,
@@ -131,13 +138,16 @@ async def list_today_entries(
         view="today-board",
     )
 
+
 @router.get("/search", response_model=EntrySearchResponse)
 async def search_entries(
     current_user: Annotated[UserResponse, Depends(get_current_user)],
     entry_service: Annotated[EntryService, Depends(get_entry_service)],
     q: Annotated[str, Query(min_length=2, max_length=200)],
     scope: Literal["all", "date", "week"] = Query("all"),
-    date_param: str | None = Query(None, alias="date", description="YYYY-MM-DD, required when scope=date"),
+    date_param: str | None = Query(
+        None, alias="date", description="YYYY-MM-DD, required when scope=date"
+    ),
     limit: int = Query(30, ge=1, le=100),
 ) -> EntrySearchResponse:
     """
@@ -330,22 +340,37 @@ async def translate_texts(
     # Translate uncached sentences using user's configured provider
     translated_new: list[str] = []
     if to_translate:
-        provider_name = "google"
-        if current_user.settings:
-            if isinstance(current_user.settings, dict):
-                configured_provider = current_user.settings.get("translation_provider")
-            else:
-                configured_provider = getattr(current_user.settings, "translation_provider", None)
+        provider_name = resolve_translation_provider_name(current_user.settings)
 
-            if isinstance(configured_provider, str) and configured_provider.strip():
-                provider_name = configured_provider.strip()
-        provider = create_translation_provider(current_user.settings)
-        try:
-            translated_new = await asyncio.to_thread(
-                provider.translate_batch, to_translate, data.source_language, data.target_language
+        def translate_uncached() -> list[str]:
+            provider = create_translation_provider(current_user.settings)
+            results = provider.translate_batch(
+                to_translate, data.source_language, data.target_language
             )
+            validated_results = TypeAdapter(list[str]).validate_python(results, strict=True)
+            if len(validated_results) != len(to_translate):
+                raise ValueError("Translation provider returned an invalid result shape")
+            return validated_results
+
+        try:
+            translated_new = await asyncio.to_thread(translate_uncached)
+        except TranslationRateLimitError as exc:
+            logger.warning(
+                "Translation provider rate limited",
+                extra={
+                    "provider": exc.provider,
+                    "retry_after": exc.retry_after,
+                    "count": len(to_translate),
+                },
+            )
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Translation provider {exc.provider} is rate limited. Retry in {exc.retry_after} seconds or choose another provider in settings.",
+                headers={"Retry-After": str(exc.retry_after)},
+            ) from exc
+        except TranslationConfigurationError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
         except Exception as exc:
-            error_message = str(exc).strip() or exc.__class__.__name__
             logger.exception(
                 "Translation provider failed in translate-texts",
                 extra={
@@ -355,15 +380,12 @@ async def translate_texts(
                     "user_id": current_user.id,
                     "provider": provider_name,
                     "count": len(to_translate),
-                    "error": error_message,
+                    "error_type": exc.__class__.__name__,
                 },
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=(
-                    "Translation provider failed "
-                    f"(provider={provider_name}, target={data.target_language}): {error_message}"
-                ),
+                detail=f"Translation provider {provider_name} is unavailable. Please retry later or check translation settings.",
             ) from exc
 
     # Merge cached + newly translated results
@@ -423,6 +445,7 @@ async def get_paragraph_translations(
     """
     result = await translation_service.get_paragraph_translations(entry_id, target_language)
     return ParagraphTranslationsResponse(translations=result or {})
+
 
 # Translation endpoints
 

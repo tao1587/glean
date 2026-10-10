@@ -158,8 +158,6 @@ async def translate_entry_task(
             if user:
                 user_settings = user.settings
 
-        provider = create_translation_provider(user_settings)
-
         # Get the translation record
         stmt = select(EntryTranslation).where(
             EntryTranslation.entry_id == entry_id,
@@ -188,6 +186,7 @@ async def translate_entry_task(
             return {"status": "error", "message": "Entry not found"}
 
         try:
+            provider = create_translation_provider(user_settings)
             source = "auto"
 
             # Translate title

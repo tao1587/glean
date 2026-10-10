@@ -1348,6 +1348,10 @@ class TestFetchFeedTaskProgress:
                 new=AsyncMock(return_value=blocked_until),
             ) as mock_open_circuit,
             patch(
+                "glean_worker.tasks.feed_fetcher._probe_rsshub_health",
+                new=AsyncMock(return_value=False),
+            ),
+            patch(
                 "glean_worker.tasks.feed_fetch_progress.refresh_running_eta",
                 new=AsyncMock(return_value=None),
             ),
@@ -1460,6 +1464,10 @@ class TestFetchFeedTaskProgress:
             patch(
                 "glean_worker.tasks.feed_fetcher._is_rsshub_infrastructure_error",
                 return_value=True,
+            ),
+            patch(
+                "glean_worker.tasks.feed_fetcher._probe_rsshub_health",
+                new=AsyncMock(return_value=False),
             ),
             patch(
                 "glean_worker.tasks.feed_fetcher.finalize_feed_fetch_run",

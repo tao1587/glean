@@ -10,7 +10,6 @@ from glean_core.schemas.user import UserSettings
 from glean_core.services.translation_providers import (
     DEFAULT_MTRAN_SERVER_URL,
     MTRAN_MAX_PAYLOAD_SIZE,
-    FallbackProvider,
     GoogleFreeProvider,
     MTranProvider,
     _parse_openai_batch_response,
@@ -111,69 +110,198 @@ def _assert_safe_request_bodies(calls: list[tuple[str, dict[str, Any]]]) -> None
 
 
 def test_create_provider_returns_mtran() -> None:
-    from unittest.mock import patch
+    provider = create_translation_provider(
+        {
+            "translation_provider": "mtran",
+            "translation_base_url": "http://localhost:8080",
+            "translation_api_key": "token-123",
+            "translation_model": "mtran-large",
+        }
+    )
 
-    with patch(
-        "glean_core.services.translation_providers._is_mtran_available",
-        return_value=True,
-    ):
-        provider = create_translation_provider(
-            {
-                "translation_provider": "mtran",
-                "translation_base_url": "http://localhost:8080",
-                "translation_api_key": "token-123",
-                "translation_model": "mtran-large",
-            }
-        )
-
-    assert isinstance(provider, FallbackProvider)
-    assert isinstance(provider.primary, MTranProvider)
-    assert provider.primary.base_url == "http://localhost:8080"
-    assert provider.primary.api_key == "token-123"
-    assert provider.primary.model == "mtran-large"
+    assert isinstance(provider, MTranProvider)
+    assert provider.base_url == "http://localhost:8080"
+    assert provider.api_key == "token-123"
+    assert provider.model == "mtran-large"
 
 
 def test_create_provider_accepts_user_settings_model() -> None:
-    from unittest.mock import patch
-
-    with patch(
-        "glean_core.services.translation_providers._is_mtran_available",
-        return_value=True,
-    ):
-        provider = create_translation_provider(
-            UserSettings(
-                translation_provider="mtran",
-                translation_base_url="http://localhost:8080",
-                translation_api_key="token-123",
-                translation_model="mtran-large",
-            )
+    provider = create_translation_provider(
+        UserSettings(
+            translation_provider="mtran",
+            translation_base_url="http://localhost:8080",
+            translation_api_key="token-123",
+            translation_model="mtran-large",
         )
+    )
 
-    assert isinstance(provider, FallbackProvider)
-    assert isinstance(provider.primary, MTranProvider)
-    assert provider.primary.base_url == "http://localhost:8080"
-
-
-def test_create_provider_falls_back_when_mtran_unavailable() -> None:
-    from unittest.mock import patch
-
-    with patch(
-        "glean_core.services.translation_providers._is_mtran_available",
-        return_value=False,
-    ):
-        provider = create_translation_provider(
-            {
-                "translation_provider": "mtran",
-                "translation_base_url": "http://localhost:8080",
-            }
-        )
-
-    assert isinstance(provider, GoogleFreeProvider)
+    assert isinstance(provider, MTranProvider)
+    assert provider.base_url == "http://localhost:8080"
 
 
 def test_create_provider_falls_back_to_google_for_unknown() -> None:
     provider = create_translation_provider({"translation_provider": "unknown"})
     assert isinstance(provider, GoogleFreeProvider)
+
+
+def test_unset_provider_prefers_configured_mtran(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MTRAN_SERVER_URL", "http://mtran.local")
+    provider = create_translation_provider(UserSettings())
+
+    assert isinstance(provider, MTranProvider)
+    assert provider.base_url == "http://mtran.local"
+
+
+def test_explicit_google_is_preserved_with_mtran_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("MTRAN_SERVER_URL", "http://mtran.local")
+
+    provider = create_translation_provider({"translation_provider": "google"})
+
+    assert isinstance(provider, GoogleFreeProvider)
+
+
+@pytest.mark.parametrize("provider", ["deepl", "openai"])
+def test_selected_paid_provider_requires_key_instead_of_switching_to_google(provider: str) -> None:
+    with pytest.raises(RuntimeError, match="API key"):
+        create_translation_provider({"translation_provider": provider})
+
+
+def test_explicit_mtran_never_changes_to_google_when_unreachable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def no_preflight(**_kwargs: object) -> None:
+        raise AssertionError("Factory must not make blocking preflight HTTP requests")
+
+    monkeypatch.setattr("glean_core.services.translation_providers.httpx.Client", no_preflight)
+
+    provider = create_translation_provider({"translation_provider": "mtran"})
+
+    assert isinstance(provider, MTranProvider)
+
+
+def test_google_rate_limit_blocks_subsequent_provider_instances_until_cooldown(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from deep_translator.exceptions import TooManyRequests
+
+    clock = [100.0]
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.monotonic", lambda: clock[0], raising=False
+    )
+    monkeypatch.setattr(GoogleFreeProvider, "_rate_limited_until", 0.0, raising=False)
+    calls: list[str] = []
+
+    class FakeGoogleTranslator:
+        def __init__(self, **_kwargs: object) -> None:
+            pass
+
+        def translate(self, text: str) -> str:
+            calls.append(text)
+            if len(calls) == 1:
+                raise TooManyRequests()
+            return "translated"
+
+    monkeypatch.setattr("deep_translator.GoogleTranslator", FakeGoogleTranslator)
+
+    with pytest.raises(RuntimeError, match="rate limit") as first:
+        GoogleFreeProvider().translate("hello", "en", "zh-CN")
+    assert getattr(first.value, "retry_after", None) == 60
+
+    clock[0] += 10
+    with pytest.raises(RuntimeError, match="rate limit") as second:
+        GoogleFreeProvider().translate_batch(["another text"], "en", "zh-CN")
+    assert getattr(second.value, "retry_after", None) == 50
+    assert calls == ["hello"]
+
+    clock[0] += 50
+    assert GoogleFreeProvider().translate("retry", "en", "zh-CN") == "translated"
+    assert calls == ["hello", "retry"]
+
+
+def test_google_concurrent_calls_stop_after_first_rate_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    from deep_translator.exceptions import TooManyRequests
+
+    monkeypatch.setattr(GoogleFreeProvider, "_rate_limited_until", 0.0, raising=False)
+    entered = Event()
+    release = Event()
+    second_started = Event()
+    calls: list[str] = []
+
+    class FakeGoogleTranslator:
+        def __init__(self, **_kwargs: object) -> None:
+            pass
+
+        def translate(self, text: str) -> str:
+            calls.append(text)
+            entered.set()
+            assert release.wait(timeout=5)
+            raise TooManyRequests()
+
+    monkeypatch.setattr("deep_translator.GoogleTranslator", FakeGoogleTranslator)
+
+    def translate(text: str, is_second: bool = False) -> str:
+        if is_second:
+            second_started.set()
+        return GoogleFreeProvider().translate(text, "en", "zh-CN")
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(translate, "first")
+        assert entered.wait(timeout=5)
+        second = pool.submit(translate, "second", True)
+        assert second_started.wait(timeout=5)
+        release.set()
+        for future in (first, second):
+            with pytest.raises(RuntimeError, match="rate limit"):
+                future.result(timeout=5)
+
+    assert calls == ["first"]
+
+
+def test_google_batch_rejects_lost_separator_instead_of_empty_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(GoogleFreeProvider, "_rate_limited_until", 0.0)
+
+    class FakeGoogleTranslator:
+        def __init__(self, **_kwargs: object) -> None:
+            pass
+
+        def translate(self, _text: str) -> str:
+            return "one result without a separator"
+
+    monkeypatch.setattr("deep_translator.GoogleTranslator", FakeGoogleTranslator)
+
+    with pytest.raises(ValueError, match="result count"):
+        GoogleFreeProvider().translate_batch(["first", "second"], "en", "zh-CN")
+
+
+def test_mtran_batch_server_failure_does_not_fan_out_single_requests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(503, json={"error": "temporarily unavailable"})
+
+    real_client = httpx.Client
+    monkeypatch.setattr(
+        "glean_core.services.translation_providers.httpx.Client",
+        lambda **kwargs: real_client(transport=httpx.MockTransport(respond), **kwargs),
+    )
+    provider = MTranProvider(base_url="http://mtran.local")
+
+    with pytest.raises(httpx.HTTPStatusError):
+        provider.translate_batch(["first", "second", "third"], "en", "zh-CN")
+
+    assert [request.url.path for request in requests] == ["/translate/batch"]
 
 
 def test_mtran_translate_parses_standard_payload(monkeypatch) -> None:  # type: ignore[no-untyped-def]

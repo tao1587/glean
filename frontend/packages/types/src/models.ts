@@ -10,7 +10,7 @@ export type TranslationTargetLanguage = 'zh-CN' | 'en'
 export interface UserSettings {
   read_later_days?: number // Days until read later items expire (0 = never)
   show_read_later_remaining?: boolean // Show remaining time in read later list
-  translation_provider?: 'google' | 'deepl' | 'openai' | 'mtran'
+  translation_provider?: 'google' | 'deepl' | 'openai' | 'mtran' | null
   translation_target_language?: TranslationTargetLanguage
   list_translation_auto_enabled?: boolean // Auto-enable list viewport translation
   list_translation_english_only?: boolean // Translate only English content in list

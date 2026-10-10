@@ -378,6 +378,9 @@ async def fetch_feed(
 
             except httpx.HTTPError as e:
                 last_error = e
+                # Immediate retries amplify upstream limits and cannot repair client errors.
+                if isinstance(e, httpx.HTTPStatusError) and e.response.status_code < 500:
+                    break
                 if attempt == 0:
                     await asyncio.sleep(1)
 

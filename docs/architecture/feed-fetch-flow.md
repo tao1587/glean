@@ -1,6 +1,6 @@
 # Feed Fetch Flow
 
-Last updated: 2026-04-10
+Last updated: 2026-10-10
 
 This document describes the current feed fetching pipeline implemented in `glean`, based on the worker task, API refresh entrypoints, and RSS parsing/content extraction packages.
 
@@ -108,10 +108,10 @@ flowchart TD
   D1 -->|No| D2{"Database index corruption?"}
   D2 -->|Yes| R4["Keep feed ACTIVE<br/>record infra error<br/>next_fetch_at = now + refresh interval"]
   D2 -->|No| D3["error_count++ and save fetch_error_message"]
-  D3 --> D4{"error_count >= 10?"}
+  D3 --> D4{"Other than a transient RSSHub failure<br/>and error_count >= 10?"}
   D4 -->|Yes| D5["Set feed status = ERROR"]
   D4 -->|No| D6["Keep feed enabled"]
-  D5 --> D7["Set retry schedule with backoff<br/>raise arq Retry(defer=5m)"]
+  D5 --> D7["Set capped retry schedule with backoff<br/>raise arq Retry using the scheduled delay"]
   D6 --> D7
 ```
 
@@ -157,8 +157,11 @@ flowchart TD
 - `304 Not Modified` is treated as a successful fetch and clears previous feed error state.
 - Duplicate GUID insert races are treated as benign idempotency cases.
 - Database index corruption is treated as infrastructure failure, not feed failure.
-- Other exceptions increment `error_count`, store `fetch_error_message`, schedule exponential backoff, and raise an arq retry.
-- After 10 consecutive errors, the feed status becomes `ERROR`.
+- RSSHub connection failures and HTTP 502/503/504 are possible instance outages, but only a failed origin-root health probe opens a circuit. Circuits are keyed separately by origin, including when the final failed attempt used a different fallback instance. Only feeds on that unavailable instance are deferred, without incrementing their error counts.
+- Origin circuits use 2/5/10/20/30-minute backoff and retain the failure counter for 30 minutes beyond the health window. A healthy root or successful feed response clears that origin's circuit.
+- A RSSHub route returning HTTP 429 or 5xx while its origin is healthy remains `ACTIVE` even after ten failures. Transport failures at a reachable origin also remain eligible. They retain error details and retry at 15/30/60 minutes (capped), without blocking healthy routes or other instances.
+- Other exceptions increment `error_count`, store `fetch_error_message`, schedule exponential backoff, and raise an arq retry. After 10 consecutive errors outside the RSSHub transient exception, the feed status becomes `ERROR`.
+- The HTTP fetcher performs at most one immediate retry for server/transport failures. HTTP 4xx, including 429, return immediately to the worker's backoff policy instead of issuing a duplicate request one second later.
 
 ### 4.7 Operational guardrails
 

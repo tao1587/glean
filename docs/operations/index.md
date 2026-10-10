@@ -8,5 +8,6 @@ Use this section for deployment, runtime operations, local development workflows
 - [personal-deployment-guide.md](./personal-deployment-guide.md)
 - [admin-setup.md](./admin-setup.md)
 - [feed-fetch-guardrails.md](./feed-fetch-guardrails.md)
+- [rsshub-route-repairs.md](./rsshub-route-repairs.md)
 - [backend-logging-baseline.md](./backend-logging-baseline.md)
 - [cloudflare-tunnel-optimization.md](./cloudflare-tunnel-optimization.md)

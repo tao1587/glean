@@ -1,6 +1,6 @@
 # Feed Fetch Guardrails
 
-Last updated: 2026-04-10
+Last updated: 2026-10-10
 
 This document captures the recent RSS/feed fetching failures seen during real NAS deployments and the guardrails that future code changes must preserve.
 
@@ -128,6 +128,21 @@ Guardrail:
 - keep queue-health debugging separate from feed-source debugging
 - worker fetch failures should not be mistaken for scheduler or queue deadlocks
 
+### 1.7 One RSSHub route or instance must not block healthy sources
+
+Observed on 2026-10-10: local RSSHub root and `/healthz` returned 200, the Anthropic research route returned 503 with an empty-route error, and a representative Twitter route returned valid XML. The Anthropic website itself remained reachable; its publication markup no longer matched RSSHub's original Next.js data path.
+
+Guardrails:
+
+- A route 503 is insufficient evidence of an instance outage. Confirm origin health before opening a circuit.
+- Use a separate circuit per origin, and attribute failure to the actual final attempted URL when fallback instances differ.
+- Keep temporary RSSHub route failures (429, 5xx, transport errors) eligible for scheduled refreshes with capped backoff. Do not permanently disable them after ten transient failures.
+- Preserve the circuit counter beyond its unblock timestamp so repeated failed health probes escalate rather than continually restarting at two minutes.
+- Treat permanent client failures separately. The HTTP fetcher must not repeat 403/404/429 immediately.
+- Retain terminal run writes and Redis reconciliation while deferring feed jobs; unavailable sources must still converge to a terminal run state.
+
+The inspected Anthropic route repair and build instructions are recorded in [rsshub-route-repairs.md](./rsshub-route-repairs.md).
+
 ## 2. Invariants Future Changes Must Preserve
 
 1. Persisted active runs and Redis jobs can diverge; queue views must reconcile them.
@@ -154,6 +169,7 @@ Recommended test targets:
 ```bash
 cd backend
 uv run pytest apps/api/tests/test_feed_fetch_progress.py apps/api/tests/test_feeds_router_active_runs.py apps/worker/tests/test_feed_refresh_scheduler.py
+uv run pytest apps/worker/tests/test_rsshub_reliability.py packages/rss/tests/test_fetch_retry_policy.py
 ```
 
 ## 4. Fast Debugging Checklist

@@ -239,6 +239,10 @@
       "zh-CN": "简体中文",
       "en": "English"
     },
+    "automatic": {
+      "name": "自动",
+      "desc": "使用服务器默认翻译服务"
+    },
     "google": {
       "name": "Google 翻译",
       "desc": "免费翻译服务，无需 API 密钥"
@@ -261,7 +265,7 @@
     "baseUrlPlaceholder": "http://your-mtran-host:8989",
     "model": "模型",
     "modelPlaceholder": "可选模型名",
-    "noKeyWarning": "{{provider}} 需要 API 密钥，将使用 Google 翻译作为备选。",
+    "noKeyWarning": "使用 {{provider}} 翻译需要配置 API 密钥。",
     "settingsSaved": "翻译设置已保存",
     "listAutoEnable": "默认开启列表翻译",
     "listAutoEnableDesc": "在阅读列表中自动开启基于视窗的翻译",

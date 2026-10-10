@@ -72,7 +72,7 @@ The vectorization-status implementation has no authentication dependency, despit
 | `PATCH /api/entries/{entry_id}` | Update `is_read`, `read_later`, `is_hidden` |
 | `GET /api/entries/source-affinity` | Per-source score: reads + saves − hides |
 | `POST /api/entries/mark-all-read` | Mark selected scope read |
-| `POST /api/entries/translate-texts` | Batch text translation |
+| `POST /api/entries/translate-texts` | Batch text translation; provider/configuration failures use 400/429/502, and rate limits include `Retry-After` |
 | `GET /api/entries/{entry_id}/paragraph-translations` | Cached paragraph translations |
 | `POST /api/entries/{entry_id}/translate` | Queue full-article translation |
 | `GET /api/entries/{entry_id}/translation/{target_language}` | Translation status/result |
@@ -104,3 +104,7 @@ Sources: [`server.py`](../../backend/apps/api/glean_api/mcp/server.py), [`auth.p
 Retired on 2026-10-10: `/api/ai/*`, `/api/today/ai/*`, `/api/system/ai-integration`, `/api/admin/settings/ai-integration`. Summary UI controls, worker jobs/cron, and dedicated `LLM_*`/`SUMMARY_CRON_HOURS` settings were removed.
 
 The summary ORM module and model exports have also been removed. Historical migration records remain to preserve existing database revision history; they are not application feature code. No running database data was modified. Translation, discovery, and MCP remain available.
+
+## Translation provider behavior
+
+An unset/null provider preference means Automatic: use the configured `MTRAN_SERVER_URL` when present, otherwise Google. Explicit provider selections remain unchanged. MTran does not silently fall back to Google. Missing explicit paid-provider credentials return a configuration error; provider rate limits return 429 with `Retry-After` and a bounded cooldown instead of a generic 502. Paragraph cache hits and blank text positions are preserved.

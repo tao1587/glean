@@ -168,6 +168,33 @@ class TestTranslateEntryTask:
     """Test translate_entry_task worker function."""
 
     @pytest.mark.asyncio
+    async def test_missing_selected_provider_key_marks_translation_failed(self):
+        from glean_database.models.entry_translation import EntryTranslation
+
+        translation = EntryTranslation(
+            entry_id="test-entry-id", target_language="zh-CN", status="pending"
+        )
+        user = MagicMock(settings={"translation_provider": "openai"})
+        entry = MagicMock(title="Title", content="<p>Content</p>")
+        results = []
+        for value in (user, translation, entry):
+            result = MagicMock()
+            result.scalar_one_or_none.return_value = value
+            results.append(result)
+        session = AsyncMock()
+        session.execute.side_effect = results
+
+        with patch("glean_worker.tasks.translation.get_session_context") as context:
+            context.return_value.__aenter__.return_value = session
+            result = await translate_entry_task(
+                {}, entry_id="test-entry-id", target_language="zh-CN", user_id="user-1"
+            )
+
+        assert result["status"] == "error"
+        assert translation.status == "failed"
+        assert "API key" in (translation.error or "")
+
+    @pytest.mark.asyncio
     async def test_translation_record_not_found(self):
         """Test task handles missing translation record."""
         mock_session = AsyncMock()

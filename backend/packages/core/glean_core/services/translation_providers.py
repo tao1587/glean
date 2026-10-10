@@ -3,7 +3,8 @@ Translation provider abstraction.
 
 Supports Google Translate (free), DeepL, and OpenAI as configurable
 translation backends. Users configure their preferred provider and
-API key via user settings; no key falls back to Google free.
+API key via user settings. An unset preference uses configured local
+MTran, or Google when no local service is configured.
 """
 
 import json
@@ -12,7 +13,10 @@ import re
 import unicodedata
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
-from typing import Any
+from math import ceil
+from threading import Lock
+from time import monotonic
+from typing import Any, ClassVar
 
 import httpx
 
@@ -26,6 +30,20 @@ _SEPARATOR = " ||| "
 DEFAULT_MTRAN_SERVER_URL = "http://127.0.0.1:8989"
 MTRAN_BATCH_SIZE = 24
 MTRAN_MAX_PAYLOAD_SIZE = 100 * 1024  # 100KB limit for MTranServer
+GOOGLE_RATE_LIMIT_COOLDOWN_SECONDS = 60
+
+
+class TranslationRateLimitError(RuntimeError):
+    """A provider rejected requests; callers should wait before retrying."""
+
+    def __init__(self, provider: str, retry_after: int = 60) -> None:
+        self.provider = provider
+        self.retry_after = max(1, retry_after)
+        super().__init__(f"Translation rate limit reached for {provider}; retry later.")
+
+
+class TranslationConfigurationError(RuntimeError):
+    """The explicitly selected provider lacks required configuration."""
 
 
 def _encode_mtran_payload(payload: dict[str, Any]) -> bytes:
@@ -146,30 +164,32 @@ def _parse_openai_batch_response(raw: str, expected_count: int) -> list[str] | N
     return None
 
 
-class FallbackProvider(TranslationProvider):
-    """Provider wrapper that falls back to another provider on failures."""
-
-    def __init__(self, primary: TranslationProvider, fallback: TranslationProvider) -> None:
-        self.primary = primary
-        self.fallback = fallback
-
-    def translate(self, text: str, source: str, target: str) -> str:
-        try:
-            return self.primary.translate(text, source, target)
-        except Exception:
-            logger.exception("Primary translation provider failed; using fallback")
-            return self.fallback.translate(text, source, target)
-
-    def translate_batch(self, texts: list[str], source: str, target: str) -> list[str]:
-        try:
-            return self.primary.translate_batch(texts, source, target)
-        except Exception:
-            logger.exception("Primary batch translation failed; using fallback")
-            return self.fallback.translate_batch(texts, source, target)
-
-
 class GoogleFreeProvider(TranslationProvider):
     """Free Google Translate via deep-translator."""
+
+    _request_lock = Lock()
+    _rate_limited_until: ClassVar[float] = 0.0
+
+    def _translate_request(self, translator: Any, text: str) -> str:
+        from deep_translator.exceptions import TooManyRequests
+
+        # Google limits apply to the process/source IP, not one provider instance.
+        # Serializing requests means callers already waiting cannot issue more
+        # upstream requests after the first rate-limit response.
+        with self._request_lock:
+            remaining = ceil(GoogleFreeProvider._rate_limited_until - monotonic())
+            if remaining > 0:
+                raise TranslationRateLimitError("google", remaining)
+            try:
+                result: str = translator.translate(text)
+                return result
+            except TooManyRequests as exc:
+                GoogleFreeProvider._rate_limited_until = (
+                    monotonic() + GOOGLE_RATE_LIMIT_COOLDOWN_SECONDS
+                )
+                raise TranslationRateLimitError(
+                    "google", GOOGLE_RATE_LIMIT_COOLDOWN_SECONDS
+                ) from exc
 
     def translate(self, text: str, source: str, target: str) -> str:
         from deep_translator import GoogleTranslator
@@ -177,7 +197,7 @@ class GoogleFreeProvider(TranslationProvider):
         if not text or not text.strip():
             return text
         translator = GoogleTranslator(source=source, target=target)
-        result: str = translator.translate(text[:_CHUNK_SIZE])
+        result = self._translate_request(translator, text[:_CHUNK_SIZE])
         return result
 
     def translate_batch(self, texts: list[str], source: str, target: str) -> list[str]:
@@ -211,13 +231,15 @@ class GoogleFreeProvider(TranslationProvider):
             combined = _SEPARATOR.join(batch_texts)
 
             if len(combined) <= _CHUNK_SIZE:
-                translated_combined: str = translator.translate(combined)
+                translated_combined = self._translate_request(translator, combined)
                 translated_parts = translated_combined.split("|||")
+                if len(translated_parts) != len(batch_indices):
+                    raise ValueError("Google translation result count did not match the batch")
                 for j, idx in enumerate(batch_indices):
-                    results[idx] = translated_parts[j].strip() if j < len(translated_parts) else ""
+                    results[idx] = translated_parts[j].strip()
             else:
                 for j, idx in enumerate(batch_indices):
-                    result: str = translator.translate(batch_texts[j][:_CHUNK_SIZE])
+                    result = self._translate_request(translator, batch_texts[j][:_CHUNK_SIZE])
                     results[idx] = result
 
             batch_start += len(batch_texts)
@@ -475,11 +497,18 @@ class MTranProvider(TranslationProvider):
             raise ValueError(
                 f"MTranServer request body exceeds {MTRAN_MAX_PAYLOAD_SIZE}-byte payload limit"
             )
-        return client.post(
+        response = client.post(
             f"{self.base_url}{path}",
             content=encoded,
             headers=self._headers(),
         )
+        if response.status_code == 429:
+            raw_retry_after = response.headers.get("Retry-After", "")
+            retry_after = (
+                max(1, min(300, int(raw_retry_after))) if raw_retry_after.isdigit() else 60
+            )
+            raise TranslationRateLimitError("mtran", retry_after)
+        return response
 
     def _translate_single_request(
         self,
@@ -686,10 +715,14 @@ class MTranProvider(TranslationProvider):
                     return parsed
                 raise ValueError("MTranServer batch response is not parseable")
         except Exception as exc:
+            # An outage, timeout or rate limit cannot be repaired by multiplying
+            # the same batch into individual upstream requests.
+            if response is None or response.status_code == 429 or response.status_code >= 500:
+                raise
             # If it's a "No model found" error, don't bother with single requests
             err_text = ""
             try:
-                err_text = response.text if response is not None else str(exc)
+                err_text = response.text
             except Exception:
                 err_text = str(exc)
 
@@ -704,19 +737,13 @@ class MTranProvider(TranslationProvider):
             return [self.translate(t, source, target) for t in texts]
 
 
-def _is_mtran_available(base_url: str, timeout: float = 0.8) -> bool:
-    """Check whether MTranServer is reachable."""
-    check_urls = [f"{base_url}/health", base_url]
-    with httpx.Client(timeout=timeout) as client:
-        for url in check_urls:
-            try:
-                response = client.get(url)
-                # Any HTTP response means the server is reachable.
-                if response.status_code >= 100:
-                    return True
-            except httpx.RequestError:
-                continue
-    return False
+def resolve_translation_provider_name(settings: Any | None) -> str:
+    """Respect an explicit preference; use configured local MTran as the default."""
+    normalized = _normalize_translation_settings(settings)
+    configured = normalized.get("translation_provider")
+    if isinstance(configured, str) and configured.strip():
+        return configured.strip()
+    return "mtran" if os.getenv("MTRAN_SERVER_URL", "").strip() else "google"
 
 
 def create_translation_provider(settings: Any | None) -> TranslationProvider:
@@ -729,25 +756,26 @@ def create_translation_provider(settings: Any | None) -> TranslationProvider:
         - translation_model: Model name for OpenAI/MTran (default: "gpt-4o-mini")
         - translation_base_url: Base URL for MTranServer (optional)
 
-    Falls back to GoogleFreeProvider when provider is google, no key is
-    provided for non-google providers, or settings are empty.
+    Explicit selections never switch provider after a failure. An unset
+    preference uses the configured MTran service, or Google when no local
+    service is configured. Missing paid-provider keys are reported to callers.
     """
     normalized_settings = _normalize_translation_settings(settings)
-    if not normalized_settings:
-        return GoogleFreeProvider()
-
-    provider = normalized_settings.get("translation_provider", "google")
+    provider = resolve_translation_provider_name(normalized_settings)
     api_key = normalized_settings.get("translation_api_key", "")
     raw_model = normalized_settings.get("translation_model")
     model = raw_model if isinstance(raw_model, str) else None
     raw_base_url = normalized_settings.get("translation_base_url")
     base_url = raw_base_url if isinstance(raw_base_url, str) else ""
 
-    if provider == "deepl" and api_key:
+    if provider in {"deepl", "openai"} and not api_key:
+        raise TranslationConfigurationError(f"Configure an API key for {provider} translation.")
+
+    if provider == "deepl":
         logger.info("Using DeepL translation provider")
         return DeepLProvider(api_key)
 
-    if provider == "openai" and api_key:
+    if provider == "openai":
         openai_model = model or "gpt-4o-mini"
         logger.info(
             "Using OpenAI translation provider",
@@ -761,20 +789,10 @@ def create_translation_provider(settings: Any | None) -> TranslationProvider:
             "Using MTran translation provider",
             extra={"base_url": resolved_base_url},
         )
-        if not _is_mtran_available(resolved_base_url):
-            logger.warning(
-                "MTranServer is not reachable; falling back to Google Translate",
-                extra={"base_url": resolved_base_url},
-            )
-            return GoogleFreeProvider()
-
-        return FallbackProvider(
-            primary=MTranProvider(
-                base_url=resolved_base_url,
-                api_key=api_key,
-                model=model or "",
-            ),
-            fallback=GoogleFreeProvider(),
+        return MTranProvider(
+            base_url=resolved_base_url,
+            api_key=api_key,
+            model=model or "",
         )
 
     return GoogleFreeProvider()
