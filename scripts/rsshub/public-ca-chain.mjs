@@ -1,6 +1,6 @@
 import { X509Certificate } from 'node:crypto';
 import tls from 'node:tls';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const EXPECTED_SHA256 = '072639d0b140d5bffae16ad9c3f6cc6086040621f51ee61a6d46a8915c07cf76';
@@ -40,5 +40,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (typeof tls.getCACertificates !== 'function' || typeof tls.setDefaultCACertificates !== 'function') {
     throw new Error('Unsupported Node CA runtime');
   }
-  console.log(JSON.stringify(verifyPublicBridge(await readFile(process.argv[2], 'utf8'))));
+  console.log(JSON.stringify(verifyPublicBridge(readFileSync(process.argv[2], 'utf8'))));
 }
