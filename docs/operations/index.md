@@ -14,3 +14,5 @@ Use this section for deployment, runtime operations, local development workflows
 - [cloudflare-tunnel-optimization.md](./cloudflare-tunnel-optimization.md)
 
 The [latest NAS log audit and scheduling repair](../agent-workflows/reviews/2026-10-10-latest-nas-log-audit/index.md) records deployed worker eligibility, current translation/RSS evidence and protected rollback.
+
+The [Bilibili video reliability review](../agent-workflows/reviews/2026-10-10-bilibili-video-reliability/index.md) records the deployed CDP/session correction, original-video maintenance result and remaining provider verification signals.
