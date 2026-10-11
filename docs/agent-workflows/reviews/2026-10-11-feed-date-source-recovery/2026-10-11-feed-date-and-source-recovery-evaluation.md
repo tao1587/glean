@@ -1,8 +1,8 @@
 # Feed date and source recovery independent evaluation
 
-Date: 2026-10-11. Phase: **COMBINED SOURCES/PACKAGING APPROVED — isolated image, data and source-operation verification pending**.
+Date: 2026-10-11. Phase: **FINAL ACCEPTED — producer deployment, scoped recovery, owned subscriptions and preservation independently verified**.
 
-Contract: [feed publication-date and source recovery](./2026-10-11-feed-date-and-source-recovery-contract.md). Local source baseline: `ddb4b153c90887d08d449821d4997b8ed7a5e920`. This phase inspects local code only; the evaluator makes no NAS/provider/browser request, account mutation or refresh enqueue. Private inventories, identifiers, fingerprints, content and credentials stay outside the public record. Exact user-referenced replacement links are pending; ambiguity cannot be resolved by changing author or publication.
+Contract: [feed publication-date and source recovery](2026-10-11-feed-date-and-source-recovery-contract.md). Initial local source baseline: `ddb4b153c90887d08d449821d4997b8ed7a5e920`. The early review below was local-only; missing replacement links were later resolved under the user's explicit authorization for official-address research. Final evaluation independently reads protected NAS evidence/runtime metadata, executes read-only SQL and four authenticated internal date-search GETs, and parses existing candidate/production XML. It makes no publisher/browser request, mutation or enqueue. Private inventories, identifiers, fingerprints, content and credentials stay outside this public record. Earlier pending/rejected phases below are historical; final verified gates at the end supersede them.
 
 ## Date producer, persistence and consumer boundaries
 
@@ -28,7 +28,7 @@ A Today/period response containing the four items does not prove publication-dat
 
 If implementation updates conflicts automatically, a broad `DO UPDATE ... RETURNING Entry.id` is unsafe with the current worker control flow: the returned old ID would be treated as a new insert, affecting `new_entries`, backfill/embedding jobs and latest-entry handling. Separate the update outcome from insertion, use an atomic null guard, keep ingestion/creation timestamps and all content fields, and make repeated/concurrent repair idempotent. Required regression cases include old-null/new-valid, old-valid/new-different, absent incoming date, wrong Feed/GUID/URL, publication-versus-modification provenance, and existing-row updates counted as zero new entries.
 
-Producer validation must also separate a new item from an old cached item. Public article/card metadata alone is not a deployed reproduction. Verify actual route output, article/feed cache behavior and parsed timestamps, then old-row persistence independently. The [engineering research handoff](./2026-10-11-engineering-date-research-handoff.md) supplies current publisher/history evidence; it does not replace those runtime checks.
+Producer validation must also separate a new item from an old cached item. Public article/card metadata alone is not a deployed reproduction. Verify actual route output, article/feed cache behavior and parsed timestamps, then old-row persistence independently. The [engineering research handoff](2026-10-11-engineering-date-research-handoff.md) supplies current publisher/history evidence; it does not replace those runtime checks.
 
 ## Full-text and backfill boundaries
 
@@ -124,7 +124,7 @@ The real 39-paragraph replay establishes current full-text availability. Structu
 
 ## Independent fixed daily recipe review
 
-The evaluator reviews the adapter, exact-source-pinned patcher, actual compiled generic-transform fixture and [implementation handoff](./2026-10-11-ainews-date-implementation-handoff.md). Independent executable result: **18 passed**. Replaying today's expanded 15-case adapter suite against the actual old module yields **13 failures/two passing controls**, distinct from the generator's earlier ten-case RED evidence. No NAS/provider/browser request occurs.
+The evaluator reviews the adapter, exact-source-pinned patcher, actual compiled generic-transform fixture and [implementation handoff](2026-10-11-ainews-date-implementation-handoff.md). Independent executable result: **18 passed**. Replaying today's expanded 15-case adapter suite against the actual old module yields **13 failures/two passing controls**, distinct from the generator's earlier ten-case RED evidence. No NAS/provider/browser request occurs.
 
 Scope and behavior reviewed:
 
@@ -156,3 +156,89 @@ Independent post-correction results:
 Dockerfile review confirms only the three new production adapter/patcher pairs are copied and run in addition to the existing repairs. Research, podcast/retry, public bridge, synchronous common entry and wrapper files remain in the build. `ENTRYPOINT` retains `dumb-init` plus the existing CA wrapper; `CMD` remains `npm run start`. No package manifest, dependency runtime, application worker or global environment policy changes are introduced by this packaging delta.
 
 **APPROVE combined source freeze and isolated actual-image build.** Source rejections are resolved. Production acceptance still requires the default candidate image's real XML/cache/formatting and prior-route/CA/CDP markers, four authoritative null-only dates and owned publication-date API results, all four new bootstrap/ownership outcomes, verified old-address changes and justified association-only unsubscribe with protected all-field comparisons. Root owns those canaries/mutations; the evaluator has not issued NAS/provider requests at this stage.
+
+## Operator scripts: rejected stale-object guard, corrected before data apply
+
+The evaluator locally reviews the protected data/image operation scripts without executing apply, enqueues or NAS/provider requests. Image handling retains an immutable old-image tag and protected original Compose/runtime baseline, asserts the current container/configuration hash, clones the exact environment for an owned canary, validates revision/default command and recreates only RSSHub. Resolved Compose may differ only in its image; other component identities/environment and owned cleanup are checked. Source/image review is not substituted for final runtime inspection.
+
+The first data script was **rejected before apply**: preflight populated ORM objects, but subsequent `FOR UPDATE` queries did not refresh that identity-map state. A concurrent null-date fill or URL/association change could therefore remain invisible to the cached comparison; the original date write lacked an SQL null predicate. This is a source-review finding grounded in SQLAlchemy's documented normal object-loading behavior, not a claimed executed NAS race. [SQLAlchemy populate-existing reference](https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#populate-existing).
+
+Root corrects the script, and independent local re-review confirms:
+
+- Ordered Feed and individual Entry/Subscription locks use `populate_existing`; full before rows are revalidated after locking.
+- Four date Core updates require exact ID/Feed/GUID/URL and `published_at IS NULL`, each affecting exactly one row. No global worker/parser date policy changes.
+- Source Core updates require old ID/URL/type, after-lock destination collision checks and one affected row; validators are cleared explicitly.
+- Unsubscribe uses only the owned Subscription table row with owner/Feed predicates and one affected row. No ORM orphan cascade or read-state deletion occurs; the deleted instance is detached before fresh checks.
+- All preservation reads use fresh objects. Remaining subscription IDs, old fields and the exact four-date allowlist are checked before one commit. Current-owner subscription guards cover refresh/source targets before and after locking and before enqueuing.
+- Helpers are mode 600; raw operational evidence/rollback remains protected. The applied marker is written after commit, so an evidence-write failure must trigger read-only outcome inspection, not a blind retry; old-state/null guards independently prevent a second write.
+
+**APPROVE the corrected bounded transaction plan** for four authoritative null dates, three confirmed in-place addresses and one justified current-owner association removal. Actual commit, old-field/date/association preservation and owned publication-date retrieval remain final gates. Root's preview reports 809 old entries/805 non-null dates/120 reading states/eight target subscriptions; those figures have not yet been independently read from the NAS by this evaluator.
+
+The four tracked Feed refreshes disable existing-entry backfill. Native-feed newly inserted articles can still enqueue normal content backfill, so this does not mean four total jobs or zero other transport calls. Root explicitly accepts/monitors that normal pipeline; no queue reset or fabricated quiescence is an acceptance method.
+
+## GUID/content interpretation corrected before final assessment
+
+Weekly GUID checks distinguish producer XML, feedparser and Glean: the producer preserves its literal issue GUID, while Glean's long-standing relative-identifier resolution can make the stored GUID absolute. Root reports historical mixed literal/resolved rows and verifies the recent stored issue is compatible; the new default issue has no old collision. Do not attribute this behavior to the recent HTML guard, rewrite old GUIDs or alter the global parser. Default-one verification does not establish safe replay of every old literal row under a wider limit; final checks must retain all old mixed identities and detect new duplicate canonical articles.
+
+The existing daily article's short body is preserved; the corrected producer's long body does not overwrite a GUID-conflicting old row. Root separately reports the specifically requested short-content publication has obtained full text through the existing normal backfill pipeline. Final reporting must distinguish that target's actual stored body from the daily producer-only improvement; no blanket old-fulltext repair is claimed.
+
+## Final independent runtime and saved-XML verification
+
+Actual running RSSHub image is `53379de86ff9a963fe2ad0275ba073aef4c5a8fcc0e756cc493a3e0cdc5f702d`, revision `33aa4c81c49379062aa24fe3b4a22c24a0e02471`, started 2026-10-11 14:48:49.201304 UTC, restart count zero. Its environment equals the protected before snapshot exactly; fifteen other running component IDs/images remain identical. All fifteen checked production adapter/patcher/CA/certificate/wrapper files match frozen repository bytes. Correct Engineering, weekly, daily, research, podcast-detail, no-429-retry and synchronous CA-entry markers are present.
+
+CDP session 90 seconds, legacy WS, Browserless global 30 seconds, two configured HTTP retries and generic-domain setting are retained. Image default `ENTRYPOINT` retains the CA wrapper. The actual production container retains its existing Compose `dumb-init --` override, equal to the old container; command remains `npm run start`. A first evaluator comparison incorrectly expected the image default on the container, then an explicit before/image/container comparison resolved the distinction. The common app entry still imports the synchronous verified CA installer. No startup regression or override change is inferred.
+
+The evaluator parses the already captured eight candidate and eight production XML samples inside the NAS, without exporting bodies or refetching routes:
+
+| Saved route evidence | Independent result |
+|---|---|
+| Engineering first/repeat | 20 items/20 parsed dates/20 existing GUID overlaps; all four repaired old articles appear with the authoritative dates; repeated identity/date/body equal |
+| Weekly publication first/repeat | Default one item, original raw issue GUID, actual Glean relative-GUID resolution, real 2026-10-09T14:00:25Z publication and 39 body paragraphs; repeated identity/date/body equal |
+| Daily publication first/repeat | One dated existing-GUID item, full producer body over 10,000 stripped characters; repeated identity/date/body equal |
+| Generic weekly | Four dated items with canonical links; fixed daily wrapper does not intercept this recipe |
+| Prior research repair | Two dated items with canonical links |
+
+Raw files are mode 600 in a mode-700 directory. These limited normal-cache samples prove observed compatibility, not perpetual availability. The separate actual-image ofetch receipt has exit zero, three tests passed/zero failed; its program SHA matches the frozen repository test, and the deployed package is independently read as 1.5.1. The evaluator reads that existing loopback receipt rather than running another transport/provider test. Protected original Compose/image and runtime snapshots remain available for rollback.
+
+## Final independent data, ownership and consumer gates
+
+At 2026-10-11 15:07:19 UTC the evaluator opens an explicit read-only transaction and rechecks every protected old row. No operator `apply`, `enqueue` or artifact-writing `check` mode is executed by the evaluator.
+
+| Gate | Verified result |
+|---|---|
+| Old articles | 809 distinct rows retained; zero field differences outside four `published_at`/corresponding `updated_at` changes |
+| Date preservation | All 805 old non-null dates identical; four null dates equal exact publisher evidence; Engineering now 24 dated stored articles |
+| State/bookmarks | 120 old reading-state rows and the empty target bookmark set unchanged |
+| Subscriptions | Seven of eight target associations retained unchanged; only the authorized current-owner association removed; all global remaining IDs and fields equal the protected before set minus that one |
+| Retired source history | Same Feed/URL/type retained, with all fifty old articles and three reading states; no orphan cascade |
+| Existing source recovery | Three confirmed current URLs/types on the same Feed IDs; no delete/recreate or article reassociation |
+| Four new subscriptions | Four unique receipts owned by the sole active account; each bootstrap success/complete with no stored error, dated nonempty content; payload counts 20/15/182/4 |
+| Actual publication-date API | Four independent authenticated internal GETs all HTTP 200 and each repaired old ID found in its true publication-day search; these are not collection-time-only checks |
+| Four maintenance runs | Owned Feed/job match, manual-admin success/complete, no error, original/current primary URL and `fallback_used=false`, one complete stage and all stages terminal |
+| Queue/schema | Zero active target runs, queue zero/in-progress zero, positive worker-health TTL (1,836 seconds at the independent check), schema `94af7ef02eb9` |
+
+The maintenance payloads are 20/one/one/fifteen with zero/one/zero/fifteen new entries. No new canonical article duplicates any old URL. The recovered weekly source now has 31 articles and the latest issue's true date/full body. Its seventeen old literal and thirteen resolved GUIDs remain unchanged. The native programme source has 77 articles, preserving its 62 audio-history rows and adding fifteen confirmed current official videos. Old-channel staleness did not cause a false programme unsubscribe.
+
+For the requested short-content publication, all fifteen new article rows are `done`, dated and outside the old 809-row set. Independently stripped stored bodies exceed 8,000 characters each; root's stricter whitespace-normalized count has minimum 8,533. Normal extraction rather than a marketing/teaser substitution supplies these bodies. The daily producer's long XML body is distinct: its 126 existing rows, including the short old body, remain unchanged. No broad old-content overwrite or date policy was introduced.
+
+## Bounded operational recovery and remaining limits
+
+Root correlates three new native-video body jobs returning `EntryNotFound` with the pre-existing enqueue-before-final-commit visibility race. Four precisely tracked new-body jobs, including one failed short-content target, receive one normal `force=false` retry. The evaluator independently reads that protected receipt and verifies four targets all outside the old 809 IDs and the false force flag. No old row is retried or forced, no queue is reset and no global worker/parser race fix is claimed.
+
+The requested article publication finishes fifteen of fifteen bodies. Native-video body statuses finish eleven done/four failed/zero pending or processing; one failed job had partial content before a browser-context-close error. These extraction statuses do not certify transcripts. Its primary RSS titles, dates and media summaries work; four body-extraction failures remain honestly recorded, and the already failed video jobs are not repeatedly probed. The general pre-commit worker race can recur outside this bounded recovery and remains an explicit limitation.
+
+Other limits remain: tagged weekly pages still delegate to their old parser; a wider historical weekly replay is not proven deduplicated against old literal GUIDs; saved/repeated cache samples do not guarantee future provider behavior; the daily fixed allowlist exception does not enable arbitrary generic domains; ordinary unsubscribe views need not keep listing the retained database history. No paywall or provider-verification bypass is used.
+
+## Final disposition and artifact closure
+
+| Evaluator rubric | Result |
+|---|---|
+| Contract compliance | PASS: requested date retrieval, four owned subscriptions, three verified same-publication recoveries, justified association-only removal and requested current full text |
+| Behavioral correctness | PASS within measured scope: actual deployed XML/worker results and independent publication-date API; body/transcript and historic replay limits disclosed |
+| Regression/preservation | PASS: 809 old rows/805 dates/120 states/global remaining subscriptions unchanged outside the exact allowlist; prior patches/startup/environment/component identities preserved |
+| Repository fit | PASS: source/contract/handoffs/evaluation recorded; public aggregates and private evidence separated; original six edits and unrelated plan preserved |
+| Verification quality | PASS: reproduced/fixed provenance and cache failures, independent 73 fixtures, saved actual XML/transport receipt, frozen runtime source, fresh read-only SQL and real consumer GETs |
+
+**FINAL ACCEPTED.** All required controlled gates are verified; material extraction/worker limitations above are not hidden or presented as globally fixed. Documentation validation, whitespace verification and final six original Git-diff fingerprint checks pass.
+
+Root reports the owned canary/environment clone already removed while protected XML/runtime/transport receipts and rollback remain. The evaluator no longer needs temporary runtime services or diagnostic helpers. This evaluation is frozen for root's task-only archival and documentation commit/push. Keep the private user report, evidence/before state and rollback; do not touch the unrelated active plan or six original working-tree edits.

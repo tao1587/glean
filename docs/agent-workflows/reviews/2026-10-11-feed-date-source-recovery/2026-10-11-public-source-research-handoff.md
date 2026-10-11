@@ -90,7 +90,7 @@ The substantive body is `main .prose[role="tabpanel"][data-state="active"]` (app
 
 The existing HTML transformation's `itemContent` step changes only `description`; it does **not** merge the child article's `article:published_time` into the feed item. Therefore the homepage recipe can restore body content but cannot, by itself, establish a dated daily feed. Using the single known article as the route input could extract its advertised title, identity and date, but would remain a fixed edition instead of automatically selecting future daily editions. Root must verify this boundary before choosing an address repair; do not claim a fully dated automatic feed from a homepage recipe that only fills content.
 
-Root stopped the proposed broader fixed-source wrapper after verifying the existing gate. At that point this generator had not created adapter, patcher, test or fixture files, installed dependencies or changed Docker configuration. Root subsequently authorized only the necessary daily publication-date recipe; its separate [implementation handoff](./2026-10-11-ainews-date-implementation-handoff.md) records tests and the narrowed boundary. The weekly continues through the original generic route.
+Root stopped the proposed broader fixed-source wrapper after verifying the existing gate. At that point this generator had not created adapter, patcher, test or fixture files, installed dependencies or changed Docker configuration. Root subsequently authorized only the necessary daily publication-date recipe; its separate [implementation handoff](2026-10-11-ainews-date-implementation-handoff.md) records tests and the narrowed boundary. The weekly continues through the original generic route.
 
 ### Remaining freshness limits
 

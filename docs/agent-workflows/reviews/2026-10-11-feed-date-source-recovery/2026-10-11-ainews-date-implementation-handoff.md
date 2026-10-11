@@ -4,7 +4,7 @@
 
 The official [AI developer daily homepage](https://ainews.liduos.com/) links a substantial public edition, while its native RSS currently supplies no items. The existing RSSHub HTML-transform recipe can fetch the linked article body, but its `itemContent` step does not merge the article's publication metadata. A homepage-based recipe therefore cannot supply a verified publication date on its own.
 
-The [adapter](../../../scripts/rsshub/ainews-transform-adapter.mjs) wraps only the exact existing route parameter pair:
+The [adapter](../../../../scripts/rsshub/ainews-transform-adapter.mjs) wraps only the exact existing route parameter pair:
 
 - `url=https://ainews.liduos.com/`
 - `routeParams=glean-ainews-v1`
@@ -23,12 +23,12 @@ The adapter calls the existing RSSHub got binding with `responseType=arrayBuffer
 
 ## Files touched
 
-- [adapter](../../../scripts/rsshub/ainews-transform-adapter.mjs)
-- [behavior tests](../../../scripts/rsshub/ainews-transform-adapter.test.mjs)
-- [fixture boundary utilities](../../../scripts/rsshub/ainews-transform-test-utils.mjs)
-- [compiled module fixture](../../../scripts/rsshub/fixtures/rsshub-html-transform-legacy.mjs)
-- [compiled-route patcher](../../../scripts/rsshub/patch-html-ainews.mjs)
-- [patcher tests](../../../scripts/rsshub/patch-html-ainews.test.mjs)
+- [adapter](../../../../scripts/rsshub/ainews-transform-adapter.mjs)
+- [behavior tests](../../../../scripts/rsshub/ainews-transform-adapter.test.mjs)
+- [fixture boundary utilities](../../../../scripts/rsshub/ainews-transform-test-utils.mjs)
+- [compiled module fixture](../../../../scripts/rsshub/fixtures/rsshub-html-transform-legacy.mjs)
+- [compiled-route patcher](../../../../scripts/rsshub/patch-html-ainews.mjs)
+- [patcher tests](../../../../scripts/rsshub/patch-html-ainews.test.mjs)
 
 The fixture is the public compiled upstream HTML-transform handler captured by Root from the installed image. The patcher pins its trimmed source SHA-256, `96c70122e4b10d62c14867a135b6021474eaa2976e66205f68de9ac59358f03b`, and reuses its known got/cache/Cheerio/sanitizer bindings. Unknown modules/layouts, changed source, duplicate candidate modules and false patch markers abort before writing. The CLI verifies generated JavaScript syntax and supports `--dry-run`; a correct repeat invocation is idempotent.
 

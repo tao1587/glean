@@ -1,5 +1,7 @@
 # Feed publication-date and source recovery contract
 
+Status: **completed and independently accepted, 2026-10-11**. This closes the scoped date/source recovery; recorded video extraction and pre-existing enqueue/commit limitations are not represented as globally fixed.
+
 ## Requested outcomes
 
 Investigate and correct missing publication dates in the engineering publication feed, including verified existing articles so date-filtered reading can retrieve them. Verify the four named missing publications before subscribing them for the existing active account. Recover obsolete subscriptions using confirmed current addresses for the same publication. Investigate the short-content source and obtain real full text where publicly available; do not treat a short teaser or a marketing page as factual article content.
@@ -28,4 +30,4 @@ Root plans, controls bounded NAS requests/account mutations and any deployment, 
 
 Runtime code must pass relevant tests before committing/building. Preserve existing RSSHub research/podcast/CA/CDP repairs, parser, scheduling, retry/circuit and inactive-account rules. Use isolated canaries with the actual candidate image/normal transport before rollout, then bounded tracked refreshes and date-filter API verification. Preserve the six pre-existing local edits and unrelated active plans. Stop only the task's owned temporary services after acceptance and retain rollback/evidence.
 
-References: [feed fetch flow](../../architecture/feed-fetch-flow.md), [feed guardrails](../../operations/feed-fetch-guardrails.md), [route operations](../../operations/rsshub-route-repairs.md), [agent workflow](../../agent-workflows/default-loop.md).
+References: [feed fetch flow](../../../architecture/feed-fetch-flow.md), [feed guardrails](../../../operations/feed-fetch-guardrails.md), [route operations](../../../operations/rsshub-route-repairs.md), [agent workflow](../../default-loop.md).

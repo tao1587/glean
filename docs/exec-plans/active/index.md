@@ -4,7 +4,9 @@ This directory holds in-flight agent-first execution plans only.
 
 ## Active
 
-The [feed date and source recovery](./2026-10-11-feed-date-and-source-recovery-contract.md) is active: verify engineering publication dates, restore confirmed source addresses and preserve article/subscription associations.
+The [HTML-only feed discovery fallback](./2026-04-22-html-only-feed-discovery-fallback.md) remains active.
+
+The [feed date and source recovery](../../agent-workflows/reviews/2026-10-11-feed-date-source-recovery/index.md) is complete: publication dates, four new owned subscriptions, three in-place source changes and one justified association-only unsubscribe are independently accepted. Old data and reading state are preserved; documented video-content and worker limits remain explicit.
 
 The [Bilibili video reliability repair](../../agent-workflows/reviews/2026-10-10-bilibili-video-reliability/index.md) is complete: the original video route is retained, CDP/session configuration is corrected, and actual worker recovery plus old-record preservation are independently verified. Provider verification errors remain explicitly recorded.
 
